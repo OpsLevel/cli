@@ -1,0 +1,66 @@
+name: Release
+on: 
+  release:
+    types: [created]
+jobs:
+  release-go-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, darwin]
+        goarch: ["386", amd64]
+        exclude:  
+          - goarch: "386"
+            goos: darwin 
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Fetch Tags
+      run: |
+        git fetch --tags --force
+        export TAG=$(git describe --tags --long --abbrev=12 --match "v[0-9].*" --always)
+        echo "TAG=${TAG}" >> $GITHUB_ENV
+    - uses: wangyoucao577/go-release-action@v1.17
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: "https://dl.google.com/go/go1.13.1.linux-amd64.tar.gz"
+        project_path: "./src"
+        binary_name: "opslevel"
+        ldflags: "-X 'github.com/opslevel/cli/cmd.version=${{ env.TAG }}'"
+        asset_name: opslevel-${{ matrix.goos }}-${{ matrix.goarch }}
+  release-docker:
+    name: Release Docker Image
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Login to Public ECR
+      uses: docker/login-action@v1
+      with:
+        registry: public.ecr.aws
+        username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      env:
+        AWS_REGION: us-east-1
+    - name: Build & Push
+      run: |
+        git fetch --tags --force
+        TAG=$(git describe --tags --match "v[0-9].*" --always)
+        IMAGE="opslevel:${TAG}"
+        docker build -t ${IMAGE} --build-arg VERSION=$(git describe --tags --long --abbrev=12 --match "v[0-9].*" --always) .
+
+        AWS_IMAGE="public.ecr.aws/e1n4f2i6/cli:${TAG}"
+        docker tag ${IMAGE} ${AWS_IMAGE}
+        docker push ${AWS_IMAGE}
+
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login https://docker.pkg.github.com -u ${GITHUB_ACTOR} --password-stdin
+        GITHUB_IMAGE="docker.pkg.github.com/opslevel/cli:${TAG}"
+        docker tag ${IMAGE} ${GITHUB_IMAGE}
+        docker push ${GITHUB_IMAGE}
