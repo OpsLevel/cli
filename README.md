@@ -36,7 +36,7 @@ EOF
 It can also be run with our public docker container
 
 ```bash
-docker run -it --rm public.ecr.aws.com/opslevel/cli:0.0.1 create deploy -s "foo"
+docker run -it --rm -v $(pwd):/app public.ecr.aws.com/opslevel/cli:0.0.1 create deploy -s "foo"
 ```
 
 <!---
