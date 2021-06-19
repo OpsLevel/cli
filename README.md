@@ -36,7 +36,7 @@ EOF
 It can also be run with our public docker container
 
 ```bash
-docker run -it --rm public.ecr.aws.com/e1n4f2i6/cli:0.0.1 create deploy -s "foo"
+docker run -it --rm public.ecr.aws.com/opslevel/cli:0.0.1 create deploy -s "foo"
 ```
 
 <!---
@@ -69,14 +69,14 @@ sudo mv opslevel /usr/local/bin/opslevel
 
 #### Docker
 
-The docker container is hosted on [AWS Public ECR](https://gallery.ecr.aws/e1n4f2i6/cli)
+The docker container is hosted on [AWS Public ECR](https://gallery.ecr.aws/opslevel/cli)
 
 The following downloads the container and creates a shim at `/usr/local/bin` so you can use the binary like its downloaded natively - it will just be running in a docker container. *NOTE: you may need to adjust how your kube config is mounted and set inside the container*
 
 ```
 TOOL_VERSION=$(curl -s https://api.github.com/repos/opslevel/cli/releases/latest | grep tag_name | cut -d '"' -f 4)
-docker pull public.ecr.aws/e1n4f2i6/cli:${TOOL_VERSION}
-docker tag public.ecr.aws/e1n4f2i6/cli:${TOOL_VERSION} opslevel:latest 
+docker pull public.ecr.aws/opslevel/cli:${TOOL_VERSION}
+docker tag public.ecr.aws/opslevel/cli:${TOOL_VERSION} opslevel:latest 
 cat << EOF > /usr/local/bin/opslevel
 #! /bin/sh
 docker run -it --rm -v \$(pwd):/app -v ${HOME}/.kube:/.kube -e KUBECONFIG=/.kube/config --network=host opslevel:latest \$@
