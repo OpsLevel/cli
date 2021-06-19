@@ -56,6 +56,6 @@ jobs:
         IMAGE="opslevel:${TAG}"
         docker build -t ${IMAGE} --build-arg VERSION=$(git describe --tags --long --abbrev=12 --match "v[0-9].*" --always) .
 
-        AWS_IMAGE="public.ecr.aws/e1n4f2i6/cli:${TAG}"
+        AWS_IMAGE="public.ecr.aws/opslevel/cli:${TAG}"
         docker tag ${IMAGE} ${AWS_IMAGE}
         docker push ${AWS_IMAGE}
