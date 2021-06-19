@@ -7,6 +7,7 @@ import (
 	"github.com/opslevel/cli/client"
 
 	"github.com/creasty/defaults"
+	git "github.com/go-git/go-git/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -50,6 +51,7 @@ var deployCreateCmd = &cobra.Command{
 	Short: "Create deployment events",
 	Long:  "Create deployment events",
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
 		evt, err := readCreateConfigAsDeployEvent()
 		cobra.CheckErr(err)
 		log.Debug().Msgf("%#v", evt)
@@ -57,8 +59,9 @@ var deployCreateCmd = &cobra.Command{
 			Result string `json:"result"`
 		}
 		c := client.NewClient()
-		c.Do("POST", fmt.Sprintf("/integrations/deploy/%s", integrationId), evt, &resp)
-		// TODO: Check Response
+		err = c.Do("POST", fmt.Sprintf("/integrations/deploy/%s", integrationId), evt, &resp)
+		cobra.CheckErr(err)
+		log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
 	},
 }
 
@@ -66,6 +69,7 @@ func init() {
 	createCmd.AddCommand(deployCreateCmd)
 
 	deployCreateCmd.Flags().StringVarP(&integrationId, "integration", "i", "", "The OpsLevel integration id")
+	deployCreateCmd.Flags().String("git-path", "./", "The relative path to grab the git commit info from")
 
 	deployCreateCmd.Flags().StringP("service", "s", "", "The service alias for the event")
 	deployCreateCmd.Flags().StringP("environment", "e", "", "The environment of the event")
@@ -84,6 +88,12 @@ func readCreateConfigAsDeployEvent() (*DeployEvent, error) {
 	}
 	evt.DeployedAt = time.Now()
 
+	fillWithFlagOverrides(evt)
+	fillGitInfo(evt)
+	return evt, nil
+}
+
+func fillWithFlagOverrides(evt *DeployEvent) {
 	if service := viper.GetString("service"); service != "" {
 		evt.Service = service
 	}
@@ -99,6 +109,31 @@ func readCreateConfigAsDeployEvent() (*DeployEvent, error) {
 	if id := viper.GetString("id"); id != "" {
 		evt.DedupID = id
 	}
-	// TODO: fill in git commiter info automatically
-	return evt, nil
+}
+
+func fillGitInfo(evt *DeployEvent) {
+	var err error
+	r, err := git.PlainOpen(viper.GetString("git-path"))
+	if err != nil {
+		return
+	}
+	ref, err := r.Head()
+	if err != nil {
+		return
+	}
+	hash := ref.Hash()
+	commit, err := r.CommitObject(hash)
+	if err != nil {
+		return
+	}
+	evt.Commit = *&Commit{
+		SHA:            hash.String(),
+		Message:        commit.Message,
+		Date:           commit.Committer.When,
+		CommitterName:  commit.Committer.Name,
+		CommitterEmail: commit.Committer.Email,
+		AuthorName:     commit.Author.Name,
+		AuthorEmail:    commit.Author.Email,
+		AuthoringDate:  commit.Author.When,
+	}
 }
