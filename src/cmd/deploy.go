@@ -115,18 +115,21 @@ func fillGitInfo(evt *DeployEvent) {
 	var err error
 	r, err := git.PlainOpen(viper.GetString("git-path"))
 	if err != nil {
+		log.Debug().Msgf("Failed to open git repo: '%s'", viper.GetString("git-path"))
 		return
 	}
 	ref, err := r.Head()
 	if err != nil {
+		log.Debug().Msg("Failed to get HEAD of git repo")
 		return
 	}
 	hash := ref.Hash()
 	commit, err := r.CommitObject(hash)
 	if err != nil {
+		log.Debug().Msg("Failed to read 'CommitObject' from hash of HEAD of git repo")
 		return
 	}
-	evt.Commit = *&Commit{
+	evt.Commit = Commit{
 		SHA:            hash.String(),
 		Message:        commit.Message,
 		Date:           commit.Committer.When,
