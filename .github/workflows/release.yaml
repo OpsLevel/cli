@@ -59,8 +59,3 @@ jobs:
         AWS_IMAGE="public.ecr.aws/e1n4f2i6/cli:${TAG}"
         docker tag ${IMAGE} ${AWS_IMAGE}
         docker push ${AWS_IMAGE}
-
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login https://docker.pkg.github.com -u ${GITHUB_ACTOR} --password-stdin
-        GITHUB_IMAGE="docker.pkg.github.com/opslevel/cli:${TAG}"
-        docker tag ${IMAGE} ${GITHUB_IMAGE}
-        docker push ${GITHUB_IMAGE}
