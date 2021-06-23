@@ -26,24 +26,24 @@ type Commit struct {
 	Message        string    `json:"message,omitempty"`
 	Branch         string    `json:"branch,omitempty"`
 	Date           time.Time `json:"date,omitempty"`
-	CommitterName  string    `json:"committer_name,omitempty"`
-	CommitterEmail string    `json:"committer_email,omitempty"`
-	AuthorName     string    `json:"author_name,omitempty"`
-	AuthorEmail    string    `json:"author_email,omitempty"`
-	AuthoringDate  time.Time `json:"authoring_date,omitempty"`
+	CommitterName  string    `json:"committer_name,omitempty" yaml:"committer_name"`
+	CommitterEmail string    `json:"committer_email,omitempty" yaml:"committer_email"`
+	AuthorName     string    `json:"author_name,omitempty" yaml:"author_name"`
+	AuthorEmail    string    `json:"author_email,omitempty" yaml:"author_email"`
+	AuthoringDate  time.Time `json:"authoring_date,omitempty" yaml:"authoring_date"`
 }
 
 // DeployRequest represents a structured request to the OpsLevel deploys webhook endpoint
 type DeployEvent struct {
 	Service      string    `validate:"required" json:"service"`
 	Deployer     Deployer  `validate:"required" json:"deployer"`
-	DeployedAt   time.Time `validate:"required" json:"deployed_at"`
+	DeployedAt   time.Time `validate:"required" json:"deployed_at" yaml:"deployed_at"`
 	Description  string    `validate:"required" json:"description" default:"Event Created by OpsLevel CLI"`
 	Environment  string    `json:"environment,omitempty"`
-	DeployURL    string    `json:"deploy_url,omitempty"`
-	DeployNumber string    `json:"deploy_number,omitempty"`
+	DeployURL    string    `json:"deploy_url,omitempty" yaml:"deploy_url"`
+	DeployNumber string    `json:"deploy_number,omitempty" yaml:"deploy_number"`
 	Commit       Commit    `json:"commit,omitempty"`
-	DedupID      string    `json:"dedup_id,omitempty"`
+	DedupID      string    `json:"dedup_id,omitempty" yaml:"dedup_id"`
 }
 
 var deployCreateCmd = &cobra.Command{
