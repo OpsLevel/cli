@@ -22,15 +22,36 @@
 Follow the [installation](#installation) instructions before running the below commands
 
 ```bash
-opslevel create deploy -i "XXX" -s "foo"
+opslevel create deploy -i "https://app.opslevel.com/integrations/deploy/XXX" -s "foo"
 ```
 OR
 ```bash
-cat << EOF | opslevel create deploy -i "XXX" -f -
+cat << EOF | opslevel create deploy -i "https://app.opslevel.com/integrations/deploy/XXX" -f -
 service: "foo"
+description: "Hello World"
 environment: "Production"
-deployNumber: "10"
+deploy-number: 10
+deploy-url: http://example.com
+dedup-id: 123456789
+deployer:
+  name: glen
+  email: glen@example.com
 EOF
+```
+OR
+```bash
+export OL_INTEGRATION_URL="https://app.opslevel.com/integrations/deploy/XXX"
+export OL_SERVICE=foo
+export OL_DESCRIPTION="Hello World"
+export OL_ENVIRONMENT=Production
+export OL_DEPLOY_NUMBER=10
+export OL_DEPLOY_URL="http://example.com"
+export OL_DEDUP_ID=123456789
+export OL_DEPLOYER_NAME=glen
+export OL_DEPLOYER_EMAIL=glen@example.com
+export OL_COMMIT_SHA=0s9df90sdf09
+export OL_COMMIT_MESSAGE="Hello world"
+opslevel create deploy
 ```
 
 It can also be run with our public docker container
