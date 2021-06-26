@@ -1,19 +1,18 @@
 package cmd
 
 import (
-	"fmt"
+	"encoding/json"
 	"time"
-
-	"github.com/opslevel/cli/client"
 
 	"github.com/creasty/defaults"
 	git "github.com/go-git/go-git/v5"
+	"github.com/opslevel/cli/client"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var integrationId string
+var integrationUrl string
 
 type Deployer struct {
 	Email string `validate:"required" json:"email" default:"automation@opslevel.com"`
@@ -22,28 +21,28 @@ type Deployer struct {
 
 // Commit represents the commit being deployed
 type Commit struct {
-	SHA            string    `json:"sha,omitempty"`
-	Message        string    `json:"message,omitempty"`
-	Branch         string    `json:"branch,omitempty"`
-	Date           time.Time `json:"date,omitempty"`
-	CommitterName  string    `json:"committer_name,omitempty" yaml:"committer_name"`
-	CommitterEmail string    `json:"committer_email,omitempty" yaml:"committer_email"`
-	AuthorName     string    `json:"author_name,omitempty" yaml:"author_name"`
-	AuthorEmail    string    `json:"author_email,omitempty" yaml:"author_email"`
-	AuthoringDate  time.Time `json:"authoring_date,omitempty" yaml:"authoring_date"`
+	SHA            string     `json:"sha,omitempty"`
+	Message        string     `json:"message,omitempty"`
+	Branch         string     `json:"branch,omitempty"`
+	Date           *time.Time `json:"date,omitempty"`
+	CommitterName  string     `json:"committer_name,omitempty" yaml:"committer-name"`
+	CommitterEmail string     `json:"committer_email,omitempty" yaml:"committer-email"`
+	AuthorName     string     `json:"author_name,omitempty" yaml:"author-name"`
+	AuthorEmail    string     `json:"author_email,omitempty" yaml:"author-email"`
+	AuthoringDate  *time.Time `json:"authoring_date,omitempty" yaml:"authoring-date"`
 }
 
 // DeployRequest represents a structured request to the OpsLevel deploys webhook endpoint
 type DeployEvent struct {
 	Service      string    `validate:"required" json:"service"`
 	Deployer     Deployer  `validate:"required" json:"deployer"`
-	DeployedAt   time.Time `validate:"required" json:"deployed_at" yaml:"deployed_at"`
+	DeployedAt   time.Time `validate:"required" json:"deployed_at" yaml:"deployed-at"`
 	Description  string    `validate:"required" json:"description" default:"Event Created by OpsLevel CLI"`
 	Environment  string    `json:"environment,omitempty"`
-	DeployURL    string    `json:"deploy_url,omitempty" yaml:"deploy_url"`
-	DeployNumber string    `json:"deploy_number,omitempty" yaml:"deploy_number"`
+	DeployURL    string    `json:"deploy_url,omitempty" yaml:"deploy-url"`
+	DeployNumber string    `json:"deploy_number,omitempty" yaml:"deploy-number"`
 	Commit       Commit    `json:"commit,omitempty"`
-	DedupID      string    `json:"dedup_id,omitempty" yaml:"dedup_id"`
+	DedupID      string    `json:"dedup_id,omitempty" yaml:"dedup-id"`
 }
 
 var deployCreateCmd = &cobra.Command{
@@ -54,29 +53,51 @@ var deployCreateCmd = &cobra.Command{
 		var err error
 		evt, err := readCreateConfigAsDeployEvent()
 		cobra.CheckErr(err)
-		log.Debug().Msgf("%#v", evt)
-		var resp struct {
-			Result string `json:"result"`
+		if dryrun := viper.GetBool("dry-run"); dryrun {
+			b, _ := json.Marshal(evt)
+			log.Info().Msgf("%s", string(b))
+		} else {
+			c := client.NewClient()
+			var resp struct {
+				Result string `json:"result"`
+			}
+			err = c.Do("POST", integrationUrl, evt, &resp)
+			cobra.CheckErr(err)
+			log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
 		}
-		c := client.NewClient()
-		err = c.Do("POST", fmt.Sprintf("/integrations/deploy/%s", integrationId), evt, &resp)
-		cobra.CheckErr(err)
-		log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
 	},
 }
 
 func init() {
 	createCmd.AddCommand(deployCreateCmd)
 
-	deployCreateCmd.Flags().StringVarP(&integrationId, "integration", "i", "", "The OpsLevel integration id")
-	deployCreateCmd.Flags().String("git-path", "./", "The relative path to grab the git commit info from")
+	deployCreateCmd.Flags().StringVarP(&integrationUrl, "integration-url", "i", "", "OpsLevel integration url (OL_INTEGRATION_URL)")
+	deployCreateCmd.Flags().Bool("dry-run", false, "if true data will be logged and not sent to the integration-url (OL_DRY_RUN)")
+	deployCreateCmd.Flags().String("git-path", "./", "relative path to grab the git commit info from (if git repo is found overrides all commit details)")
 
-	deployCreateCmd.Flags().StringP("service", "s", "", "The service alias for the event")
-	deployCreateCmd.Flags().StringP("environment", "e", "", "The environment of the event")
-	deployCreateCmd.Flags().StringP("number", "n", "", "The deploy number of the event")
-	deployCreateCmd.Flags().String("url", "", "The deploy url of the event")
-	deployCreateCmd.Flags().String("id", "", "The dedup id of the event")
+	deployCreateCmd.Flags().StringP("service", "s", "", "service alias for the event (OL_SERVICE)")
+	deployCreateCmd.Flags().StringP("description", "d", "", "description of the event (OL_DESCRIPTION)")
+	deployCreateCmd.Flags().StringP("environment", "", "", "environment name of the event (OL_ENVIRONMENT)")
+	deployCreateCmd.Flags().StringP("deploy-number", "", "", "deploy number of the event (OL_DEPLOY_NUMBER)")
+	deployCreateCmd.Flags().String("deploy-url", "", "url the event will link back to (OL_DEPLOY_URL)")
+	deployCreateCmd.Flags().String("dedup-id", "", "dedup id of the event (OL_DEDUP_ID)")
+
+	deployCreateCmd.Flags().String("deployer-name", "", "deployer name who created the event (OL_DEPLOYER_NAME)")
+	deployCreateCmd.Flags().String("deployer-email", "", "deployer email who created the event (OL_DEPLOYER_EMAIL)")
+
+	deployCreateCmd.Flags().String("commit-sha", "", "git commit sha associated with the event (OL_DEPLOYER_NAME)")
+	deployCreateCmd.Flags().String("commit-message", "", "git commit message associated with the event (OL_DEPLOYER_EMAIL)")
 	viper.BindPFlags(deployCreateCmd.Flags())
+	viper.BindEnv("integration-URL", "OL_INTEGRATION_URL")
+	viper.BindEnv("dry-run", "OL_DRY_RUN")
+	viper.BindEnv("git-path", "OL_GIT_PATH")
+	viper.BindEnv("deploy-number", "OL_DEPLOY_NUMBER")
+	viper.BindEnv("deploy-url", "OL_DEPLOY_URL")
+	viper.BindEnv("dedup-id", "OL_DEDUP_ID")
+	viper.BindEnv("deployer-name", "OL_DEPLOYER_NAME")
+	viper.BindEnv("deployer-email", "OL_DEPLOYER_EMAIL")
+	viper.BindEnv("commit-sha", "OL_COMMIT_SHA")
+	viper.BindEnv("commit-message", "OL_COMMIT_MESSAGE")
 }
 
 func readCreateConfigAsDeployEvent() (*DeployEvent, error) {
@@ -86,28 +107,43 @@ func readCreateConfigAsDeployEvent() (*DeployEvent, error) {
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}
-	evt.DeployedAt = time.Now()
+	evt.DeployedAt = time.Now().UTC()
 
-	fillWithFlagOverrides(evt)
+	fillWithOverrides(evt)
 	fillGitInfo(evt)
 	return evt, nil
 }
 
-func fillWithFlagOverrides(evt *DeployEvent) {
+func fillWithOverrides(evt *DeployEvent) {
 	if service := viper.GetString("service"); service != "" {
 		evt.Service = service
+	}
+	if description := viper.GetString("description"); description != "" {
+		evt.Description = description
 	}
 	if environment := viper.GetString("environment"); environment != "" {
 		evt.Environment = environment
 	}
-	if number := viper.GetString("number"); number != "" {
+	if number := viper.GetString("deploy-number"); number != "" {
 		evt.DeployNumber = number
 	}
-	if url := viper.GetString("url"); url != "" {
+	if url := viper.GetString("deploy-url"); url != "" {
 		evt.DeployURL = url
 	}
-	if id := viper.GetString("id"); id != "" {
+	if id := viper.GetString("dedup-id"); id != "" {
 		evt.DedupID = id
+	}
+	if name := viper.GetString("deployer-name"); name != "" {
+		evt.Deployer.Name = name
+	}
+	if email := viper.GetString("deployer-email"); email != "" {
+		evt.Deployer.Email = email
+	}
+	if sha := viper.GetString("commit-sha"); sha != "" {
+		evt.Commit.SHA = sha
+	}
+	if message := viper.GetString("commit-message"); message != "" {
+		evt.Commit.Message = message
 	}
 }
 
@@ -132,11 +168,11 @@ func fillGitInfo(evt *DeployEvent) {
 	evt.Commit = Commit{
 		SHA:            hash.String(),
 		Message:        commit.Message,
-		Date:           commit.Committer.When,
+		Date:           &commit.Committer.When,
 		CommitterName:  commit.Committer.Name,
 		CommitterEmail: commit.Committer.Email,
 		AuthorName:     commit.Author.Name,
 		AuthorEmail:    commit.Author.Email,
-		AuthoringDate:  commit.Author.When,
+		AuthoringDate:  &commit.Author.When,
 	}
 }

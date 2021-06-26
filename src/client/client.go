@@ -47,7 +47,7 @@ func WithHTTPClient(hc *http.Client) ClientOption {
 	}
 }
 
-func (c *Client) Do(method string, path string, body interface{}, recv interface{}) error {
+func (c *Client) Do(method string, url string, body interface{}, recv interface{}) error {
 	var err error
 
 	b, err := json.Marshal(body)
@@ -55,7 +55,6 @@ func (c *Client) Do(method string, path string, body interface{}, recv interface
 		return err
 	}
 
-	url := fmt.Sprintf("%s%s", c.baseURL, path)
 	log.Debug().Msgf("%s\n%s", url, string(b))
 	req, err := http.NewRequest(method, url, bytes.NewReader(b))
 	if err != nil {
