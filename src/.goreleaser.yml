@@ -33,6 +33,7 @@ brews:
     homepage: "https://www.opslevel.com/"
     description: "Opslevel Command Line Utility"
     license: "MIT"
+    folder: Formula
     dependencies:
       - name: jq
     install: |
