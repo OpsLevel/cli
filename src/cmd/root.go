@@ -32,6 +32,8 @@ func init() {
 }
 
 func initConfig() {
+	viper.SetEnvPrefix("OL")
+	viper.AutomaticEnv()
 	setupLogging()
 }
 
