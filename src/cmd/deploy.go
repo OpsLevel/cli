@@ -6,7 +6,7 @@ import (
 
 	"github.com/creasty/defaults"
 	git "github.com/go-git/go-git/v5"
-	"github.com/opslevel/cli/client"
+	"github.com/opslevel/cli/common"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -57,7 +57,7 @@ var deployCreateCmd = &cobra.Command{
 			b, _ := json.Marshal(evt)
 			log.Info().Msgf("%s", string(b))
 		} else {
-			c := client.NewClient()
+			c := common.NewRestClient()
 			var resp struct {
 				Result string `json:"result"`
 			}

@@ -43,7 +43,5 @@ func readCreateConfigFile() {
 		viper.AddConfigPath(".")
 		viper.AddConfigPath(home)
 	}
-	viper.SetEnvPrefix("OL")
-	viper.AutomaticEnv()
 	viper.ReadInConfig()
 }

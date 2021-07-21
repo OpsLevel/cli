@@ -1,4 +1,4 @@
-package client
+package common
 
 import (
 	"bytes"
@@ -6,8 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
+	"github.com/opslevel/opslevel-go"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // Client represents a rest http client and is used to send requests to OpsLevel integrations
@@ -19,8 +23,24 @@ type Client struct {
 // ClientOption modifies fields on a Client
 type ClientOption func(c *Client)
 
+func NewGraphClient() *opslevel.Client {
+	client := opslevel.NewClient(viper.GetString("apitoken"))
+
+	clientErr := client.Validate()
+	if clientErr != nil {
+		if strings.Contains(clientErr.Error(), "Please provide a valid OpsLevel API token") {
+			cobra.CheckErr(fmt.Errorf("%s via 'export OL_APITOKEN=XXX' or '--api-token=XXX'", clientErr.Error()))
+		} else {
+			cobra.CheckErr(clientErr)
+		}
+	}
+	cobra.CheckErr(clientErr)
+
+	return client
+}
+
 // NewClient returns a Client pointer
-func NewClient(opts ...ClientOption) *Client {
+func NewRestClient(opts ...ClientOption) *Client {
 	baseURL, _ := url.Parse("https://app.opslevel.com")
 	client := &Client{
 		baseURL:    baseURL,
