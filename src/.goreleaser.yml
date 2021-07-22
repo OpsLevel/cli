@@ -47,5 +47,15 @@ brews:
 checksum:
   name_template: '{{ .ProjectName }}.sha256'
   algorithm: sha256
+signs:
+  - artifacts: checksum
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
 changelog:
   skip: true
