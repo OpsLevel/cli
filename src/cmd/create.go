@@ -3,7 +3,6 @@ package cmd
 import (
 	"os"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -35,7 +34,7 @@ func readCreateConfigFile() {
 			viper.SetConfigFile(createDataFile)
 		}
 	} else {
-		home, err := homedir.Dir()
+		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
 		viper.SetConfigName("data")
