@@ -6,15 +6,43 @@ import (
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-var getCategoriesCmd = &cobra.Command{
-	Use:   "categories",
+var createCategoryCmd = &cobra.Command{
+	Use:        "category [name]",
+	Short:      "Create a rubric category",
+	Long:       `Create a rubric category`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"name"},
+	Run: func(cmd *cobra.Command, args []string) {
+		client := common.NewGraphClient()
+		category, err := client.CreateCategory(opslevel.CategoryCreateInput{
+			Name: args[0],
+		})
+		cobra.CheckErr(err)
+		fmt.Println(category.Id)
+	},
+}
+
+var getCategoryCmd = &cobra.Command{
+	Use:        "category [id]",
+	Short:      "Get details about a rubic category given its ID",
+	Long:       `Get details about a rubic category given its ID`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"id"},
+	Run: func(cmd *cobra.Command, args []string) {
+		client := common.NewGraphClient()
+		category, err := client.GetCategory(args[0])
+		cobra.CheckErr(err)
+		common.PrettyPrint(category)
+	},
+}
+
+var listCategoryCmd = &cobra.Command{
+	Use:   "category",
 	Short: "Lists the valid names for rubric categories",
 	Long:  `Lists the valid names for rubric categories`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		client := common.NewGraphClient()
 		list, err := client.ListCategories()
 		cobra.CheckErr(err)
@@ -28,33 +56,51 @@ var getCategoriesCmd = &cobra.Command{
 	},
 }
 
-var createCategoryCmd = &cobra.Command{
-	Use:   "category",
-	Short: "Create a rubric category",
-	Long:  `Create a rubric category`,
+var deleteCategoryCmd = &cobra.Command{
+	Use:        "category [id]",
+	Short:      "Delete a rubric category",
+	Long:       `Delete a rubric category`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"id"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
-		category, err := client.CreateCategory(opslevel.CategoryCreateInput{
-			Name: viper.GetString("name"),
+		err := client.DeleteCategory(args[0])
+		cobra.CheckErr(err)
+	},
+}
+
+var createLevelCmd = &cobra.Command{
+	Use:        "level [name]",
+	Short:      "Create a rubric level",
+	Long:       `Create a rubric level`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"name"},
+	Run: func(cmd *cobra.Command, args []string) {
+		client := common.NewGraphClient()
+		category, err := client.CreateLevel(opslevel.LevelCreateInput{
+			Name: args[0],
 		})
 		cobra.CheckErr(err)
 		fmt.Println(category.Id)
 	},
 }
 
-var deleteCategoryCmd = &cobra.Command{
-	Use:   "category",
-	Short: "Delete a rubric category",
-	Long:  `Delete a rubric category`,
+var getLevelCmd = &cobra.Command{
+	Use:        "level [id]",
+	Short:      "Get details about a rubic level given its ID",
+	Long:       `Get details about a rubic level given its ID`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"id"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
-		err := client.DeleteCategory(viper.GetString("id"))
+		level, err := client.GetLevel(args[0])
 		cobra.CheckErr(err)
+		common.PrettyPrint(level)
 	},
 }
 
-var getLevelsCmd = &cobra.Command{
-	Use:   "levels",
+var listLevelCmd = &cobra.Command{
+	Use:   "level",
 	Short: "Lists the valid alias for rubric levels",
 	Long:  `Lists the valid alias for rubric levels`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -71,49 +117,27 @@ var getLevelsCmd = &cobra.Command{
 	},
 }
 
-var createLevelCmd = &cobra.Command{
-	Use:   "level",
-	Short: "Create a rubric level",
-	Long:  `Create a rubric level`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		category, err := client.CreateLevel(opslevel.LevelCreateInput{
-			Name: viper.GetString("name"),
-		})
-		cobra.CheckErr(err)
-		fmt.Println(category.Id)
-	},
-}
-
 var deleteLevelCmd = &cobra.Command{
-	Use:   "level",
-	Short: "Delete a rubric level",
-	Long:  `Delete a rubric level`,
+	Use:        "level [id]",
+	Short:      "Delete a rubric level",
+	Long:       `Delete a rubric level`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"id"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
-		err := client.DeleteLevel(viper.GetString("id"))
+		err := client.DeleteLevel(args[0])
 		cobra.CheckErr(err)
 	},
 }
 
 func init() {
-	getCmd.AddCommand(getCategoriesCmd)
 	createCmd.AddCommand(createCategoryCmd)
+	getCmd.AddCommand(getCategoryCmd)
+	listCmd.AddCommand(listCategoryCmd)
 	deleteCmd.AddCommand(deleteCategoryCmd)
 
-	createCategoryCmd.Flags().StringP("name", "n", "", "the name for the category")
-	viper.BindPFlags(createCategoryCmd.Flags())
-
-	deleteCategoryCmd.Flags().String("id", "", "the id for the category")
-	viper.BindPFlags(deleteCategoryCmd.Flags())
-
-	getCmd.AddCommand(getLevelsCmd)
 	createCmd.AddCommand(createLevelCmd)
+	getCmd.AddCommand(getLevelCmd)
+	listCmd.AddCommand(listLevelCmd)
 	deleteCmd.AddCommand(deleteLevelCmd)
-
-	createLevelCmd.Flags().StringP("name", "n", "", "the name for the category")
-	viper.BindPFlags(createLevelCmd.Flags())
-
-	deleteLevelCmd.Flags().String("id", "", "the id for the category")
-	viper.BindPFlags(deleteLevelCmd.Flags())
 }
