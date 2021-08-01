@@ -1,11 +1,20 @@
 package common
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 	"text/tabwriter"
+
+	"github.com/spf13/cobra"
 )
+
+func PrettyPrint(object interface{}) {
+	bytes, err := json.MarshalIndent(object, "", "  ")
+	cobra.CheckErr(err)
+	fmt.Println(string(bytes))
+}
 
 func NewTabWriter(headers ...string) *tabwriter.Writer {
 	longestHeader := 0
