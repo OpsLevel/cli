@@ -9,11 +9,11 @@ import (
 )
 
 var createCategoryCmd = &cobra.Command{
-	Use:        "category [name]",
+	Use:        "category NAME",
 	Short:      "Create a rubric category",
 	Long:       `Create a rubric category`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"name"},
+	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		category, err := client.CreateCategory(opslevel.CategoryCreateInput{
@@ -25,11 +25,11 @@ var createCategoryCmd = &cobra.Command{
 }
 
 var getCategoryCmd = &cobra.Command{
-	Use:        "category [id]",
+	Use:        "category ID",
 	Short:      "Get details about a rubic category given its ID",
 	Long:       `Get details about a rubic category given its ID`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"id"},
+	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		category, err := client.GetCategory(args[0])
@@ -57,11 +57,11 @@ var listCategoryCmd = &cobra.Command{
 }
 
 var deleteCategoryCmd = &cobra.Command{
-	Use:        "category [id]",
+	Use:        "category ID",
 	Short:      "Delete a rubric category",
 	Long:       `Delete a rubric category`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"id"},
+	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		err := client.DeleteCategory(args[0])
@@ -70,11 +70,11 @@ var deleteCategoryCmd = &cobra.Command{
 }
 
 var createLevelCmd = &cobra.Command{
-	Use:        "level [name]",
+	Use:        "level NAME",
 	Short:      "Create a rubric level",
 	Long:       `Create a rubric level`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"name"},
+	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		category, err := client.CreateLevel(opslevel.LevelCreateInput{
@@ -86,11 +86,11 @@ var createLevelCmd = &cobra.Command{
 }
 
 var getLevelCmd = &cobra.Command{
-	Use:        "level [id]",
+	Use:        "level ID",
 	Short:      "Get details about a rubic level given its ID",
 	Long:       `Get details about a rubic level given its ID`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"id"},
+	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		level, err := client.GetLevel(args[0])
@@ -118,11 +118,11 @@ var listLevelCmd = &cobra.Command{
 }
 
 var deleteLevelCmd = &cobra.Command{
-	Use:        "level [id]",
+	Use:        "level ID",
 	Short:      "Delete a rubric level",
 	Long:       `Delete a rubric level`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"id"},
+	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		err := client.DeleteLevel(args[0])
