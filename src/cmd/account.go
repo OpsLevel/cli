@@ -9,14 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var accountCmd = &cobra.Command{
-	Use:   "account",
-	Short: "Commands for interacting with the account API",
-	Long:  `Commands for interacting with the account API`,
-}
-
 var lifecycleCmd = &cobra.Command{
-	Use:   "lifecycles",
+	Use:   "lifecycle",
 	Short: "Lists the valid alias for lifecycles in your account",
 	Long:  `Lists the valid alias for lifecycles in your account`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -31,7 +25,7 @@ var lifecycleCmd = &cobra.Command{
 }
 
 var tierCmd = &cobra.Command{
-	Use:   "tiers",
+	Use:   "tier",
 	Short: "Lists the valid alias for tiers in your account",
 	Long:  `Lists the valid alias for tiers in your account`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -46,22 +40,25 @@ var tierCmd = &cobra.Command{
 }
 
 var teamCmd = &cobra.Command{
-	Use:   "teams",
-	Short: "Lists the valid alias for teams in your account",
-	Long:  `Lists the valid alias for teams in your account`,
+	Use:   "team",
+	Short: "Lists teams in your account",
+	Long:  `Lists teams in your account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		list, err := client.ListTeams()
+		cobra.CheckErr(err)
+		w := common.NewTabWriter("Name", "ID", "Alias")
 		if err == nil {
 			for _, item := range list {
-				fmt.Println(item.Alias)
+				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Id, item.Alias)
 			}
 		}
+		w.Flush()
 	},
 }
 
 var toolsCmd = &cobra.Command{
-	Use:   "tools",
+	Use:   "tool",
 	Short: "Lists the valid alias for tools in your account",
 	Long:  `Lists the valid alias for tools in your account`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -84,9 +81,8 @@ var toolsCmd = &cobra.Command{
 }
 
 func init() {
-	accountCmd.AddCommand(lifecycleCmd)
-	accountCmd.AddCommand(tierCmd)
-	accountCmd.AddCommand(teamCmd)
-	accountCmd.AddCommand(toolsCmd)
-	getCmd.AddCommand(accountCmd)
+	listCmd.AddCommand(lifecycleCmd)
+	listCmd.AddCommand(tierCmd)
+	listCmd.AddCommand(teamCmd)
+	listCmd.AddCommand(toolsCmd)
 }

@@ -6,11 +6,24 @@ import (
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-var getServicesCmd = &cobra.Command{
-	Use:   "services",
+var getServiceCmd = &cobra.Command{
+	Use:        "service [alias]",
+	Short:      "Get details about a service given one of its Aliases",
+	Long:       `Get details about a service given one of its Aliases`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"alias"},
+	Run: func(cmd *cobra.Command, args []string) {
+		client := common.NewGraphClient()
+		service, err := client.GetServiceWithAlias(args[0])
+		cobra.CheckErr(err)
+		common.PrettyPrint(service)
+	},
+}
+
+var listServiceCmd = &cobra.Command{
+	Use:   "service",
 	Short: "Lists the services",
 	Long:  `Lists the services`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -29,20 +42,20 @@ var getServicesCmd = &cobra.Command{
 }
 
 var deleteServiceCmd = &cobra.Command{
-	Use:   "service",
-	Short: "Delete a service",
-	Long:  `Delete a service`,
+	Use:        "service [id]",
+	Short:      "Delete a service",
+	Long:       `Delete a service`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"id"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
-		err := client.DeleteServiceWithAlias(viper.GetString("id"))
+		err := client.DeleteServiceWithAlias(args[0])
 		cobra.CheckErr(err)
 	},
 }
 
 func init() {
-	getCmd.AddCommand(getServicesCmd)
+	getCmd.AddCommand(getServiceCmd)
+	listCmd.AddCommand(listServiceCmd)
 	deleteCmd.AddCommand(deleteServiceCmd)
-
-	deleteServiceCmd.Flags().String("id", "", "the id of the service")
-	viper.BindPFlags(deleteServiceCmd.Flags())
 }
