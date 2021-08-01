@@ -8,11 +8,11 @@ import (
 )
 
 var getCheckCmd = &cobra.Command{
-	Use:        "check [id]",
+	Use:        "check ID",
 	Short:      "Get details about a rubic check given its ID",
 	Long:       `Get details about a rubic check given its ID`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"id"},
+	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		category, err := client.GetCheck(args[0])

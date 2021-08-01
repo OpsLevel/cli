@@ -9,11 +9,11 @@ import (
 )
 
 var getServiceCmd = &cobra.Command{
-	Use:        "service [alias]",
+	Use:        "service ALIAS",
 	Short:      "Get details about a service given one of its Aliases",
 	Long:       `Get details about a service given one of its Aliases`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"alias"},
+	ArgAliases: []string{"ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		service, err := client.GetServiceWithAlias(args[0])
@@ -42,11 +42,11 @@ var listServiceCmd = &cobra.Command{
 }
 
 var deleteServiceCmd = &cobra.Command{
-	Use:        "service [id]",
+	Use:        "service ID",
 	Short:      "Delete a service",
 	Long:       `Delete a service`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"id"},
+	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.NewGraphClient()
 		err := client.DeleteServiceWithAlias(args[0])
