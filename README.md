@@ -11,8 +11,8 @@
         <img src="https://img.shields.io/github/contributors/OpsLevel/cli" /></a>
     <a href="https://github.com/OpsLevel/cli/pulse" alt="Activity">
         <img src="https://img.shields.io/github/commit-activity/m/OpsLevel/cli" /></a>
-    <a href="https://dependabot.com/" alt="Dependabot">
-        <img src="https://badgen.net/badge/Dependabot/enabled/green?icon=dependabot" /></a>
+    <a href="https://github.com/OpsLevel/cli/releases" alt="Downloads">
+        <img src="https://img.shields.io/github/downloads/OpsLevel/cli/total" /></a>
 </p>
 
 `opslevel` is the command line tool for interacting with [OpsLevel](https://www.opslevel.com/)
