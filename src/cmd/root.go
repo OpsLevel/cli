@@ -22,17 +22,19 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().String("logFormat", "TEXT", "overrides environment variable 'OL_LOGFORMAT' (options [\"JSON\", \"TEXT\"])")
-	rootCmd.PersistentFlags().String("logLevel", "INFO", "overrides environment variable 'OL_LOGLEVEL' (options [\"ERROR\", \"WARN\", \"INFO\", \"DEBUG\"])")
-	rootCmd.PersistentFlags().String("api-token", "", "The OpsLevel API Token. Overrides environment variable 'OL_APITOKEN'")
+	rootCmd.PersistentFlags().String("logFormat", "TEXT", "overrides environment variable 'OPSLEVEL_LOGFORMAT' (options [\"JSON\", \"TEXT\"])")
+	rootCmd.PersistentFlags().String("logLevel", "INFO", "overrides environment variable 'OPSLEVEL_LOGLEVEL' (options [\"ERROR\", \"WARN\", \"INFO\", \"DEBUG\"])")
+	rootCmd.PersistentFlags().String("apiurl", "https://api.opslevel.com/graphql", "The OpsLevel API Url. Overrides environment variable 'OPSLEVEL_APITOKEN'")
+	rootCmd.PersistentFlags().String("apitoken", "", "The OpsLevel API Token. Overrides environment variable 'OPSLEVEL_APITOKEN'")
 
 	viper.BindPFlags(rootCmd.PersistentFlags())
-	viper.BindPFlag("apitoken", rootCmd.PersistentFlags().Lookup("api-token"))
+	viper.BindEnv("apiurl", "OPSLEVEL_API_URL", "OL_API_URL")
+	viper.BindEnv("apitoken", "OPSLEVEL_API_TOKEN", "OL_API_TOKEN", "OL_APITOKEN")
 	cobra.OnInitialize(initConfig)
 }
 
 func initConfig() {
-	viper.SetEnvPrefix("OL")
+	viper.SetEnvPrefix("OPSLEVEL")
 	viper.AutomaticEnv()
 	setupLogging()
 }

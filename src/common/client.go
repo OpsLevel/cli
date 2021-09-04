@@ -24,7 +24,7 @@ type Client struct {
 type ClientOption func(c *Client)
 
 func NewGraphClient() *opslevel.Client {
-	client := opslevel.NewClient(viper.GetString("apitoken"))
+	client := opslevel.NewClient(viper.GetString("apitoken"), opslevel.SetURL(viper.GetString("apiurl")))
 
 	clientErr := client.Validate()
 	if clientErr != nil {
