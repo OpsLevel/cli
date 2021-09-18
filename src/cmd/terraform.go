@@ -115,9 +115,27 @@ func getIntegrationTerraformName(integration opslevel.Integration) string {
 	return makeTerraformSlug(fmt.Sprintf("%s_%s", integration.Type, integration.Name))
 }
 
+// Given a field that could be a multiline string - this will return it with the correct formating
+func buildMultilineStringArg(fieldName string, fieldContents string) string {
+	if len(fieldContents) > 0 {
+		if len(strings.Split(fieldContents, "\n")) > 1 {
+			fieldContents = strings.TrimSuffix(fieldContents, "\n")
+			return fmt.Sprintf(`%s = <<-EOT
+%s
+EOT`, fieldName, fieldContents)
+		} else {
+			return fmt.Sprintf("%s = \"%s\"", fieldName, fieldContents)
+		}
+	}
+	return fieldContents
+}
+
 func exportConstants(c *opslevel.Client, config *os.File) {
 	lifecycleConfig := `data "opslevel_lifecycle" "%s" {
-  id = "%s"
+  filter {
+    field = "id"
+    value = "%s"
+  }
 }
 `
 	lifecycles, err := c.ListLifecycles()
@@ -127,7 +145,10 @@ func exportConstants(c *opslevel.Client, config *os.File) {
 	}
 
 	tierConfig := `data "opslevel_tier" "%s" {
-  id = "%s"
+  filter {
+    field = "id"
+    value = "%s"
+  }
 }
 `
 	tiers, err := c.ListTiers()
@@ -207,11 +228,11 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
   %s
   %s
 
-  tags = ["%s"]
+  %s
 }
 `
 	serviceToolConfig := `resource "opslevel_service_tool" "%s" {
-  service = data.opslevel_service.%s.id
+  service = opslevel_service.%s.id
 
   name = "%s"
   category = "%s"
@@ -221,11 +242,11 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 `
 
 	serviceRepoConfig := `resource "opslevel_service_repository" "%s" {
-  service = data.opslevel_service.%s.id
+  service = opslevel_service.%s.id
   repository = data.opslevel_repository.%s.id
 
   name = "%s"
-  base_direcotry = "%s"
+  base_directory = "%s"
 }
 `
 	services, err := c.ListServices()
@@ -233,13 +254,17 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 	for _, service := range services {
 		serviceMainAlias := makeTerraformSlug(service.Aliases[0])
 		file := newFile(fmt.Sprintf("%s/opslevel_service_%s.tf", directory, serviceMainAlias), false)
-		file.WriteString(templateConfig(serviceConfig, serviceMainAlias, service.Name, service.Description, service.Product, service.Framework, service.Language, flattenLifecycle(service.Lifecycle), flattenTier(service.Tier), flattenOwner(service.Owner), flattenTags(service.Tags.Nodes)))
+		tags := flattenTags(service.Tags.Nodes)
+		if len(tags) > 0 {
+			tags = fmt.Sprintf("tags = [\"%s\"]", tags)
+		}
+		file.WriteString(templateConfig(serviceConfig, serviceMainAlias, service.Name, service.Description, service.Product, service.Framework, service.Language, flattenLifecycle(service.Lifecycle), flattenTier(service.Tier), flattenOwner(service.Owner), tags))
 		shell.WriteString(fmt.Sprintf("# Service: %s\n", serviceMainAlias))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_service.%s %s\n", serviceMainAlias, service.Id))
 		for _, tool := range service.Tools.Nodes {
 			toolTerraformName := makeTerraformSlug(fmt.Sprintf("%s_%s", serviceMainAlias, getToolTerraformName(tool)))
 			file.WriteString(templateConfig(serviceToolConfig, toolTerraformName, serviceMainAlias, tool.DisplayName, tool.Category, tool.Url, tool.Environment))
-			shell.WriteString(fmt.Sprintf("terraform import opslevel_service_tool.%s %s\n", toolTerraformName, tool.Id))
+			shell.WriteString(fmt.Sprintf("terraform import opslevel_service_tool.%s %s:%s\n", toolTerraformName, service.Id, tool.Id))
 		}
 		for _, edge := range service.Repositories.Edges {
 			for _, serviceRepo := range edge.ServiceRepositories {
@@ -247,13 +272,12 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 				repoName := makeTerraformSlug(repo.DefaultAlias)
 				serviceRepoTerraformName := fmt.Sprintf("%s_%s", serviceMainAlias, repoName)
 				file.WriteString(templateConfig(serviceRepoConfig, serviceRepoTerraformName, serviceMainAlias, repoName, serviceRepo.DisplayName, serviceRepo.BaseDirectory))
-				shell.WriteString(fmt.Sprintf("terraform import opslevel_service_repository.%s %s\n", serviceRepoTerraformName, serviceRepo.Id))
+				shell.WriteString(fmt.Sprintf("terraform import opslevel_service_repository.%s %s:%s\n", serviceRepoTerraformName, service.Id, serviceRepo.Id))
 			}
 		}
 		file.Close()
 		shell.WriteString("##########\n\n")
 	}
-
 }
 
 func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
@@ -262,15 +286,13 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 	teamConfig := `resource "opslevel_team" "%s" {
   name = "%s"
   manager_email = "%s"
-  responsibilities = <<-EOT
-%s
-EOT
+  %s
 }
 `
 	teams, err := c.ListTeams()
 	cobra.CheckErr(err)
 	for _, team := range teams {
-		config.WriteString(templateConfig(teamConfig, team.Alias, team.Name, team.Manager.Email, team.Responsibilities))
+		config.WriteString(templateConfig(teamConfig, team.Alias, team.Name, team.Manager.Email, buildMultilineStringArg("responsibilities", team.Responsibilities)))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_team.%s %s\n", team.Alias, team.Id))
 	}
 	shell.WriteString("##########\n\n")
@@ -377,17 +399,13 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
   %s
   %s
   %s
-  notes = <<-EOT
-%s
-EOT
+  %s
 }
 `
 	customEventCheckConfig := `integration = data.opslevel_integration.%s.id
   service_selector = "%s"
   success_condition = "%s"
-  message = <<-EOT
-%s
-EOT`
+  %s`
 	manualCheckConfig := `%s
   update_requires_comment = %v`
 	repoFileCheckConfig := `directory_search = %v
@@ -437,7 +455,7 @@ EOT`
 			casted := check.CustomEventCheckFragment
 			activeFile = customEventCheckFile
 			checkTypeTerraformName = "custom_event"
-			checkExtras = templateConfig(customEventCheckConfig, makeTerraformSlug(casted.Integration.Name), casted.ServiceSelector, casted.SuccessCondition, casted.ResultMessage)
+			checkExtras = templateConfig(customEventCheckConfig, getIntegrationTerraformName(casted.Integration), casted.ServiceSelector, casted.SuccessCondition, buildMultilineStringArg("message", casted.ResultMessage))
 		case opslevel.CheckTypeManual:
 			casted := check.ManualCheckFragment
 			activeFile = manualCheckFile
@@ -484,9 +502,9 @@ EOT`
 		if activeFile == nil {
 			continue
 		}
-		checkConfig := templateConfig(baseCheckConfig, checkTypeTerraformName, checkTerraformName, check.Name, check.Enabled, makeTerraformSlug(check.Category.Name), check.Level.Alias, flattenCheckOwner(check.Owner), flattenCheckFilter(check.Filter), checkExtras, check.Notes)
+		checkConfig := templateConfig(baseCheckConfig, checkTypeTerraformName, checkTerraformName, check.Name, check.Enabled, makeTerraformSlug(check.Category.Name), check.Level.Alias, flattenCheckOwner(check.Owner), flattenCheckFilter(check.Filter), checkExtras, buildMultilineStringArg("notes", check.Notes))
 		activeFile.WriteString(checkConfig)
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_check_%s %s\n", checkTerraformName, check.Id))
+		shell.WriteString(fmt.Sprintf("terraform import opslevel_check_%s.%s %s\n", checkTypeTerraformName, checkTerraformName, check.Id))
 	}
 
 	shell.WriteString("##########\n")
