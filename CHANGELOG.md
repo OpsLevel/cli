@@ -2,6 +2,34 @@
 ## [Unreleased]
 
 
+<a name="v0.2.0-beta"></a>
+## [v0.2.0-beta] - 2021-09-18
+### Feature
+- upgrade opslevel-go to v0.3.3
+- initial pass at `export terraform` for exporting data from your account to be controlled by terraform
+- add shell completion generation command
+- add get and list check commands
+- add list commands which differ from get commands
+- add commands for rubric categories and levels
+- add get and delete service commands
+- add gpg signing
+- add ability to query account lifecycles, tiers, teams and tools
+
+### Refactor
+- convert prefered environment variable prefix from `OL_` to `OPSLEVEL_` but still support old prefix
+- use args instead of flags for rubric commands
+- seperate get and list commands
+
+
+<a name="v0.1.0-beta.5"></a>
+## [v0.1.0-beta.5] - 2021-07-10
+
+<a name="v0.1.0-beta.4"></a>
+## [v0.1.0-beta.4] - 2021-07-10
+
+<a name="v0.1.0-beta.3"></a>
+## [v0.1.0-beta.3] - 2021-07-10
+
 <a name="v0.1.0-beta.2"></a>
 ## [v0.1.0-beta.2] - 2021-07-10
 ### Refactor
@@ -38,7 +66,11 @@
 - add ability to scrape git commit info if available
 
 
-[Unreleased]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.2...HEAD
+[Unreleased]: https://github.com/OpsLevel/cli/compare/v0.2.0-beta...HEAD
+[v0.2.0-beta]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.5...v0.2.0-beta
+[v0.1.0-beta.5]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.4...v0.1.0-beta.5
+[v0.1.0-beta.4]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.3...v0.1.0-beta.4
+[v0.1.0-beta.3]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.2...v0.1.0-beta.3
 [v0.1.0-beta.2]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.1...v0.1.0-beta.2
 [v0.1.0-beta.1]: https://github.com/OpsLevel/cli/compare/v0.0.1-beta.2...v0.1.0-beta.1
 [v0.0.1-beta.2]: https://github.com/OpsLevel/cli/compare/v0.0.1-beta.1...v0.0.1-beta.2
