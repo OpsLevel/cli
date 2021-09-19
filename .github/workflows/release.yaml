@@ -33,6 +33,21 @@ jobs:
           # GitHub sets this automatically
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+      - name: Checkout cli-repo
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.repository_owner }}/cli-repo
+          path: cli-repo
+          fetch-depth: 0
+          token: ${{ secrets.ORG_REPO_TOKEN }}
+      - name: Setup git settings
+        run: |
+          git config --global user.email "info@opslevel.com"
+          git config --global user.name "OpsLevel"
+      - name: Create rpm repository
+        run: ci/deploy-rpm.sh
+      - name: Create deb repository
+        run: ci/deploy-deb.sh
   release-docker:
     name: Release Docker Image
     runs-on: ubuntu-latest

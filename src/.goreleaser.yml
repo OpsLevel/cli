@@ -14,15 +14,36 @@ builds:
       - windows
       - linux
       - darwin
+      - freebsd
+      - openbsd
     goarch:
       - amd64
-      - '386'
+      - 386
       - arm
       - arm64
     ignore:
       - goos: darwin
         goarch: '386'
     binary: '{{ .ProjectName }}'
+nfpms:
+  - formats:
+      - deb
+      - rpm
+    vendor: "opslevel"
+    homepage: "https://opslevel.com"
+    maintainer: "OpsLevel <info@opslevel.com>"
+    description: "Opslevel Command Line Utility"
+    license: "Apache-2.0"
+    file_name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
+    replacements:
+      amd64: 64bit
+      386: 32bit
+      arm: ARM
+      arm64: ARM64
+      darwin: macOS
+      linux: Linux
+      openbsd: OpenBSD
+      freebsd: FreeBSD
 archives:
   - name_template: '{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}'
     format_overrides:
