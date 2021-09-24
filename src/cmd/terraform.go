@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -119,10 +120,18 @@ func getIntegrationTerraformName(integration opslevel.Integration) string {
 func buildMultilineStringArg(fieldName string, fieldContents string) string {
 	if len(fieldContents) > 0 {
 		if len(strings.Split(fieldContents, "\n")) > 1 {
-			fieldContents = strings.TrimSuffix(fieldContents, "\n")
-			return fmt.Sprintf(`%s = <<-EOT
+			if strings.HasSuffix(fieldContents, "\n") {
+				fieldContents = strings.TrimSuffix(fieldContents, "\n")
+				return fmt.Sprintf(`%s = <<-EOT
 %s
 EOT`, fieldName, fieldContents)
+			} else {
+				escaped, err := json.Marshal(fieldContents)
+				if err != nil {
+					fmt.Println(err)
+				}
+				return fmt.Sprintf("%s = %s", fieldName, string(escaped))
+			}
 		} else {
 			return fmt.Sprintf("%s = \"%s\"", fieldName, fieldContents)
 		}
