@@ -79,8 +79,34 @@ TODO: Add CLI Demo Gif
 
 ### Installation
 
+#### MacOS
+
 ```sh
 brew install opslevel/tap/cli
+```
+
+#### Deb
+
+```sh
+sudo apt-get install apt-transport-https
+wget -qO - https://opslevel.github.io/cli-repo/deb/public.key | sudo apt-key add -
+echo deb https://opslevel.github.io/cli-repo/deb [CODE_NAME] main | sudo tee -a /etc/apt/sources.list
+sudo apt-get update
+sudo apt-get install opslevel
+```
+
+#### RPM
+
+```sh
+cat << EOF > /etc/yum.repos.d/opslevel.repo
+[opslevel]
+name=opslevel cli repository
+baseurl=https://opslevel.github.io/cli-repo/rpm/releases/$releasever/$basearch/
+gpgcheck=0
+enabled=1
+EOF
+sudo yum -y update
+sudo yum -y install opslevel
 ```
 
 #### Docker
