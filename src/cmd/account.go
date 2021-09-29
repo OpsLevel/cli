@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/opslevel/cli/common"
@@ -10,79 +11,66 @@ import (
 )
 
 var lifecycleCmd = &cobra.Command{
-	Use:   "lifecycle",
-	Short: "Lists the valid alias for lifecycles in your account",
-	Long:  `Lists the valid alias for lifecycles in your account`,
+	Use:     "lifecycle",
+	Aliases: []string{"lifecycles"},
+	Short:   "Lists lifecycles",
+	Long:    `Lists lifecycles`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		list, err := client.ListLifecycles()
-		if err == nil {
+		list, err := graphqlClient.ListLifecycles()
+		cobra.CheckErr(err)
+		if isJsonOutput() {
+			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else {
+			w := common.NewTabWriter("ALIAS", "ID")
 			for _, item := range list {
-				fmt.Println(item.Alias)
+				fmt.Fprintf(w, "%s\t%s\t\n", item.Alias, item.Id)
 			}
+			w.Flush()
 		}
 	},
 }
 
 var tierCmd = &cobra.Command{
-	Use:   "tier",
-	Short: "Lists the valid alias for tiers in your account",
-	Long:  `Lists the valid alias for tiers in your account`,
+	Use:     "tier",
+	Aliases: []string{"tiers"},
+	Short:   "Lists tiers",
+	Long:    `Lists tiers`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		list, err := client.ListTiers()
-		if err == nil {
-			for _, item := range list {
-				fmt.Println(item.Alias)
-			}
-		}
-	},
-}
-
-var teamCmd = &cobra.Command{
-	Use:   "team",
-	Short: "Lists teams in your account",
-	Long:  `Lists teams in your account`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		list, err := client.ListTeams()
+		list, err := graphqlClient.ListTiers()
 		cobra.CheckErr(err)
-		w := common.NewTabWriter("Name", "ID", "Alias")
-		if err == nil {
+		if isJsonOutput() {
+			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else {
+			w := common.NewTabWriter("ALIAS", "ID")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Id, item.Alias)
+				fmt.Fprintf(w, "%s\t%s\t\n", item.Alias, item.Id)
 			}
+			w.Flush()
 		}
-		w.Flush()
 	},
 }
 
 var toolsCmd = &cobra.Command{
-	Use:   "tool",
-	Short: "Lists the valid alias for tools in your account",
-	Long:  `Lists the valid alias for tools in your account`,
+	Use:     "tool",
+	Aliases: []string{"tools"},
+	Short:   "Lists the valid alias for tools",
+	Long:    `Lists the valid alias for tools`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(opslevel.ToolCategoryAdmin)
-		fmt.Println(opslevel.ToolCategoryCode)
-		fmt.Println(opslevel.ToolCategoryContinuousIntegration)
-		fmt.Println(opslevel.ToolCategoryDeployment)
-		fmt.Println(opslevel.ToolCategoryErrors)
-		fmt.Println(opslevel.ToolCategoryFeatureFlag)
-		fmt.Println(opslevel.ToolCategoryHealthChecks)
-		fmt.Println(opslevel.ToolCategoryIncidents)
-		fmt.Println(opslevel.ToolCategoryLogs)
-		fmt.Println(opslevel.ToolCategoryMetrics)
-		fmt.Println(opslevel.ToolCategoryOrchestrator)
-		fmt.Println(opslevel.ToolCategoryRunbooks)
-		fmt.Println(opslevel.ToolCategoryStatusPage)
-		fmt.Println(opslevel.ToolCategoryWiki)
-		fmt.Println(opslevel.ToolCategoryOther)
+		list := opslevel.AllToolCategory()
+		if isJsonOutput() {
+			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else {
+			w := common.NewTabWriter("NAME")
+			for _, item := range list {
+				fmt.Fprintf(w, "%s\t\n", item)
+			}
+			w.Flush()
+		}
 	},
 }
 
 func init() {
 	listCmd.AddCommand(lifecycleCmd)
 	listCmd.AddCommand(tierCmd)
-	listCmd.AddCommand(teamCmd)
 	listCmd.AddCommand(toolsCmd)
 }
