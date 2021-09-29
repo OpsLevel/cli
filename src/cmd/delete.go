@@ -6,8 +6,8 @@ import (
 
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete resources or data from OpsLevel",
-	Long:  "Delete resources or data from OpsLevel",
+	Short: "Delete or remove data in OpsLevel",
+	Long:  "Delete or remove data in OpsLevel",
 }
 
 func init() {

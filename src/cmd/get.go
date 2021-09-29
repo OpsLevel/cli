@@ -6,8 +6,8 @@ import (
 
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get resources or data from OpsLevel",
-	Long:  "Get resources or data from OpsLevel",
+	Short: "Get detailed info about resources in OpsLevel",
+	Long:  "Get detailed info about resources in OpsLevel",
 }
 
 func init() {

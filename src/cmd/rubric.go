@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/opslevel/cli/common"
@@ -15,8 +16,7 @@ var createCategoryCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		category, err := client.CreateCategory(opslevel.CategoryCreateInput{
+		category, err := graphqlClient.CreateCategory(opslevel.CategoryCreateInput{
 			Name: args[0],
 		})
 		cobra.CheckErr(err)
@@ -26,33 +26,34 @@ var createCategoryCmd = &cobra.Command{
 
 var getCategoryCmd = &cobra.Command{
 	Use:        "category ID",
-	Short:      "Get details about a rubic category given its ID",
-	Long:       `Get details about a rubic category given its ID`,
+	Short:      "Get details about a rubic category",
+	Long:       `Get details about a rubic category`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		category, err := client.GetCategory(args[0])
+		category, err := graphqlClient.GetCategory(args[0])
 		cobra.CheckErr(err)
 		common.PrettyPrint(category)
 	},
 }
 
 var listCategoryCmd = &cobra.Command{
-	Use:   "category",
-	Short: "Lists the valid names for rubric categories",
-	Long:  `Lists the valid names for rubric categories`,
+	Use:     "category",
+	Aliases: []string{"categories"},
+	Short:   "Lists rubric categories",
+	Long:    `Lists rubric categories`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		list, err := client.ListCategories()
+		list, err := graphqlClient.ListCategories()
 		cobra.CheckErr(err)
-		w := common.NewTabWriter("NAME", "ID")
-		if err == nil {
+		if isJsonOutput() {
+			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else {
+			w := common.NewTabWriter("NAME", "ID")
 			for _, item := range list {
 				fmt.Fprintf(w, "%s\t%s\t\n", item.Name, item.Id)
 			}
+			w.Flush()
 		}
-		w.Flush()
 	},
 }
 
@@ -63,9 +64,10 @@ var deleteCategoryCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		err := client.DeleteCategory(args[0])
+		key := args[0]
+		err := graphqlClient.DeleteCategory(key)
 		cobra.CheckErr(err)
+		fmt.Printf("deleted '%s' category\n", key)
 	},
 }
 
@@ -76,8 +78,7 @@ var createLevelCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		category, err := client.CreateLevel(opslevel.LevelCreateInput{
+		category, err := graphqlClient.CreateLevel(opslevel.LevelCreateInput{
 			Name: args[0],
 		})
 		cobra.CheckErr(err)
@@ -87,33 +88,34 @@ var createLevelCmd = &cobra.Command{
 
 var getLevelCmd = &cobra.Command{
 	Use:        "level ID",
-	Short:      "Get details about a rubic level given its ID",
-	Long:       `Get details about a rubic level given its ID`,
+	Short:      "Get details about a rubic level",
+	Long:       `Get details about a rubic level`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		level, err := client.GetLevel(args[0])
+		level, err := graphqlClient.GetLevel(args[0])
 		cobra.CheckErr(err)
 		common.PrettyPrint(level)
 	},
 }
 
 var listLevelCmd = &cobra.Command{
-	Use:   "level",
-	Short: "Lists the valid alias for rubric levels",
-	Long:  `Lists the valid alias for rubric levels`,
+	Use:     "level",
+	Aliases: []string{"levels"},
+	Short:   "Lists rubric levels",
+	Long:    `Lists rubric levels`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		list, err := client.ListLevels()
+		list, err := graphqlClient.ListLevels()
 		cobra.CheckErr(err)
-		w := common.NewTabWriter("Alias", "ID")
-		if err == nil {
+		if isJsonOutput() {
+			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else {
+			w := common.NewTabWriter("Alias", "ID")
 			for _, item := range list {
 				fmt.Fprintf(w, "%s\t%s\t\n", item.Alias, item.Id)
 			}
+			w.Flush()
 		}
-		w.Flush()
 	},
 }
 
@@ -124,9 +126,10 @@ var deleteLevelCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		err := client.DeleteLevel(args[0])
+		key := args[0]
+		err := graphqlClient.DeleteLevel(key)
 		cobra.CheckErr(err)
+		fmt.Printf("deleted '%s' level\n", key)
 	},
 }
 

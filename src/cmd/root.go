@@ -4,6 +4,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/opslevel/cli/common"
+	"github.com/opslevel/opslevel-go"
 	"github.com/spf13/cobra"
 
 	"github.com/rs/zerolog"
@@ -11,10 +13,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+var restClient *common.Client
+var graphqlClient *opslevel.Client
+
 var rootCmd = &cobra.Command{
 	Use:   "opslevel",
-	Short: "Opslevel Commandline Tools",
-	Long:  `Opslevel Commandline Tools`,
+	Short: "Opslevel Commandline Tool",
+	Long:  `Opslevel Commandline Tool`,
 }
 
 func Execute() {
@@ -39,6 +44,7 @@ func initConfig() {
 	viper.SetEnvPrefix("OPSLEVEL")
 	viper.AutomaticEnv()
 	setupLogging()
+	createClients()
 }
 
 func setupLogging() {
@@ -62,4 +68,9 @@ func setupLogging() {
 	default:
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
+}
+
+func createClients() {
+	restClient = common.NewRestClient()
+	graphqlClient = common.NewGraphClient()
 }
