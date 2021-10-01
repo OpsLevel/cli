@@ -2,6 +2,23 @@
 ## [Unreleased]
 
 
+<a name="v0.3.0-beta"></a>
+## [v0.3.0-beta] - 2021-10-01
+### Bugfix
+- if multiline string from opslevel does not end with \n then have terraform treat it as an escaped string
+
+### Docs
+- add installation instructions for Deb/RPM
+
+### Feature
+- add deb/rpm package releases
+- add create, get, list and delete for filters
+- implement create, get, list, and delete for team, team member and team contact
+- implement get & list for repository
+- add ability to output list data as a json array
+- implement correct output formatting for list tier, lifecycle and tools
+
+
 <a name="v0.2.0-beta"></a>
 ## [v0.2.0-beta] - 2021-09-18
 ### Feature
@@ -66,7 +83,8 @@
 - add ability to scrape git commit info if available
 
 
-[Unreleased]: https://github.com/OpsLevel/cli/compare/v0.2.0-beta...HEAD
+[Unreleased]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta...HEAD
+[v0.3.0-beta]: https://github.com/OpsLevel/cli/compare/v0.2.0-beta...v0.3.0-beta
 [v0.2.0-beta]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.5...v0.2.0-beta
 [v0.1.0-beta.5]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.4...v0.1.0-beta.5
 [v0.1.0-beta.4]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.3...v0.1.0-beta.4
