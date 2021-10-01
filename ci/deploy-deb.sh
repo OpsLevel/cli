@@ -3,12 +3,12 @@
 DEBIAN_RELEASES=$(debian-distro-info --supported)
 UBUNTU_RELEASES=$(ubuntu-distro-info --supported-esm)
 
-cd trivy-repo/deb
+cd cli-repo/deb
 
 for release in ${DEBIAN_RELEASES[@]} ${UBUNTU_RELEASES[@]}; do
   echo "Removing deb package of $release"
-  reprepro -A i386 remove $release trivy
-  reprepro -A amd64 remove $release trivy
+  reprepro -A i386 remove $release opslevel
+  reprepro -A amd64 remove $release opslevel
 done
 
 for release in ${DEBIAN_RELEASES[@]} ${UBUNTU_RELEASES[@]}; do

@@ -39,7 +39,7 @@ jobs:
           repository: ${{ github.repository_owner }}/cli-repo
           path: cli-repo
           fetch-depth: 0
-          token: ${{ secrets.ORG_REPO_TOKEN }}
+          token: ${{ secrets.ORG_GITHUB_TOKEN }}
       - name: Setup git settings
         run: |
           git config --global user.email "info@opslevel.com"

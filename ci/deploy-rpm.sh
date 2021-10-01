@@ -13,7 +13,7 @@ function create_rpm_repo () {
         createrepo --update $rpm_path
 }
 
-cd trivy-repo
+cd cli-repo
 
 VERSIONS=(5 6 7 8)
 for version in ${VERSIONS[@]}; do
