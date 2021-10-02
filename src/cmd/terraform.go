@@ -49,9 +49,10 @@ func newFile(filename string, makeExecutable bool) *os.File {
 	return file
 }
 
-// TODO: we need to remove blank lines to condense the terraform config - this is a hacky way we should find a better way
 func templateConfig(tmpl string, a ...interface{}) string {
-	return strings.ReplaceAll(fmt.Sprintf(tmpl, a...), "  \n", "")
+	// TODO: it would be nice to remove blank lines to condense the terraform config - this is a hacky way that doesn't work
+	//return strings.ReplaceAll(fmt.Sprintf(tmpl, a...), "  \n", "")
+	return fmt.Sprintf(tmpl, a...)
 }
 
 func runExportTerraform(cmd *cobra.Command, args []string) {
@@ -133,7 +134,7 @@ EOT`, fieldName, fieldContents)
 				return fmt.Sprintf("%s = %s", fieldName, string(escaped))
 			}
 		} else {
-			return fmt.Sprintf("%s = \"%s\"", fieldName, fieldContents)
+			return fmt.Sprintf("%s = %q", fieldName, fieldContents)
 		}
 	}
 	return fieldContents
@@ -412,15 +413,15 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 }
 `
 	customEventCheckConfig := `integration = data.opslevel_integration.%s.id
-  service_selector = "%s"
-  success_condition = "%s"
+  service_selector = %q
+  success_condition = %q
   %s`
 	manualCheckConfig := `%s
   update_requires_comment = %v`
 	repoFileCheckConfig := `directory_search = %v
   filepaths = ["%s"]
   %s`
-	repoSearchCheckConfig := `file_extensions = ["%s"]
+	repoSearchCheckConfig := `%s
   %s`
 	servicePropertyCheckConfig := `property = "%s"
   %s`
@@ -482,7 +483,11 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			casted := check.RepositorySearchCheckFragment
 			activeFile = repoSearchCheckFile
 			checkTypeTerraformName = "repository_search"
-			checkExtras = templateConfig(repoSearchCheckConfig, strings.Join(casted.FileExtensions, "\", \""), flattenCheckPredicate("file_contents_predicate", &casted.FileContentsPredicate))
+			fileExtensions := ""
+			if len(casted.FileExtensions) > 0 {
+				fileExtensions = fmt.Sprintf(`file_extensions = ["%s"]`, strings.Join(casted.FileExtensions, "\", \""))
+			}
+			checkExtras = templateConfig(repoSearchCheckConfig, fileExtensions, flattenCheckPredicate("file_contents_predicate", &casted.FileContentsPredicate))
 		case opslevel.CheckTypeHasServiceConfig:
 			activeFile = serviceConfigCheckFile
 			checkTypeTerraformName = "service_configuration"
