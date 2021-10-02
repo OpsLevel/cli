@@ -9,7 +9,7 @@ COPY ./src .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./opslevel -ldflags="-X 'github.com/opslevel/cli/cmd.version=${VERSION}'"
 
 
-FROM ubuntu:impish AS release
+FROM ubuntu:focal AS release
 ENV USER_UID=1001 USER_NAME=opslevel
 ENTRYPOINT ["/usr/local/bin/opslevel"]
 WORKDIR /app
