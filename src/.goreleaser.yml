@@ -29,12 +29,14 @@ nfpms:
   - formats:
       - deb
       - rpm
+    dependencies:
+      - jq
     vendor: "opslevel"
     homepage: "https://opslevel.com"
     maintainer: "OpsLevel <info@opslevel.com>"
     description: "Opslevel Command Line Utility"
     license: "Apache-2.0"
-    file_name_template: "{{.ProjectName}}_{{.Os}}-{{.Arch}}"
+    file_name_template: "{{.ProjectName}}-{{.Os}}-{{.Arch}}"
     replacements:
       amd64: 64bit
       386: 32bit
