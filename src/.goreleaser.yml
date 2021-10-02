@@ -34,16 +34,10 @@ nfpms:
     maintainer: "OpsLevel <info@opslevel.com>"
     description: "Opslevel Command Line Utility"
     license: "Apache-2.0"
-    file_name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
+    file_name_template: "{{.ProjectName}}_{{.Os}}-{{.Arch}}"
     replacements:
       amd64: 64bit
       386: 32bit
-      arm: ARM
-      arm64: ARM64
-      darwin: macOS
-      linux: Linux
-      openbsd: OpenBSD
-      freebsd: FreeBSD
 archives:
   - name_template: '{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}'
     format_overrides:
