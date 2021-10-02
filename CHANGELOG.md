@@ -2,6 +2,27 @@
 ## [Unreleased]
 
 
+<a name="v0.3.0"></a>
+## [v0.3.0] - 2021-10-02
+
+<a name="v0.3.0-beta.5"></a>
+## [v0.3.0-beta.5] - 2021-10-02
+
+<a name="v0.3.0-beta.4"></a>
+## [v0.3.0-beta.4] - 2021-10-01
+
+<a name="v0.3.0-beta.3"></a>
+## [v0.3.0-beta.3] - 2021-10-01
+
+<a name="v0.3.0-beta.2"></a>
+## [v0.3.0-beta.2] - 2021-10-01
+
+<a name="v0.3.0-beta.1"></a>
+## [v0.3.0-beta.1] - 2021-10-01
+### Bugfix
+- fix outstanding multiline string issues with `export terraform`
+
+
 <a name="v0.3.0-beta"></a>
 ## [v0.3.0-beta] - 2021-10-01
 ### Bugfix
@@ -83,7 +104,13 @@
 - add ability to scrape git commit info if available
 
 
-[Unreleased]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta...HEAD
+[Unreleased]: https://github.com/OpsLevel/cli/compare/v0.3.0...HEAD
+[v0.3.0]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta.5...v0.3.0
+[v0.3.0-beta.5]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta.4...v0.3.0-beta.5
+[v0.3.0-beta.4]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta.3...v0.3.0-beta.4
+[v0.3.0-beta.3]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta.2...v0.3.0-beta.3
+[v0.3.0-beta.2]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta.1...v0.3.0-beta.2
+[v0.3.0-beta.1]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta...v0.3.0-beta.1
 [v0.3.0-beta]: https://github.com/OpsLevel/cli/compare/v0.2.0-beta...v0.3.0-beta
 [v0.2.0-beta]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.5...v0.2.0-beta
 [v0.1.0-beta.5]: https://github.com/OpsLevel/cli/compare/v0.1.0-beta.4...v0.1.0-beta.5
