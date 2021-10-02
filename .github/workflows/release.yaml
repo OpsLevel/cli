@@ -44,6 +44,10 @@ jobs:
         run: |
           git config --global user.email "info@opslevel.com"
           git config --global user.name "OpsLevel"
+      - name: Install DEB/RPM dependencies
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install rpm reprepro createrepo distro-info
       - name: Create rpm repository
         run: ci/deploy-rpm.sh
       - name: Create deb repository
