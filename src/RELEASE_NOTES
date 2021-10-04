@@ -1,0 +1,11 @@
+
+<a name="v0.3.1"></a>
+## [v0.3.1] - 2021-10-04
+### Docs
+- cleanup readme to bring it more inline with kubectl-opslevel
+
+### Feature
+- set custom graphql user agent extras
+
+
+[v0.3.1]: https://github.com/OpsLevel/cli/compare/v0.3.0...v0.3.1

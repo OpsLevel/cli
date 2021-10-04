@@ -25,6 +25,14 @@ builds:
       - goos: darwin
         goarch: '386'
     binary: '{{ .ProjectName }}'
+dockers:
+  - image_templates:
+    - "public.ecr.aws/opslevel/cli:{{ .Tag }}"
+    build_flag_templates:
+    - "--label=org.opencontainers.image.created={{ .Date }}"
+    - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+    - "--label=org.opencontainers.image.version={{ .Tag }}"
+    - "--build-arg=VERSION={{ .Tag }}"
 nfpms:
   - formats:
       - deb
@@ -75,4 +83,7 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 changelog:
-  skip: true
+  sort: desc
+  filters:
+    exclude:
+      - "^Merge"

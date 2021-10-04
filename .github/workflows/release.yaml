@@ -29,11 +29,26 @@ jobs:
           # These secrets will need to be configured for the repository:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Login to Public ECR
+        uses: docker/login-action@v1
+        with:
+          registry: public.ecr.aws
+          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        env:
+          AWS_REGION: us-east-1
+      - name: Cache Docker Layers
+        run: docker pull public.ecr.aws/opslevel/cli:v0.3.0 || true
+      # - name: Write Release Notes
+      #   run: |
+      #     curl -L https://github.com/git-chglog/git-chglog/releases/download/v0.15.0/git-chglog_0.15.0_linux_amd64.tar.gz | tar xz -C /usr/local/bin git-chglog
+      #     chmod 755 /usr/local/bin/git-chglog
+      #     /usr/local/bin/git-chglog $(git describe --tags $(git rev-list --tags --max-count=1)) > RELEASE_NOTES
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist
+          args: release --rm-dist --release-notes=RELEASE_NOTES
           workdir: ./src
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
@@ -59,29 +74,3 @@ jobs:
       #   run: ci/deploy-rpm.sh
       # - name: Create deb repository
       #   run: ci/deploy-deb.sh
-  release-docker:
-    name: Release Docker Image
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Login to Public ECR
-      uses: docker/login-action@v1
-      with:
-        registry: public.ecr.aws
-        username: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      env:
-        AWS_REGION: us-east-1
-    - name: Build & Push
-      run: |
-        git fetch --tags --force
-        TAG=$(git describe --tags --match "v[0-9].*" --always)
-        IMAGE="opslevel:${TAG}"
-        docker build -t ${IMAGE} --build-arg VERSION=$(git describe --tags --long --abbrev=12 --match "v[0-9].*" --always) .
-
-        AWS_IMAGE="public.ecr.aws/opslevel/cli:${TAG}"
-        docker tag ${IMAGE} ${AWS_IMAGE}
-        docker push ${AWS_IMAGE}

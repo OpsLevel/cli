@@ -1,5 +1,11 @@
-<a name="unreleased"></a>
-## [Unreleased]
+
+<a name="v0.3.1"></a>
+## [v0.3.1] - 2021-10-04
+### Docs
+- cleanup readme to bring it more inline with kubectl-opslevel
+
+### Feature
+- set custom graphql user agent extras
 
 
 <a name="v0.3.0"></a>
@@ -104,7 +110,7 @@
 - add ability to scrape git commit info if available
 
 
-[Unreleased]: https://github.com/OpsLevel/cli/compare/v0.3.0...HEAD
+[v0.3.1]: https://github.com/OpsLevel/cli/compare/v0.3.0...v0.3.1
 [v0.3.0]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta.5...v0.3.0
 [v0.3.0-beta.5]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta.4...v0.3.0-beta.5
 [v0.3.0-beta.4]: https://github.com/OpsLevel/cli/compare/v0.3.0-beta.3...v0.3.0-beta.4
