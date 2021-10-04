@@ -15,8 +15,7 @@ var getCheckCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.NewGraphClient()
-		category, err := client.GetCheck(args[0])
+		category, err := graphqlClient.GetCheck(args[0])
 		cobra.CheckErr(err)
 		common.PrettyPrint(category)
 	},

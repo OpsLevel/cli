@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gosimple/slug"
-	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go"
 	"github.com/spf13/cobra"
 )
@@ -67,7 +66,6 @@ func runExportTerraform(cmd *cobra.Command, args []string) {
 	makeDirErr := os.MkdirAll(directory, os.ModePerm)
 	cobra.CheckErr(makeDirErr)
 	fmt.Printf("Writing files to: %s\n", directory)
-	client := common.NewGraphClient()
 	bash := newFile(fmt.Sprintf("%s/import.sh", directory), true)
 	main := newFile(fmt.Sprintf("%s/main.tf", directory), false)
 	teams := newFile(fmt.Sprintf("%s/opslevel_teams.tf", directory), false)
@@ -95,13 +93,13 @@ provider "opslevel" {
 `)
 	bash.WriteString("#!/bin/sh\n\n")
 
-	exportConstants(client, main)
-	exportRepos(client, repos, bash)
-	exportServices(client, bash, directory)
-	exportTeams(client, teams, bash)
-	exportFilters(client, filters, bash)
-	exportRubric(client, rubric, bash)
-	exportChecks(client, bash, directory)
+	exportConstants(graphqlClient, main)
+	exportRepos(graphqlClient, repos, bash)
+	exportServices(graphqlClient, bash, directory)
+	exportTeams(graphqlClient, teams, bash)
+	exportFilters(graphqlClient, filters, bash)
+	exportRubric(graphqlClient, rubric, bash)
+	exportChecks(graphqlClient, bash, directory)
 	fmt.Println("Complete!")
 }
 
