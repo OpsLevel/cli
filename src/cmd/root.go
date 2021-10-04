@@ -72,5 +72,5 @@ func setupLogging() {
 
 func createClients() {
 	restClient = common.NewRestClient()
-	graphqlClient = common.NewGraphClient()
+	graphqlClient = common.NewGraphClient(version)
 }

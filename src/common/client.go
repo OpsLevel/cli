@@ -23,8 +23,8 @@ type Client struct {
 // ClientOption modifies fields on a Client
 type ClientOption func(c *Client)
 
-func NewGraphClient() *opslevel.Client {
-	client := opslevel.NewClient(viper.GetString("api-token"), opslevel.SetURL(viper.GetString("api-url")))
+func NewGraphClient(version string) *opslevel.Client {
+	client := opslevel.NewClient(viper.GetString("api-token"), opslevel.SetURL(viper.GetString("api-url")), opslevel.SetUserAgentExtra(fmt.Sprintf("cli-%s", version)))
 
 	clientErr := client.Validate()
 	if clientErr != nil {
