@@ -187,6 +187,9 @@ func exportRepos(c *opslevel.Client, config *os.File, shell *os.File) {
 	repos, err := c.ListRepositories()
 	cobra.CheckErr(err)
 	for _, repo := range repos {
+		if repo.DefaultAlias == "" {
+			continue
+		}
 		config.WriteString(templateConfig(repoConfig, makeTerraformSlug(repo.DefaultAlias), repo.DefaultAlias))
 	}
 }
