@@ -342,13 +342,18 @@ func exportFilters(c *opslevel.Client, config *os.File, shell *os.File) {
 	filterConfig := `resource "opslevel_filter" "%s" {
   name = "%s"
   connective = "%s"
+  %s
 }
 `
 	filters, err := c.ListFilters()
 	cobra.CheckErr(err)
 	for _, filter := range filters {
+		predicates := ""
 		filterTerraformName := makeTerraformSlug(filter.Name)
-		config.WriteString(templateConfig(filterConfig, filterTerraformName, filter.Name, string(filter.Connective)))
+		for _, predicate := range filter.Predicates {
+			predicates += flattenFilterPredicate(&predicate)
+		}
+		config.WriteString(templateConfig(filterConfig, filterTerraformName, filter.Name, string(filter.Connective), predicates))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_filter.%s %s\n", filterTerraformName, filter.Id))
 	}
 
@@ -369,7 +374,7 @@ func flattenCheckFilter(value opslevel.Filter) string {
 	return ""
 }
 
-func flattenCheckPredicate(key string, value *opslevel.Predicate) string {
+func flattenPredicate(key string, value *opslevel.Predicate) string {
 	config := `
   %s {
     type = "%s"
@@ -378,6 +383,21 @@ func flattenCheckPredicate(key string, value *opslevel.Predicate) string {
 `
 	if value != nil {
 		return templateConfig(config, key, value.Type, strings.ReplaceAll(value.Value, "\"", "\\\""))
+	}
+	return ""
+}
+
+func flattenFilterPredicate(value *opslevel.FilterPredicate) string {
+	config := `
+  predicate {
+    key = "%s"
+    key_data = "%s"
+    type = "%s"
+    value = "%s"
+  }
+`
+	if value != nil {
+		return templateConfig(config, value.Key, value.KeyData, value.Type, value.Value)
 	}
 	return ""
 }
@@ -473,7 +493,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			casted := check.RepositoryFileCheckFragment
 			activeFile = repoFileCheckFile
 			checkTypeTerraformName = "repository_file"
-			checkExtras = templateConfig(repoFileCheckConfig, casted.DirectorySearch, strings.Join(casted.Filepaths, "\", \""), flattenCheckPredicate("file_contents_predicate", casted.FileContentsPredicate))
+			checkExtras = templateConfig(repoFileCheckConfig, casted.DirectorySearch, strings.Join(casted.Filepaths, "\", \""), flattenPredicate("file_contents_predicate", casted.FileContentsPredicate))
 		case opslevel.CheckTypeHasRepository:
 			activeFile = repoIntegratedCheckFile
 			checkTypeTerraformName = "repository_integrated"
@@ -485,7 +505,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			if len(casted.FileExtensions) > 0 {
 				fileExtensions = fmt.Sprintf(`file_extensions = ["%s"]`, strings.Join(casted.FileExtensions, "\", \""))
 			}
-			checkExtras = templateConfig(repoSearchCheckConfig, fileExtensions, flattenCheckPredicate("file_contents_predicate", &casted.FileContentsPredicate))
+			checkExtras = templateConfig(repoSearchCheckConfig, fileExtensions, flattenPredicate("file_contents_predicate", &casted.FileContentsPredicate))
 		case opslevel.CheckTypeHasServiceConfig:
 			activeFile = serviceConfigCheckFile
 			checkTypeTerraformName = "service_configuration"
@@ -496,17 +516,17 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			casted := check.ServicePropertyCheckFragment
 			activeFile = servicePropertyCheckFile
 			checkTypeTerraformName = "service_property"
-			checkExtras = templateConfig(servicePropertyCheckConfig, casted.Property, flattenCheckPredicate("predicate", casted.Predicate))
+			checkExtras = templateConfig(servicePropertyCheckConfig, casted.Property, flattenPredicate("predicate", casted.Predicate))
 		case opslevel.CheckTypeTagDefined:
 			casted := check.TagDefinedCheckFragment
 			activeFile = tagDefinedCheckFile
 			checkTypeTerraformName = "tag_defined"
-			checkExtras = templateConfig(tagDefinedCheckConfig, casted.TagKey, flattenCheckPredicate("tag_predicate", casted.TagPredicate))
+			checkExtras = templateConfig(tagDefinedCheckConfig, casted.TagKey, flattenPredicate("tag_predicate", casted.TagPredicate))
 		case opslevel.CheckTypeToolUsage:
 			casted := check.ToolUsageCheckFragment
 			activeFile = toolUsageCheckFile
 			checkTypeTerraformName = "tool_usage"
-			checkExtras = templateConfig(toolUsageCheckConfig, casted.ToolCategory, flattenCheckPredicate("tool_name_predicate", casted.ToolNamePredicate), flattenCheckPredicate("environment_predicate", casted.EnvironmentPredicate))
+			checkExtras = templateConfig(toolUsageCheckConfig, casted.ToolCategory, flattenPredicate("tool_name_predicate", casted.ToolNamePredicate), flattenPredicate("environment_predicate", casted.EnvironmentPredicate))
 		default:
 			continue
 		}
