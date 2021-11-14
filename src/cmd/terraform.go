@@ -68,6 +68,7 @@ func runExportTerraform(cmd *cobra.Command, args []string) {
 	fmt.Printf("Writing files to: %s\n", directory)
 	bash := newFile(fmt.Sprintf("%s/import.sh", directory), true)
 	main := newFile(fmt.Sprintf("%s/main.tf", directory), false)
+	constants := newFile(fmt.Sprintf("%s/opslevel_constants.tf", directory), false)
 	teams := newFile(fmt.Sprintf("%s/opslevel_teams.tf", directory), false)
 	repos := newFile(fmt.Sprintf("%s/opslevel_repos.tf", directory), false)
 	rubric := newFile(fmt.Sprintf("%s/opslevel_rubric.tf", directory), false)
@@ -75,6 +76,7 @@ func runExportTerraform(cmd *cobra.Command, args []string) {
 
 	defer bash.Close()
 	defer main.Close()
+	defer constants.Close()
 	defer teams.Close()
 	defer repos.Close()
 	defer rubric.Close()
@@ -93,7 +95,7 @@ provider "opslevel" {
 `)
 	bash.WriteString("#!/bin/sh\n\n")
 
-	exportConstants(graphqlClient, main)
+	exportConstants(graphqlClient, constants)
 	exportRepos(graphqlClient, repos, bash)
 	exportServices(graphqlClient, bash, directory)
 	exportTeams(graphqlClient, teams, bash)
@@ -194,6 +196,10 @@ func exportRepos(c *opslevel.Client, config *os.File, shell *os.File) {
 	}
 }
 
+func flattenAliases(aliases []string) string {
+	return strings.Join(aliases, "\", \"")
+}
+
 func flattenTags(tags []opslevel.Tag) string {
 	tagStrings := []string{}
 	for _, tag := range tags {
@@ -240,6 +246,7 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
   %s
 
   %s
+  %s
 }
 `
 	serviceToolConfig := `resource "opslevel_service_tool" "%s" {
@@ -265,11 +272,15 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 	for _, service := range services {
 		serviceMainAlias := makeTerraformSlug(service.Aliases[0])
 		file := newFile(fmt.Sprintf("%s/opslevel_service_%s.tf", directory, serviceMainAlias), false)
+		aliases := flattenAliases(service.Aliases)
+		if len(aliases) > 0 {
+			aliases = fmt.Sprintf("aliases = [\"%s\"]", aliases)
+		}
 		tags := flattenTags(service.Tags.Nodes)
 		if len(tags) > 0 {
 			tags = fmt.Sprintf("tags = [\"%s\"]", tags)
 		}
-		file.WriteString(templateConfig(serviceConfig, serviceMainAlias, service.Name, service.Description, service.Product, service.Framework, service.Language, flattenLifecycle(service.Lifecycle), flattenTier(service.Tier), flattenOwner(service.Owner), tags))
+		file.WriteString(templateConfig(serviceConfig, serviceMainAlias, service.Name, service.Description, service.Product, service.Framework, service.Language, flattenLifecycle(service.Lifecycle), flattenTier(service.Tier), flattenOwner(service.Owner), aliases, tags))
 		shell.WriteString(fmt.Sprintf("# Service: %s\n", serviceMainAlias))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_service.%s %s\n", serviceMainAlias, service.Id))
 		for _, tool := range service.Tools.Nodes {
@@ -298,12 +309,17 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
   name = "%s"
   manager_email = "%s"
   %s
+  %s
 }
 `
 	teams, err := c.ListTeams()
 	cobra.CheckErr(err)
 	for _, team := range teams {
-		config.WriteString(templateConfig(teamConfig, team.Alias, team.Name, team.Manager.Email, buildMultilineStringArg("responsibilities", team.Responsibilities)))
+		aliases := flattenAliases(team.Aliases)
+		if len(aliases) > 0 {
+			aliases = fmt.Sprintf("aliases = [\"%s\"]", aliases)
+		}
+		config.WriteString(templateConfig(teamConfig, team.Alias, team.Name, team.Manager.Email, aliases, buildMultilineStringArg("responsibilities", team.Responsibilities)))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_team.%s %s\n", team.Alias, team.Id))
 	}
 	shell.WriteString("##########\n\n")
