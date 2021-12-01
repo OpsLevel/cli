@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/alecthomas/jsonschema"
+	"github.com/opslevel/opslevel-go"
 	"github.com/spf13/cobra"
 )
 
@@ -14,10 +15,10 @@ type OpsLevelTag struct {
 }
 
 type OpsLevelTool struct {
-	Name        string `json:"name"`
-	Category    string `json:"category"` // TODO: this should be an enum
-	Url         string `json:"url"`
-	Environment string `json:"environment,omitempty"`
+	Name        string                `json:"name"`
+	Category    opslevel.ToolCategory `json:"category"`
+	Url         string                `json:"url"`
+	Environment string                `json:"environment,omitempty"`
 }
 
 type OpsLevelRepository struct {
@@ -26,20 +27,24 @@ type OpsLevelRepository struct {
 	Provider string `json:"provider"` // TODO: this should be an enum
 }
 
+type OpsLevelServiceDependancy struct {
+	Alias string `json:"alias"`
+}
+
 type OpsLevelService struct {
-	Name         string               `json:"name"`
-	Description  string               `json:"description"`
-	Owner        string               `json:"owner"`
-	Lifecycle    string               `json:"lifecycle"`
-	Tier         string               `json:"tier"`
-	Product      string               `json:"product"`
-	Language     string               `json:"language"`
-	Framework    string               `json:"framework"`
-	Aliases      []string             `json:"aliases"` // JQ expressions that return a single string or a []string
-	Tags         []OpsLevelTag        `json:"tags"`
-	Tools        []OpsLevelTool       `json:"tools"`        // JQ expressions that return a single map[string]string or a []map[string]string
-	Repositories []OpsLevelRepository `json:"repositories"` // JQ expressions that return a single string or []string or map[string]string or a []map[string]string
-	// TODO: Dependencies
+	Name         string                      `json:"name"`
+	Description  string                      `json:"description,omitempty"`
+	Owner        string                      `json:"owner,omitempty"`
+	Lifecycle    string                      `json:"lifecycle,omitempty"`
+	Tier         string                      `json:"tier,omitempty"`
+	Product      string                      `json:"product,omitempty"`
+	Language     string                      `json:"language,omitempty"`
+	Framework    string                      `json:"framework,omitempty"`
+	Aliases      []string                    `json:"aliases,omitempty"`
+	Tags         []OpsLevelTag               `json:"tags,omitempty"`
+	Tools        []OpsLevelTool              `json:"tools,omitempty"`
+	Repositories []OpsLevelRepository        `json:"repositories,omitempty"`
+	Dependencies []OpsLevelServiceDependancy `json:"dependencies,omitempty"`
 }
 
 type OpsLevelConfig struct {
