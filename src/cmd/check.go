@@ -66,12 +66,9 @@ Examples:
 		common.AliasCache.CacheIntegrations(graphqlClient)
 		input, err := readCheckCreateInput()
 		cobra.CheckErr(err)
-		switch input.Kind {
-		case opslevel.CheckTypeGeneric:
-			check, err := graphqlClient.CreateCheckCustomEvent(*input.AsGenericCreate())
-			cobra.CheckErr(err)
-			fmt.Printf("Created: %s - %s\n", check.Name, check.Id)
-		}
+		check, err := createCheck(*input)
+		cobra.CheckErr(err)
+		fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
 	},
 }
 
@@ -128,7 +125,67 @@ func (self *CheckCreateType) resolveAliases() {
 	}
 }
 
-func (self *CheckCreateType) AsGenericCreate() *opslevel.CheckCustomEventCreateInput {
+func toJson(data map[string]interface{}) []byte {
+	output, err := json.Marshal(data)
+	cobra.CheckErr(err)
+	return output
+}
+
+func (self *CheckCreateType) AsServiceOwnershipCreateInput() *opslevel.CheckServiceOwnershipCreateInput {
+	payload := &opslevel.CheckServiceOwnershipCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsServicePropertyCreateInput() *opslevel.CheckServicePropertyCreateInput {
+	payload := &opslevel.CheckServicePropertyCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsServiceConfigurationCreateInput() *opslevel.CheckServiceConfigurationCreateInput {
+	payload := &opslevel.CheckServiceConfigurationCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsRepositoryFileCreateInput() *opslevel.CheckRepositoryFileCreateInput {
+	payload := &opslevel.CheckRepositoryFileCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsRepositoryIntegratedCreateInput() *opslevel.CheckRepositoryIntegratedCreateInput {
+	payload := &opslevel.CheckRepositoryIntegratedCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsRepositorySearchCreateInput() *opslevel.CheckRepositorySearchCreateInput {
+	payload := &opslevel.CheckRepositorySearchCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsTagDefinedCreateInput() *opslevel.CheckTagDefinedCreateInput {
+	payload := &opslevel.CheckTagDefinedCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsToolUsageCreateInput() *opslevel.CheckToolUsageCreateInput {
+	payload := &opslevel.CheckToolUsageCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsManualCreateInput() *opslevel.CheckManualCreateInput {
+	payload := &opslevel.CheckManualCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsCustomEventCreateInput() *opslevel.CheckCustomEventCreateInput {
 	if item, ok := self.Spec["integration"]; ok {
 		if value, ok := common.AliasCache.TryGetIntegration(item.(string)); ok {
 			delete(self.Spec, "integration")
@@ -137,10 +194,48 @@ func (self *CheckCreateType) AsGenericCreate() *opslevel.CheckCustomEventCreateI
 	}
 	self.Spec["resultMessage"] = self.Spec["message"]
 	payload := &opslevel.CheckCustomEventCreateInput{}
-	dataBytes, err := json.Marshal(self.Spec)
-	cobra.CheckErr(err)
-	json.Unmarshal(dataBytes, payload)
+	json.Unmarshal(toJson(self.Spec), payload)
 	return payload
+}
+
+func createCheck(input CheckCreateType) (*opslevel.Check, error) {
+	var output *opslevel.Check
+	var err error
+	switch input.Kind {
+	case opslevel.CheckTypeHasOwner:
+		output, err = graphqlClient.CreateCheckServiceOwnership(*input.AsServiceOwnershipCreateInput())
+
+	case opslevel.CheckTypeServiceProperty:
+		output, err = graphqlClient.CreateCheckServiceProperty(*input.AsServicePropertyCreateInput())
+
+	case opslevel.CheckTypeHasServiceConfig:
+		output, err = graphqlClient.CreateCheckServiceConfiguration(*input.AsServiceConfigurationCreateInput())
+
+	case opslevel.CheckTypeHasRepository:
+		output, err = graphqlClient.CreateCheckRepositoryIntegrated(*input.AsRepositoryIntegratedCreateInput())
+
+	case opslevel.CheckTypeToolUsage:
+		output, err = graphqlClient.CreateCheckToolUsage(*input.AsToolUsageCreateInput())
+
+	case opslevel.CheckTypeTagDefined:
+		output, err = graphqlClient.CreateCheckTagDefined(*input.AsTagDefinedCreateInput())
+
+	case opslevel.CheckTypeRepoFile:
+		output, err = graphqlClient.CreateCheckRepositoryFile(*input.AsRepositoryFileCreateInput())
+
+	case opslevel.CheckTypeRepoSearch:
+		output, err = graphqlClient.CreateCheckRepositorySearch(*input.AsRepositorySearchCreateInput())
+
+	case opslevel.CheckTypeManual:
+		output, err = graphqlClient.CreateCheckManual(*input.AsManualCreateInput())
+
+	case opslevel.CheckTypeGeneric:
+		output, err = graphqlClient.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
+	}
+	if output == nil {
+		return nil, fmt.Errorf("")
+	}
+	return output, err
 }
 
 func marshalCheck(check opslevel.Check) *CheckCreateType {
