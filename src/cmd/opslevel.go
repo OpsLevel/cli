@@ -9,6 +9,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type OpsLevelAlias struct{}
+
+func (OpsLevelAlias) JSONSchemaType() *jsonschema.Type {
+	return &jsonschema.Type{
+		Type:      "string",
+		MinLength: 1,
+		MaxLength: 255,
+	}
+}
+
 type OpsLevelTag struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
@@ -40,7 +50,7 @@ type OpsLevelService struct {
 	Product      string                      `json:"product,omitempty"`
 	Language     string                      `json:"language,omitempty"`
 	Framework    string                      `json:"framework,omitempty"`
-	Aliases      []string                    `json:"aliases,omitempty"`
+	Aliases      []OpsLevelAlias             `json:"aliases,omitempty"`
 	Tags         []OpsLevelTag               `json:"tags,omitempty"`
 	Tools        []OpsLevelTool              `json:"tools,omitempty"`
 	Repositories []OpsLevelRepository        `json:"repositories,omitempty"`
@@ -48,8 +58,9 @@ type OpsLevelService struct {
 }
 
 type OpsLevelConfig struct {
-	Version int             `json:"version"`
-	Service OpsLevelService `json:"service"`
+	Version    int                `json:"version"`
+	Service    OpsLevelService    `json:"service" jsonschema:"oneof_required=service"`
+	Repository OpsLevelRepository `json:"repository" jsonschema:"oneof_required=repository"`
 }
 
 var opslevelSchemaCmd = &cobra.Command{
