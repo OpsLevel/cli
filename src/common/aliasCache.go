@@ -1,8 +1,9 @@
 package common
 
+// TODO: Move this into opslevel-go and reuse here and in kubectl
+
 import (
 	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/gosimple/slug"
@@ -130,9 +131,7 @@ func (c *AliasCacher) doCacheCategories(client *opslevel.Client) {
 	}
 
 	for _, item := range data {
-		// TODO: Categories need an alias
-		key := strings.ToLower(string(item.Name))
-		c.Categories[key] = item
+		c.Categories[slug.Make(item.Name)] = item
 	}
 }
 
