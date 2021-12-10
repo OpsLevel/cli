@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gosimple/slug"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go"
 	"github.com/spf13/cobra"
@@ -48,9 +49,9 @@ var listFilterCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {
-			w := common.NewTabWriter("NAME", "ID")
+			w := common.NewTabWriter("NAME", "ALIAS", "ID")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t\n", item.Name, item.Id)
+				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, slug.Make(item.Name), item.Id)
 			}
 			w.Flush()
 		}
