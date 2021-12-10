@@ -161,6 +161,42 @@ func marshalCheck(check opslevel.Check) *CheckCreateType {
 		output.Spec["owner"] = check.Owner.Team.Alias
 	}
 	switch check.Type {
+	case opslevel.CheckTypeHasOwner:
+
+	case opslevel.CheckTypeServiceProperty:
+		output.Spec["serviceProperty"] = check.ServicePropertyCheckFragment.Property
+		output.Spec["propertyValuePredicate"] = check.ServicePropertyCheckFragment.Predicate
+
+	case opslevel.CheckTypeHasServiceConfig:
+
+	case opslevel.CheckTypeHasRepository:
+
+	case opslevel.CheckTypeToolUsage:
+		output.Spec["toolCategory"] = check.ToolUsageCheckFragment.ToolCategory
+		output.Spec["toolNamePredicate"] = check.ToolUsageCheckFragment.ToolNamePredicate
+		output.Spec["environmentPredicate"] = check.ToolUsageCheckFragment.EnvironmentPredicate
+
+	case opslevel.CheckTypeTagDefined:
+		output.Spec["tagKey"] = check.TagDefinedCheckFragment.TagKey
+		output.Spec["tagPredicate"] = check.TagDefinedCheckFragment.TagPredicate
+
+	case opslevel.CheckTypeRepoFile:
+		output.Spec["directorySearch"] = check.RepositoryFileCheckFragment.DirectorySearch
+		output.Spec["filePaths"] = check.RepositoryFileCheckFragment.Filepaths
+		output.Spec["fileContentsPredicate"] = check.RepositoryFileCheckFragment.FileContentsPredicate
+
+	case opslevel.CheckTypeRepoSearch:
+		output.Spec["fileExtensions"] = check.RepositorySearchCheckFragment.FileExtensions
+		output.Spec["fileContentsPredicate"] = check.RepositorySearchCheckFragment.FileContentsPredicate
+
+	case opslevel.CheckTypeCustom:
+
+	case opslevel.CheckTypePayload:
+
+	case opslevel.CheckTypeManual:
+		output.Spec["updateFrequency"] = check.ManualCheckFragment.UpdateFrequency
+		output.Spec["updateRequiresComment"] = check.ManualCheckFragment.UpdateRequiresComment
+
 	case opslevel.CheckTypeGeneric:
 		output.Spec["integration"] = fmt.Sprintf("%s-%s", slug.Make(check.CustomEventCheckFragment.Integration.Type), slug.Make(check.CustomEventCheckFragment.Integration.Name))
 		output.Spec["serviceSelector"] = check.CustomEventCheckFragment.ServiceSelector
