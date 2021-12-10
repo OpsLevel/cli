@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+var getOutputType string
 
 var getCmd = &cobra.Command{
 	Use:   "get",
@@ -12,4 +15,11 @@ var getCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(getCmd)
+
+	getCmd.PersistentFlags().StringVarP(&getOutputType, "output", "o", "text", "Output format.  One of: yaml|text [default: text]")
+	viper.BindPFlags(getCmd.Flags())
+}
+
+func isYamlOutput() bool {
+	return getOutputType == "yaml"
 }

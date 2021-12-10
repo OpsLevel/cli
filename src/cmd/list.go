@@ -17,7 +17,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	listCmd.PersistentFlags().StringVarP(&listOutputType, "output", "o", "text", "Output format.  One of: json|text [default: text]")
-	viper.BindPFlags(createCmd.Flags())
+	viper.BindPFlags(listCmd.Flags())
 }
 
 func isJsonOutput() bool {

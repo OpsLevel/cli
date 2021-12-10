@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/creasty/defaults"
+	"github.com/gosimple/slug"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go"
 	"github.com/spf13/cobra"
@@ -20,7 +21,11 @@ var getCheckCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		check, err := graphqlClient.GetCheck(args[0])
 		cobra.CheckErr(err)
-		common.PrettyPrint(check)
+		if isYamlOutput() {
+			common.YamlPrint(marshalCheck(*check))
+		} else {
+			common.PrettyPrint(check)
+		}
 	},
 }
 
@@ -62,8 +67,8 @@ Examples:
 		input, err := readCheckCreateInput()
 		cobra.CheckErr(err)
 		switch input.Kind {
-		case opslevel.CheckTypeCustom:
-			check, err := graphqlClient.CreateCheckCustomEvent(*input.AsCustomEventCreate())
+		case opslevel.CheckTypeGeneric:
+			check, err := graphqlClient.CreateCheckCustomEvent(*input.AsGenericCreate())
 			cobra.CheckErr(err)
 			fmt.Printf("Created: %s - %s\n", check.Name, check.Id)
 		}
@@ -123,7 +128,7 @@ func (self *CheckCreateType) resolveAliases() {
 	}
 }
 
-func (self *CheckCreateType) AsCustomEventCreate() *opslevel.CheckCustomEventCreateInput {
+func (self *CheckCreateType) AsGenericCreate() *opslevel.CheckCustomEventCreateInput {
 	if item, ok := self.Spec["integration"]; ok {
 		if value, ok := common.AliasCache.TryGetIntegration(item.(string)); ok {
 			delete(self.Spec, "integration")
@@ -136,6 +141,34 @@ func (self *CheckCreateType) AsCustomEventCreate() *opslevel.CheckCustomEventCre
 	cobra.CheckErr(err)
 	json.Unmarshal(dataBytes, payload)
 	return payload
+}
+
+func marshalCheck(check opslevel.Check) *CheckCreateType {
+	output := &CheckCreateType{
+		Kind: check.Type,
+		Spec: map[string]interface{}{
+			"name":     check.Name,
+			"enabled":  check.Enabled,
+			"category": slug.Make(check.Category.Name),
+			"level":    check.Level.Alias,
+			"notes":    check.Notes,
+		},
+	}
+	if check.Filter.Id != nil {
+		output.Spec["filter"] = slug.Make(check.Filter.Name)
+	}
+	if check.Owner.Team.Id != nil {
+		output.Spec["owner"] = check.Owner.Team.Alias
+	}
+	switch check.Type {
+	case opslevel.CheckTypeGeneric:
+		output.Spec["integration"] = fmt.Sprintf("%s-%s", slug.Make(check.CustomEventCheckFragment.Integration.Type), slug.Make(check.CustomEventCheckFragment.Integration.Name))
+		output.Spec["serviceSelector"] = check.CustomEventCheckFragment.ServiceSelector
+		output.Spec["successCondition"] = check.CustomEventCheckFragment.SuccessCondition
+		output.Spec["message"] = check.CustomEventCheckFragment.ResultMessage
+	}
+
+	return output
 }
 
 func readCheckCreateInput() (*CheckCreateType, error) {
