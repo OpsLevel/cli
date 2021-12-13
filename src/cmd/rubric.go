@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/gosimple/slug"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go"
 	"github.com/spf13/cobra"
@@ -51,7 +50,7 @@ var listCategoryCmd = &cobra.Command{
 		} else {
 			w := common.NewTabWriter("NAME", "ALIAS", "ID")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, slug.Make(item.Name), item.Id)
+				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Alias(), item.Id)
 			}
 			w.Flush()
 		}

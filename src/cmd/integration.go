@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/gosimple/slug"
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
 )
@@ -35,7 +34,7 @@ var listIntegrationCmd = &cobra.Command{
 		} else {
 			w := common.NewTabWriter("NAME", "TYPE", "ALIAS", "ID")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t\n", item.Name, item.Type, fmt.Sprintf("%s-%s", slug.Make(item.Type), slug.Make(item.Name)), item.Id)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t\n", item.Name, item.Type, item.Alias(), item.Id)
 			}
 			w.Flush()
 		}
