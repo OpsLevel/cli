@@ -243,8 +243,8 @@ github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJ
 github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
-github.com/opslevel/opslevel-go v0.4.1 h1:FtvLiBO+h+etvmhIiT733b+sKzCedrBgFzHDBVxevTg=
-github.com/opslevel/opslevel-go v0.4.1/go.mod h1:wJrezo27tUH5ydVnIFvPjNzzdLW7KY+CEyfQq7vUAhQ=
+github.com/opslevel/opslevel-go v0.4.2 h1:t0SvqkmK2BdYbMTssBw/bmYyWPm5N+wWRUZAfxYAGSM=
+github.com/opslevel/opslevel-go v0.4.2/go.mod h1:SJkDGPFUNoWZu9Zc2ZN6OuKPN7gL5ywmXI+7FyZp/K8=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.9.3 h1:zeC5b1GviRUyKYd6OJPvBU/mcVDVoL1OhT17FCt5dSQ=
 github.com/pelletier/go-toml v1.9.3/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
