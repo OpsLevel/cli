@@ -19,9 +19,20 @@ func (OpsLevelAlias) JSONSchemaType() *jsonschema.Type {
 	}
 }
 
+type OpsLevelTagKey string
+
+func (OpsLevelTagKey) JSONSchemaType() *jsonschema.Type {
+	return &jsonschema.Type{
+		Type:      "string",
+		MinLength: 1,
+		MaxLength: 200,
+		Pattern:   "^[A-Za-z][0-9A-Za-z_.\\/\\-]*$",
+	}
+}
+
 type OpsLevelTag struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Key   OpsLevelTagKey `json:"key"`
+	Value string         `json:"value"`
 }
 
 type OpsLevelTool struct {
@@ -32,9 +43,10 @@ type OpsLevelTool struct {
 }
 
 type OpsLevelRepository struct {
-	Name     string `json:"name"`
-	Path     string `json:"path,omitempty"`
-	Provider string `json:"provider"` // TODO: this should be an enum
+	Name        string `json:"name"`
+	Path        string `json:"path,omitempty"`
+	Provider    string `json:"provider"` // TODO: this should be an enum
+	DisplayName string `json:"displayName,omitempty"`
 }
 
 type OpsLevelServiceDependancy struct {
