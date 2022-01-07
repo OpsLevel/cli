@@ -60,6 +60,7 @@ Examples:
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readCheckCreateInput()
 		cobra.CheckErr(err)
+		cacheCheckAliases()
 		check, err := createCheck(*input)
 		cobra.CheckErr(err)
 		fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
@@ -80,11 +81,49 @@ var deleteCheckCmd = &cobra.Command{
 	},
 }
 
+var importCheckCmd = &cobra.Command{
+	Use:        "check CSV_FILEPATH",
+	Short:      "Import a CSV of check definitions",
+	Long:       `Import a CSV of check definitions`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"CSV_FILEPATH"},
+	Run: func(cmd *cobra.Command, args []string) {
+		filepath := args[0]
+		reader, err := common.ReadCSVFile(filepath)
+		cobra.CheckErr(err)
+		cacheCheckAliases()
+		for reader.Rows() {
+			checkType := reader.Text("Type")
+			if checkType != "Manual" {
+				continue
+			}
+			checkCreate := CheckCreateType{
+				Kind: opslevel.CheckTypeManual,
+				Spec: map[string]interface{}{
+					"name":                  reader.Text("Name"),
+					"enabled":               true,
+					"category":              reader.Text("Category"),
+					"level":                 reader.Text("Level"),
+					"filter":                reader.Text("Filter"),
+					"owner":                 reader.Text("Owner"),
+					"notes":                 reader.Text("Notes"),
+					"updateRequiresComment": reader.Bool("Require update comment"),
+				},
+			}
+
+			check, err := createCheck(checkCreate)
+			cobra.CheckErr(err)
+			fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
+		}
+	},
+}
+
 func init() {
 	createCmd.AddCommand(checkCreateCmd)
 	getCmd.AddCommand(getCheckCmd)
 	listCmd.AddCommand(listCheckCmd)
 	deleteCmd.AddCommand(deleteCheckCmd)
+	importCmd.AddCommand(importCheckCmd)
 }
 
 type CheckCreateType struct {
@@ -192,13 +231,16 @@ func (self *CheckCreateType) AsCustomEventCreateInput() *opslevel.CheckCustomEve
 	return payload
 }
 
-func createCheck(input CheckCreateType) (*opslevel.Check, error) {
-	var output *opslevel.Check
-	var err error
+func cacheCheckAliases() {
 	opslevel.Cache.CacheCategories(graphqlClient)
 	opslevel.Cache.CacheLevels(graphqlClient)
 	opslevel.Cache.CacheTeams(graphqlClient)
 	opslevel.Cache.CacheFilters(graphqlClient)
+}
+
+func createCheck(input CheckCreateType) (*opslevel.Check, error) {
+	var output *opslevel.Check
+	var err error
 	input.resolveAliases()
 	switch input.Kind {
 	case opslevel.CheckTypeHasOwner:
