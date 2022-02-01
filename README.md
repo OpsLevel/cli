@@ -5,8 +5,8 @@
         <img src="https://goreportcard.com/badge/github.com/OpsLevel/cli" /></a>
     <a href="https://GitHub.com/OpsLevel/cli/releases/" alt="Release">
         <img src="https://img.shields.io/github/v/release/OpsLevel/cli" /></a>  
-    <a href="https://GitHub.com/OpsLevel/cli/issues/" alt="Issues">
-        <img src="https://img.shields.io/github/issues/OpsLevel/cli.svg" /></a>  
+    <a href="https://masterminds.github.io/stability/experimental.html" alt="Stability: Experimental">
+        <img src="https://masterminds.github.io/stability/experimental.svg" /></a>  
     <a href="https://github.com/OpsLevel/cli/graphs/contributors" alt="Contributors">
         <img src="https://img.shields.io/github/contributors/OpsLevel/cli" /></a>
     <a href="https://github.com/OpsLevel/cli/pulse" alt="Activity">
