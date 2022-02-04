@@ -30,6 +30,11 @@
 
 - [jq](https://stedolan.github.io/jq/download/)
 - [OpsLevel API Token](https://app.opslevel.com/api_tokens)
+  - Generate token by clicking `Create API Token` and providing a description
+  - Export the API Token for cli access:
+    ```sh
+    > export OPSLEVEL_API_TOKEN=<api_token>
+    ```
 
 ### Installation
 
