@@ -18,7 +18,7 @@ var getCheckCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		check, err := graphqlClient.GetCheck(args[0])
+		check, err := getClientGQL().GetCheck(args[0])
 		cobra.CheckErr(err)
 		if isYamlOutput() {
 			common.YamlPrint(marshalCheck(*check))
@@ -34,7 +34,7 @@ var listCheckCmd = &cobra.Command{
 	Short:   "Lists the rubric checks",
 	Long:    `Lists the rubric checks`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListChecks()
+		list, err := getClientGQL().ListChecks()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
@@ -74,7 +74,7 @@ var deleteCheckCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := graphqlClient.DeleteCheck(key)
+		err := getClientGQL().DeleteCheck(key)
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' check\n", key)
 	},
@@ -195,42 +195,43 @@ func (self *CheckCreateType) AsCustomEventCreateInput() *opslevel.CheckCustomEve
 func createCheck(input CheckCreateType) (*opslevel.Check, error) {
 	var output *opslevel.Check
 	var err error
-	opslevel.Cache.CacheCategories(graphqlClient)
-	opslevel.Cache.CacheLevels(graphqlClient)
-	opslevel.Cache.CacheTeams(graphqlClient)
-	opslevel.Cache.CacheFilters(graphqlClient)
+	clientGQL := getClientGQL()
+	opslevel.Cache.CacheCategories(clientGQL)
+	opslevel.Cache.CacheLevels(clientGQL)
+	opslevel.Cache.CacheTeams(clientGQL)
+	opslevel.Cache.CacheFilters(clientGQL)
 	input.resolveAliases()
 	switch input.Kind {
 	case opslevel.CheckTypeHasOwner:
-		output, err = graphqlClient.CreateCheckServiceOwnership(*input.AsServiceOwnershipCreateInput())
+		output, err = clientGQL.CreateCheckServiceOwnership(*input.AsServiceOwnershipCreateInput())
 
 	case opslevel.CheckTypeServiceProperty:
-		output, err = graphqlClient.CreateCheckServiceProperty(*input.AsServicePropertyCreateInput())
+		output, err = clientGQL.CreateCheckServiceProperty(*input.AsServicePropertyCreateInput())
 
 	case opslevel.CheckTypeHasServiceConfig:
-		output, err = graphqlClient.CreateCheckServiceConfiguration(*input.AsServiceConfigurationCreateInput())
+		output, err = clientGQL.CreateCheckServiceConfiguration(*input.AsServiceConfigurationCreateInput())
 
 	case opslevel.CheckTypeHasRepository:
-		output, err = graphqlClient.CreateCheckRepositoryIntegrated(*input.AsRepositoryIntegratedCreateInput())
+		output, err = clientGQL.CreateCheckRepositoryIntegrated(*input.AsRepositoryIntegratedCreateInput())
 
 	case opslevel.CheckTypeToolUsage:
-		output, err = graphqlClient.CreateCheckToolUsage(*input.AsToolUsageCreateInput())
+		output, err = clientGQL.CreateCheckToolUsage(*input.AsToolUsageCreateInput())
 
 	case opslevel.CheckTypeTagDefined:
-		output, err = graphqlClient.CreateCheckTagDefined(*input.AsTagDefinedCreateInput())
+		output, err = clientGQL.CreateCheckTagDefined(*input.AsTagDefinedCreateInput())
 
 	case opslevel.CheckTypeRepoFile:
-		output, err = graphqlClient.CreateCheckRepositoryFile(*input.AsRepositoryFileCreateInput())
+		output, err = clientGQL.CreateCheckRepositoryFile(*input.AsRepositoryFileCreateInput())
 
 	case opslevel.CheckTypeRepoSearch:
-		output, err = graphqlClient.CreateCheckRepositorySearch(*input.AsRepositorySearchCreateInput())
+		output, err = clientGQL.CreateCheckRepositorySearch(*input.AsRepositorySearchCreateInput())
 
 	case opslevel.CheckTypeManual:
-		output, err = graphqlClient.CreateCheckManual(*input.AsManualCreateInput())
+		output, err = clientGQL.CreateCheckManual(*input.AsManualCreateInput())
 
 	case opslevel.CheckTypeGeneric:
-		opslevel.Cache.CacheIntegrations(graphqlClient)
-		output, err = graphqlClient.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
+		opslevel.Cache.CacheIntegrations(clientGQL)
+		output, err = clientGQL.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
 	}
 	cobra.CheckErr(err)
 	if output == nil {

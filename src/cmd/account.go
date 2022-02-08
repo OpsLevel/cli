@@ -16,7 +16,7 @@ var lifecycleCmd = &cobra.Command{
 	Short:   "Lists lifecycles",
 	Long:    `Lists lifecycles`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListLifecycles()
+		list, err := getClientGQL().ListLifecycles()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
@@ -36,7 +36,7 @@ var tierCmd = &cobra.Command{
 	Short:   "Lists tiers",
 	Long:    `Lists tiers`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListTiers()
+		list, err := getClientGQL().ListTiers()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))

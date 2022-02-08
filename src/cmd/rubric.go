@@ -16,7 +16,7 @@ var createCategoryCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
-		category, err := graphqlClient.CreateCategory(opslevel.CategoryCreateInput{
+		category, err := getClientGQL().CreateCategory(opslevel.CategoryCreateInput{
 			Name: args[0],
 		})
 		cobra.CheckErr(err)
@@ -31,7 +31,7 @@ var getCategoryCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		category, err := graphqlClient.GetCategory(args[0])
+		category, err := getClientGQL().GetCategory(args[0])
 		cobra.CheckErr(err)
 		common.PrettyPrint(category)
 	},
@@ -43,7 +43,7 @@ var listCategoryCmd = &cobra.Command{
 	Short:   "Lists rubric categories",
 	Long:    `Lists rubric categories`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListCategories()
+		list, err := getClientGQL().ListCategories()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
@@ -65,7 +65,7 @@ var deleteCategoryCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := graphqlClient.DeleteCategory(key)
+		err := getClientGQL().DeleteCategory(key)
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' category\n", key)
 	},
@@ -78,7 +78,7 @@ var createLevelCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
-		category, err := graphqlClient.CreateLevel(opslevel.LevelCreateInput{
+		category, err := getClientGQL().CreateLevel(opslevel.LevelCreateInput{
 			Name: args[0],
 		})
 		cobra.CheckErr(err)
@@ -93,7 +93,7 @@ var getLevelCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		level, err := graphqlClient.GetLevel(args[0])
+		level, err := getClientGQL().GetLevel(args[0])
 		cobra.CheckErr(err)
 		common.PrettyPrint(level)
 	},
@@ -105,7 +105,7 @@ var listLevelCmd = &cobra.Command{
 	Short:   "Lists rubric levels",
 	Long:    `Lists rubric levels`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListLevels()
+		list, err := getClientGQL().ListLevels()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
@@ -127,7 +127,7 @@ var deleteLevelCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := graphqlClient.DeleteLevel(key)
+		err := getClientGQL().DeleteLevel(key)
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' level\n", key)
 	},
