@@ -20,10 +20,10 @@ var getRepositoryCmd = &cobra.Command{
 		var repository *opslevel.Repository
 		var err error
 		if common.IsID(key) {
-			repository, err = graphqlClient.GetRepository(key)
+			repository, err = getClientGQL().GetRepository(key)
 			cobra.CheckErr(err)
 		} else {
-			repository, err = graphqlClient.GetRepositoryWithAlias(key)
+			repository, err = getClientGQL().GetRepositoryWithAlias(key)
 			cobra.CheckErr(err)
 		}
 		cobra.CheckErr(err)
@@ -37,7 +37,7 @@ var listRepositoryCmd = &cobra.Command{
 	Short:   "Lists repositories",
 	Long:    `Lists repositories`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListRepositories()
+		list, err := getClientGQL().ListRepositories()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))

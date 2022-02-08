@@ -13,8 +13,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-var restClient *common.Client
-var graphqlClient *opslevel.Client
+var _clientRest *common.Client
+var _clientGQL *opslevel.Client
 
 var rootCmd = &cobra.Command{
 	Use:   "opslevel",
@@ -44,7 +44,6 @@ func initConfig() {
 	viper.SetEnvPrefix("OPSLEVEL")
 	viper.AutomaticEnv()
 	setupLogging()
-	createClients()
 }
 
 func setupLogging() {
@@ -70,7 +69,16 @@ func setupLogging() {
 	}
 }
 
-func createClients() {
-	restClient = common.NewRestClient()
-	graphqlClient = common.NewGraphClient(version)
+func getClientRest() *common.Client {
+	if _clientRest == nil {
+		_clientRest = common.NewRestClient()
+	}
+	return _clientRest
+}
+
+func getClientGQL() *opslevel.Client {
+	if _clientGQL == nil {
+		_clientGQL = common.NewGraphClient(version)
+	}
+	return _clientGQL
 }

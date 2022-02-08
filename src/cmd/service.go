@@ -19,7 +19,7 @@ var createServiceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readServiceCreateInput()
 		cobra.CheckErr(err)
-		service, err := graphqlClient.CreateService(*input)
+		service, err := getClientGQL().CreateService(*input)
 		cobra.CheckErr(err)
 		fmt.Println(service.Id)
 	},
@@ -36,10 +36,10 @@ var getServiceCmd = &cobra.Command{
 		var service *opslevel.Service
 		var err error
 		if common.IsID(key) {
-			service, err = graphqlClient.GetService(key)
+			service, err = getClientGQL().GetService(key)
 			cobra.CheckErr(err)
 		} else {
-			service, err = graphqlClient.GetServiceWithAlias(key)
+			service, err = getClientGQL().GetServiceWithAlias(key)
 			cobra.CheckErr(err)
 		}
 		cobra.CheckErr(err)
@@ -53,7 +53,7 @@ var listServiceCmd = &cobra.Command{
 	Short:   "Lists services",
 	Long:    `Lists services`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListServices()
+		list, err := getClientGQL().ListServices()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
@@ -74,7 +74,7 @@ var updateServiceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readServiceUpdateInput()
 		cobra.CheckErr(err)
-		service, err := graphqlClient.UpdateService(*input)
+		service, err := getClientGQL().UpdateService(*input)
 		cobra.CheckErr(err)
 		common.JsonPrint(json.MarshalIndent(service, "", "    "))
 	},
@@ -90,12 +90,12 @@ var deleteServiceCmd = &cobra.Command{
 		key := args[0]
 		var err error
 		if common.IsID(key) {
-			err = graphqlClient.DeleteService(opslevel.ServiceDeleteInput{
+			err = getClientGQL().DeleteService(opslevel.ServiceDeleteInput{
 				Id: key,
 			})
 			cobra.CheckErr(err)
 		} else {
-			err = graphqlClient.DeleteServiceWithAlias(key)
+			err = getClientGQL().DeleteServiceWithAlias(key)
 			cobra.CheckErr(err)
 		}
 		cobra.CheckErr(err)

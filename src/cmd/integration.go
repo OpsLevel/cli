@@ -15,7 +15,7 @@ var getIntegrationCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		integration, err := graphqlClient.GetIntegration(args[0])
+		integration, err := getClientGQL().GetIntegration(args[0])
 		cobra.CheckErr(err)
 		common.PrettyPrint(integration)
 	},
@@ -27,7 +27,7 @@ var listIntegrationCmd = &cobra.Command{
 	Short:   "Lists integrations",
 	Long:    `Lists integrations`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListIntegrations()
+		list, err := getClientGQL().ListIntegrations()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))

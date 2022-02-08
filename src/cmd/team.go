@@ -16,7 +16,7 @@ var createTeamCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
-		team, err := graphqlClient.CreateTeam(opslevel.TeamCreateInput{
+		team, err := getClientGQL().CreateTeam(opslevel.TeamCreateInput{
 			Name: args[0],
 		})
 		cobra.CheckErr(err)
@@ -37,14 +37,14 @@ var createMemberCmd = &cobra.Command{
 		var team *opslevel.Team
 		var err error
 		if common.IsID(key) {
-			team, err = graphqlClient.GetTeam(key)
+			team, err = getClientGQL().GetTeam(key)
 		} else {
-			team, err = graphqlClient.GetTeamWithAlias(key)
+			team, err = getClientGQL().GetTeamWithAlias(key)
 		}
 		cobra.CheckErr(err)
 		common.WasFound(team.Id == nil, key)
 
-		_, addErr := graphqlClient.AddMember(&team.TeamId, email)
+		_, addErr := getClientGQL().AddMember(&team.TeamId, email)
 		cobra.CheckErr(addErr)
 		fmt.Printf("add member '%s' on team '%s'\n", email, team.Alias)
 	},
@@ -65,9 +65,9 @@ var createContactCmd = &cobra.Command{
 		var team *opslevel.Team
 		var err error
 		if common.IsID(key) {
-			team, err = graphqlClient.GetTeam(key)
+			team, err = getClientGQL().GetTeam(key)
 		} else {
-			team, err = graphqlClient.GetTeamWithAlias(key)
+			team, err = getClientGQL().GetTeamWithAlias(key)
 		}
 		cobra.CheckErr(err)
 		common.WasFound(team.Id == nil, key)
@@ -78,7 +78,7 @@ var createContactCmd = &cobra.Command{
 		case string(opslevel.ContactTypeWeb):
 			contactInput = opslevel.CreateContactWeb(address, displayName)
 		}
-		contact, err := graphqlClient.AddContact(&team.TeamId, contactInput)
+		contact, err := getClientGQL().AddContact(&team.TeamId, contactInput)
 		cobra.CheckErr(err)
 		if contact.Id == nil {
 			cobra.CheckErr(fmt.Errorf("unable to create contact '%+v'", contactInput))
@@ -98,9 +98,9 @@ var getTeamCmd = &cobra.Command{
 		var team *opslevel.Team
 		var err error
 		if common.IsID(key) {
-			team, err = graphqlClient.GetTeam(key)
+			team, err = getClientGQL().GetTeam(key)
 		} else {
-			team, err = graphqlClient.GetTeamWithAlias(key)
+			team, err = getClientGQL().GetTeamWithAlias(key)
 		}
 		cobra.CheckErr(err)
 		common.PrettyPrint(team)
@@ -114,7 +114,7 @@ var listTeamCmd = &cobra.Command{
 	Short:   "Lists the teams",
 	Long:    `Lists the teams`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListTeams()
+		list, err := getClientGQL().ListTeams()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
@@ -137,10 +137,10 @@ var deleteTeamCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		if common.IsID(key) {
-			err := graphqlClient.DeleteTeam(key)
+			err := getClientGQL().DeleteTeam(key)
 			cobra.CheckErr(err)
 		} else {
-			err := graphqlClient.DeleteTeamWithAlias(key)
+			err := getClientGQL().DeleteTeamWithAlias(key)
 			cobra.CheckErr(err)
 		}
 		fmt.Printf("team '%s' deleted\n", key)
@@ -160,14 +160,14 @@ var deleteMemberCmd = &cobra.Command{
 		var team *opslevel.Team
 		var err error
 		if common.IsID(key) {
-			team, err = graphqlClient.GetTeam(key)
+			team, err = getClientGQL().GetTeam(key)
 		} else {
-			team, err = graphqlClient.GetTeamWithAlias(key)
+			team, err = getClientGQL().GetTeamWithAlias(key)
 		}
 		cobra.CheckErr(err)
 		common.WasFound(team.Id == nil, key)
 
-		_, removeErr := graphqlClient.RemoveMember(&team.TeamId, email)
+		_, removeErr := getClientGQL().RemoveMember(&team.TeamId, email)
 		cobra.CheckErr(removeErr)
 		fmt.Printf("member '%s' on team '%s' removed\n", email, key)
 	},
@@ -181,7 +181,7 @@ var deleteContactCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := graphqlClient.RemoveContact(key)
+		err := getClientGQL().RemoveContact(key)
 		cobra.CheckErr(err)
 		fmt.Printf("contact '%s' removed\n", key)
 	},

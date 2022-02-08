@@ -16,7 +16,7 @@ var createFilterCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
-		filter, err := graphqlClient.CreateFilter(opslevel.FilterCreateInput{
+		filter, err := getClientGQL().CreateFilter(opslevel.FilterCreateInput{
 			Name: args[0],
 		})
 		cobra.CheckErr(err)
@@ -31,7 +31,7 @@ var getFilterCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		filter, err := graphqlClient.GetFilter(args[0])
+		filter, err := getClientGQL().GetFilter(args[0])
 		cobra.CheckErr(err)
 		common.PrettyPrint(filter)
 	},
@@ -43,7 +43,7 @@ var listFilterCmd = &cobra.Command{
 	Short:   "Lists filters",
 	Long:    `Lists filters`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := graphqlClient.ListFilters()
+		list, err := getClientGQL().ListFilters()
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
@@ -65,7 +65,7 @@ var deleteFilterCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := graphqlClient.DeleteFilter(key)
+		err := getClientGQL().DeleteFilter(key)
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' filter\n", key)
 	},
