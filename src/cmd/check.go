@@ -92,23 +92,43 @@ type CheckCreateType struct {
 	Spec map[string]interface{}
 }
 
-func (self *CheckCreateType) resolveAliases() {
+func (self *CheckCreateType) resolveAliases(client *opslevel.Client) (error) {
 	if item, ok := self.Spec["category"]; ok {
 		if value, ok := opslevel.Cache.TryGetCategory(item.(string)); ok {
 			delete(self.Spec, "category")
 			self.Spec["categoryId"] = value.Id.(interface{})
 		}
+	} else {
+		category, promptErr := common.PromptForCategories(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		self.Spec["categoryId"] = category.Id.(interface{})
 	}
 	if item, ok := self.Spec["level"]; ok {
 		if value, ok := opslevel.Cache.TryGetLevel(item.(string)); ok {
 			delete(self.Spec, "level")
 			self.Spec["levelId"] = value.Id.(interface{})
 		}
+	} else {
+		level, promptErr := common.PromptForLevels(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		self.Spec["levelId"] = level.Id.(interface{})
 	}
 	if item, ok := self.Spec["owner"]; ok {
 		if value, ok := opslevel.Cache.TryGetTeam(item.(string)); ok {
 			delete(self.Spec, "owner")
 			self.Spec["ownerId"] = value.Id.(interface{})
+		}
+	} else {
+		team, promptErr := common.PromptForTeam(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		if team.Id != nil {
+			self.Spec["ownerId"] = team.Id.(interface{})
 		}
 	}
 	if item, ok := self.Spec["filter"]; ok {
@@ -116,7 +136,16 @@ func (self *CheckCreateType) resolveAliases() {
 			delete(self.Spec, "filter")
 			self.Spec["filterId"] = value.Id.(interface{})
 		}
+	} else {
+		filter, promptErr := common.PromptForFilter(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		if filter.Id != nil {
+			self.Spec["filterId"] = filter.Id.(interface{})
+		}
 	}
+	return nil
 }
 
 func toJson(data map[string]interface{}) []byte {
@@ -179,13 +208,23 @@ func (self *CheckCreateType) AsManualCreateInput() *opslevel.CheckManualCreateIn
 	return payload
 }
 
-func (self *CheckCreateType) AsCustomEventCreateInput() *opslevel.CheckCustomEventCreateInput {
+func (self *CheckCreateType) resolveIntegrations(client *opslevel.Client) error {
 	if item, ok := self.Spec["integration"]; ok {
 		if value, ok := opslevel.Cache.TryGetIntegration(item.(string)); ok {
 			delete(self.Spec, "integration")
 			self.Spec["integrationId"] = value.Id.(interface{})
 		}
+	} else {
+		integration, promptErr := common.PromptForIntegration(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		self.Spec["integrationId"] = integration.Id.(interface{})
 	}
+	return nil
+}
+
+func (self *CheckCreateType) AsCustomEventCreateInput() *opslevel.CheckCustomEventCreateInput {
 	self.Spec["resultMessage"] = self.Spec["message"]
 	payload := &opslevel.CheckCustomEventCreateInput{}
 	json.Unmarshal(toJson(self.Spec), payload)
@@ -200,7 +239,8 @@ func createCheck(input CheckCreateType) (*opslevel.Check, error) {
 	opslevel.Cache.CacheLevels(clientGQL)
 	opslevel.Cache.CacheTeams(clientGQL)
 	opslevel.Cache.CacheFilters(clientGQL)
-	input.resolveAliases()
+	err = input.resolveAliases(clientGQL)
+	cobra.CheckErr(err)
 	switch input.Kind {
 	case opslevel.CheckTypeHasOwner:
 		output, err = clientGQL.CreateCheckServiceOwnership(*input.AsServiceOwnershipCreateInput())
@@ -231,6 +271,8 @@ func createCheck(input CheckCreateType) (*opslevel.Check, error) {
 
 	case opslevel.CheckTypeGeneric:
 		opslevel.Cache.CacheIntegrations(clientGQL)
+		err = input.resolveIntegrations(clientGQL)
+		cobra.CheckErr(err)
 		output, err = clientGQL.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
 	}
 	cobra.CheckErr(err)
