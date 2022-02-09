@@ -95,6 +95,8 @@ provider "opslevel" {
 `)
 	bash.WriteString("#!/bin/sh\n\n")
 
+	graphqlClient := getClientGQL()
+
 	exportConstants(graphqlClient, constants)
 	exportRepos(graphqlClient, repos, bash)
 	exportServices(graphqlClient, bash, directory)
