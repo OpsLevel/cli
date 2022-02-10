@@ -92,7 +92,7 @@ type CheckCreateType struct {
 	Spec map[string]interface{}
 }
 
-func (self *CheckCreateType) resolveAliases(client *opslevel.Client) (error) {
+func (self *CheckCreateType) resolveCategoryAliases(client *opslevel.Client) (error) {
 	if item, ok := self.Spec["category"]; ok {
 		if value, ok := opslevel.Cache.TryGetCategory(item.(string)); ok {
 			delete(self.Spec, "category")
@@ -105,6 +105,10 @@ func (self *CheckCreateType) resolveAliases(client *opslevel.Client) (error) {
 		}
 		self.Spec["categoryId"] = category.Id.(interface{})
 	}
+	return nil
+}
+
+func (self *CheckCreateType) resolveLevelAliases(client *opslevel.Client) (error) {
 	if item, ok := self.Spec["level"]; ok {
 		if value, ok := opslevel.Cache.TryGetLevel(item.(string)); ok {
 			delete(self.Spec, "level")
@@ -117,6 +121,10 @@ func (self *CheckCreateType) resolveAliases(client *opslevel.Client) (error) {
 		}
 		self.Spec["levelId"] = level.Id.(interface{})
 	}
+	return nil
+}
+
+func (self *CheckCreateType) resolveTeamAliases(client *opslevel.Client) (error) {
 	if item, ok := self.Spec["owner"]; ok {
 		if value, ok := opslevel.Cache.TryGetTeam(item.(string)); ok {
 			delete(self.Spec, "owner")
@@ -131,6 +139,10 @@ func (self *CheckCreateType) resolveAliases(client *opslevel.Client) (error) {
 			self.Spec["ownerId"] = team.Id.(interface{})
 		}
 	}
+	return nil
+}
+
+func (self *CheckCreateType) resolveFilterAliases(client *opslevel.Client) (error) {
 	if item, ok := self.Spec["filter"]; ok {
 		if value, ok := opslevel.Cache.TryGetFilter(item.(string)); ok {
 			delete(self.Spec, "filter")
@@ -236,10 +248,16 @@ func createCheck(input CheckCreateType) (*opslevel.Check, error) {
 	var err error
 	clientGQL := getClientGQL()
 	opslevel.Cache.CacheCategories(clientGQL)
+	err = input.resolveCategoryAliases(clientGQL)
+	cobra.CheckErr(err)
 	opslevel.Cache.CacheLevels(clientGQL)
+	err = input.resolveLevelAliases(clientGQL)
+	cobra.CheckErr(err)
 	opslevel.Cache.CacheTeams(clientGQL)
+	err = input.resolveTeamAliases(clientGQL)
+	cobra.CheckErr(err)
 	opslevel.Cache.CacheFilters(clientGQL)
-	err = input.resolveAliases(clientGQL)
+	err = input.resolveFilterAliases(clientGQL)
 	cobra.CheckErr(err)
 	switch input.Kind {
 	case opslevel.CheckTypeHasOwner:
