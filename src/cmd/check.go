@@ -97,6 +97,14 @@ func (self *CheckCreateType) resolveCategoryAliases(client *opslevel.Client) (er
 		if value, ok := opslevel.Cache.TryGetCategory(item.(string)); ok {
 			delete(self.Spec, "category")
 			self.Spec["categoryId"] = value.Id.(interface{})
+		} else {
+			fmt.Printf("%s is not a valid category, please select a valid category\n", self.Spec["category"])
+			delete(self.Spec, "category")
+			category, promptErr := common.PromptForCategories(client)
+			if promptErr != nil {
+				return promptErr
+			}
+			self.Spec["categoryId"] = category.Id.(interface{})
 		}
 	} else {
 		category, promptErr := common.PromptForCategories(client)
@@ -113,6 +121,14 @@ func (self *CheckCreateType) resolveLevelAliases(client *opslevel.Client) (error
 		if value, ok := opslevel.Cache.TryGetLevel(item.(string)); ok {
 			delete(self.Spec, "level")
 			self.Spec["levelId"] = value.Id.(interface{})
+		} else {
+			fmt.Printf("%s is not a valid level, please select a valid level\n", self.Spec["level"])
+			delete(self.Spec, "level")
+			level, promptErr := common.PromptForLevels(client)
+			if promptErr != nil {
+				return promptErr
+			}
+			self.Spec["levelId"] = level.Id.(interface{})
 		}
 	} else {
 		level, promptErr := common.PromptForLevels(client)
@@ -129,6 +145,16 @@ func (self *CheckCreateType) resolveTeamAliases(client *opslevel.Client) (error)
 		if value, ok := opslevel.Cache.TryGetTeam(item.(string)); ok {
 			delete(self.Spec, "owner")
 			self.Spec["ownerId"] = value.Id.(interface{})
+		} else {
+			fmt.Printf("%s is not a valid team, please select a valid team\n", self.Spec["owner"])
+			delete(self.Spec, "owner")
+			team, promptErr := common.PromptForTeam(client)
+			if promptErr != nil {
+				return promptErr
+			}
+			if team.Id != nil {
+				self.Spec["ownerId"] = team.Id.(interface{})
+			}
 		}
 	} else {
 		team, promptErr := common.PromptForTeam(client)
@@ -147,6 +173,16 @@ func (self *CheckCreateType) resolveFilterAliases(client *opslevel.Client) (erro
 		if value, ok := opslevel.Cache.TryGetFilter(item.(string)); ok {
 			delete(self.Spec, "filter")
 			self.Spec["filterId"] = value.Id.(interface{})
+		} else {
+			fmt.Printf("%s is not a valid filter, please select a valid filter\n", self.Spec["filter"])
+			delete(self.Spec, "filter")
+			filter, promptErr := common.PromptForFilter(client)
+			if promptErr != nil {
+				return promptErr
+			}
+			if filter.Id != nil {
+				self.Spec["filterId"] = filter.Id.(interface{})
+			}
 		}
 	} else {
 		filter, promptErr := common.PromptForFilter(client)
@@ -220,11 +256,19 @@ func (self *CheckCreateType) AsManualCreateInput() *opslevel.CheckManualCreateIn
 	return payload
 }
 
-func (self *CheckCreateType) resolveIntegrations(client *opslevel.Client) error {
+func (self *CheckCreateType) resolveIntegrationAliases(client *opslevel.Client) error {
 	if item, ok := self.Spec["integration"]; ok {
 		if value, ok := opslevel.Cache.TryGetIntegration(item.(string)); ok {
 			delete(self.Spec, "integration")
 			self.Spec["integrationId"] = value.Id.(interface{})
+		} else {
+			fmt.Printf("%s is not a valid integration, please select a valid integration\n", self.Spec["integration"])
+			delete(self.Spec, "integration")
+			integration, promptErr := common.PromptForIntegration(client)
+			if promptErr != nil {
+				return promptErr
+			}
+			self.Spec["integrationId"] = integration.Id.(interface{})
 		}
 	} else {
 		integration, promptErr := common.PromptForIntegration(client)
@@ -248,15 +292,15 @@ func createCheck(input CheckCreateType) (*opslevel.Check, error) {
 	var err error
 	clientGQL := getClientGQL()
 	opslevel.Cache.CacheCategories(clientGQL)
+	opslevel.Cache.CacheLevels(clientGQL)
+	opslevel.Cache.CacheTeams(clientGQL)
+	opslevel.Cache.CacheFilters(clientGQL)
 	err = input.resolveCategoryAliases(clientGQL)
 	cobra.CheckErr(err)
-	opslevel.Cache.CacheLevels(clientGQL)
 	err = input.resolveLevelAliases(clientGQL)
 	cobra.CheckErr(err)
-	opslevel.Cache.CacheTeams(clientGQL)
 	err = input.resolveTeamAliases(clientGQL)
 	cobra.CheckErr(err)
-	opslevel.Cache.CacheFilters(clientGQL)
 	err = input.resolveFilterAliases(clientGQL)
 	cobra.CheckErr(err)
 	switch input.Kind {
@@ -289,7 +333,7 @@ func createCheck(input CheckCreateType) (*opslevel.Check, error) {
 
 	case opslevel.CheckTypeGeneric:
 		opslevel.Cache.CacheIntegrations(clientGQL)
-		err = input.resolveIntegrations(clientGQL)
+		err = input.resolveIntegrationAliases(clientGQL)
 		cobra.CheckErr(err)
 		output, err = clientGQL.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
 	}

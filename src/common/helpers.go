@@ -44,3 +44,15 @@ func YamlPrint(object interface{}) {
 	cobra.CheckErr(err)
 	fmt.Printf("---\n%s\n", string(b.Bytes()))
 }
+
+func MinInt(values ...int) int {
+	min := values[0]
+
+	for _, val := range values {
+		if val < min {
+			min = val
+		}
+	}
+
+	return min
+}

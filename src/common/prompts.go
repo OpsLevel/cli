@@ -43,7 +43,7 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
 		Active:   fmt.Sprintf("%s {{ .Name | cyan }} ({{ .Index | red }})", promptui.IconSelect),
-		Inactive: "    {{ .Name | cyan }}",
+		Inactive: "    {{ .Name | cyan }} ({{ .Index | red }})",
 		Selected: fmt.Sprintf("%s {{ .Name | faint }} ({{ .Index | red }})", promptui.IconGood),
 		Details: `
 		{{ "Alias:" | faint }}	{{ .Alias }}
@@ -110,7 +110,7 @@ func PromptForTeam(client *opslevel.Client) (*opslevel.Team, error) {
 		Selected: fmt.Sprintf("%s {{ .Name | faint }}", promptui.IconGood),
 		Details: `
 		{{ "Aliases:" | faint }}	{{ .Aliases }}
-		{{ "Manager:" | faint }}	{{ .Manager.Name }}`,
+		{{ "Manager:" | faint }}	{{ .Manager.Email }}`,
 	}
 
 	noneValue := opslevel.Team{
@@ -147,20 +147,18 @@ func PromptForIntegration(client *opslevel.Client) (*opslevel.Integration, error
 		{{ "Type:" | faint }}	{{ .Type }}`,
 	}
 
-	n := 0
-	for _, val := range list {
+	filteredList := []opslevel.Integration{}
+	for _, val := range list{
 		if val.Type == "generic" {
-			list[n] = val
-			n++
+			filteredList = append(filteredList, val)
 		}
 	}
-	list = list[:n]
 
 	prompt := promptui.Select{
 		Label:     "Select Integration",
-		Items:     list,
+		Items:     filteredList,
 		Templates: templates,
-		Size:      len(list),
+		Size:      MinInt(6, len(filteredList)),
 	}
 
 	index, _, err := prompt.Run()
