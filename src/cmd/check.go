@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/creasty/defaults"
@@ -88,8 +89,9 @@ func init() {
 }
 
 type CheckCreateType struct {
-	Kind opslevel.CheckType
-	Spec map[string]interface{}
+	Version string
+	Kind    opslevel.CheckType
+	Spec    map[string]interface{}
 }
 
 func (self *CheckCreateType) resolveAliases() {
@@ -242,7 +244,8 @@ func createCheck(input CheckCreateType) (*opslevel.Check, error) {
 
 func marshalCheck(check opslevel.Check) *CheckCreateType {
 	output := &CheckCreateType{
-		Kind: check.Type,
+		Version: "1",
+		Kind:    check.Type,
 		Spec: map[string]interface{}{
 			"name":     check.Name,
 			"enabled":  check.Enabled,
@@ -304,8 +307,21 @@ func marshalCheck(check opslevel.Check) *CheckCreateType {
 	return output
 }
 
+var CheckConfigCurrentVersion = "1"
+
+type ConfigVersion struct {
+	Version string
+}
+
 func readCheckCreateInput() (*CheckCreateType, error) {
 	readCreateConfigFile()
+	// Validate Version
+	v := &ConfigVersion{}
+	viper.Unmarshal(&v)
+	if v.Version != CheckConfigCurrentVersion {
+		return nil, errors.New(fmt.Sprintf("Supported config version is '%s' but found '%s' | Please update config file", CheckConfigCurrentVersion, v.Version))
+	}
+	// Unmarshall
 	evt := &CheckCreateType{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
