@@ -24,7 +24,7 @@ func PromptForCategories(client *opslevel.Client) (*opslevel.Category, error) {
 		Label:     "Select Category",
 		Items:     list,
 		Templates: templates,
-		Size:      len(list),
+		Size:      MinInt(6, len(list)),
 	}
 
 	index, _, err := prompt.Run()
@@ -50,11 +50,18 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 		{{ "Description:" | faint }}	{{ .Description }}`,
 	}
 
+	filteredList := []opslevel.Level{}
+	for _, val := range list {
+		if val.Alias != "beginner" {
+			filteredList = append(filteredList, val)
+		}
+	}
+
 	prompt := promptui.Select{
 		Label:     "Select Level",
-		Items:     list,
+		Items:     filteredList,
 		Templates: templates,
-		Size:      len(list),
+		Size:      MinInt(6, len(filteredList)),
 	}
 
 	index, _, err := prompt.Run()
@@ -87,7 +94,7 @@ func PromptForFilter(client *opslevel.Client) (*opslevel.Filter, error) {
 		Label:     "Select Filter",
 		Items:     list,
 		Templates: templates,
-		Size:      len(list),
+		Size:      MinInt(6, len(list)),
 	}
 
 	index, _, err := prompt.Run()
@@ -122,7 +129,7 @@ func PromptForTeam(client *opslevel.Client) (*opslevel.Team, error) {
 		Label:     "Select Team",
 		Items:     list,
 		Templates: templates,
-		Size:      len(list),
+		Size:      MinInt(6, len(list)),
 	}
 
 	index, _, err := prompt.Run()
@@ -148,7 +155,7 @@ func PromptForIntegration(client *opslevel.Client) (*opslevel.Integration, error
 	}
 
 	filteredList := []opslevel.Integration{}
-	for _, val := range list{
+	for _, val := range list {
 		if val.Type == "generic" {
 			filteredList = append(filteredList, val)
 		}

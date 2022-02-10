@@ -94,104 +94,76 @@ type CheckCreateType struct {
 
 func (self *CheckCreateType) resolveCategoryAliases(client *opslevel.Client) (error) {
 	if item, ok := self.Spec["category"]; ok {
+		delete(self.Spec, "category")
 		if value, ok := opslevel.Cache.TryGetCategory(item.(string)); ok {
-			delete(self.Spec, "category")
 			self.Spec["categoryId"] = value.Id.(interface{})
+			return nil
 		} else {
-			fmt.Printf("%s is not a valid category, please select a valid category\n", self.Spec["category"])
-			delete(self.Spec, "category")
-			category, promptErr := common.PromptForCategories(client)
-			if promptErr != nil {
-				return promptErr
-			}
-			self.Spec["categoryId"] = category.Id.(interface{})
+			fmt.Printf("%s is not a valid category, please select a valid category\n", item.(string))
 		}
-	} else {
-		category, promptErr := common.PromptForCategories(client)
-		if promptErr != nil {
-			return promptErr
-		}
-		self.Spec["categoryId"] = category.Id.(interface{})
 	}
+	category, promptErr := common.PromptForCategories(client)
+	if promptErr != nil {
+		return promptErr
+	}
+	self.Spec["categoryId"] = category.Id.(interface{})
 	return nil
 }
 
 func (self *CheckCreateType) resolveLevelAliases(client *opslevel.Client) (error) {
 	if item, ok := self.Spec["level"]; ok {
+		delete(self.Spec, "level")
 		if value, ok := opslevel.Cache.TryGetLevel(item.(string)); ok {
-			delete(self.Spec, "level")
 			self.Spec["levelId"] = value.Id.(interface{})
+			return nil
 		} else {
-			fmt.Printf("%s is not a valid level, please select a valid level\n", self.Spec["level"])
-			delete(self.Spec, "level")
-			level, promptErr := common.PromptForLevels(client)
-			if promptErr != nil {
-				return promptErr
-			}
-			self.Spec["levelId"] = level.Id.(interface{})
+			fmt.Printf("%s is not a valid level, please select a valid level\n", item.(string))
 		}
-	} else {
-		level, promptErr := common.PromptForLevels(client)
-		if promptErr != nil {
-			return promptErr
-		}
-		self.Spec["levelId"] = level.Id.(interface{})
 	}
+	level, promptErr := common.PromptForLevels(client)
+	if promptErr != nil {
+		return promptErr
+	}
+	self.Spec["levelId"] = level.Id.(interface{})
 	return nil
 }
 
 func (self *CheckCreateType) resolveTeamAliases(client *opslevel.Client) (error) {
 	if item, ok := self.Spec["owner"]; ok {
+		delete(self.Spec, "owner")
 		if value, ok := opslevel.Cache.TryGetTeam(item.(string)); ok {
-			delete(self.Spec, "owner")
 			self.Spec["ownerId"] = value.Id.(interface{})
+			return nil
 		} else {
-			fmt.Printf("%s is not a valid team, please select a valid team\n", self.Spec["owner"])
-			delete(self.Spec, "owner")
-			team, promptErr := common.PromptForTeam(client)
-			if promptErr != nil {
-				return promptErr
-			}
-			if team.Id != nil {
-				self.Spec["ownerId"] = team.Id.(interface{})
-			}
+			fmt.Printf("%s is not a valid team, please select a valid team\n", item.(string))
 		}
-	} else {
-		team, promptErr := common.PromptForTeam(client)
-		if promptErr != nil {
-			return promptErr
-		}
-		if team.Id != nil {
-			self.Spec["ownerId"] = team.Id.(interface{})
-		}
+	}
+	team, promptErr := common.PromptForTeam(client)
+	if promptErr != nil {
+		return promptErr
+	}
+	if team.Id != nil {
+		self.Spec["ownerId"] = team.Id.(interface{})
 	}
 	return nil
 }
 
 func (self *CheckCreateType) resolveFilterAliases(client *opslevel.Client) (error) {
 	if item, ok := self.Spec["filter"]; ok {
+		delete(self.Spec, "filter")
 		if value, ok := opslevel.Cache.TryGetFilter(item.(string)); ok {
-			delete(self.Spec, "filter")
 			self.Spec["filterId"] = value.Id.(interface{})
+			return nil
 		} else {
-			fmt.Printf("%s is not a valid filter, please select a valid filter\n", self.Spec["filter"])
-			delete(self.Spec, "filter")
-			filter, promptErr := common.PromptForFilter(client)
-			if promptErr != nil {
-				return promptErr
-			}
-			if filter.Id != nil {
-				self.Spec["filterId"] = filter.Id.(interface{})
-			}
+			fmt.Printf("%s is not a valid filter, please select a valid filter\n", item.(string))
 		}
-	} else {
-		filter, promptErr := common.PromptForFilter(client)
-		if promptErr != nil {
-			return promptErr
-		}
-		if filter.Id != nil {
-			self.Spec["filterId"] = filter.Id.(interface{})
-		}
+	}
+	filter, promptErr := common.PromptForFilter(client)
+	if promptErr != nil {
+		return promptErr
+	}
+	if filter.Id != nil {
+		self.Spec["filterId"] = filter.Id.(interface{})
 	}
 	return nil
 }
@@ -258,25 +230,19 @@ func (self *CheckCreateType) AsManualCreateInput() *opslevel.CheckManualCreateIn
 
 func (self *CheckCreateType) resolveIntegrationAliases(client *opslevel.Client) error {
 	if item, ok := self.Spec["integration"]; ok {
+		delete(self.Spec, "integration")
 		if value, ok := opslevel.Cache.TryGetIntegration(item.(string)); ok {
-			delete(self.Spec, "integration")
 			self.Spec["integrationId"] = value.Id.(interface{})
+			return nil
 		} else {
-			fmt.Printf("%s is not a valid integration, please select a valid integration\n", self.Spec["integration"])
-			delete(self.Spec, "integration")
-			integration, promptErr := common.PromptForIntegration(client)
-			if promptErr != nil {
-				return promptErr
-			}
-			self.Spec["integrationId"] = integration.Id.(interface{})
+			fmt.Printf("%s is not a valid integration, please select a valid integration\n", item.(string))
 		}
-	} else {
-		integration, promptErr := common.PromptForIntegration(client)
-		if promptErr != nil {
-			return promptErr
-		}
-		self.Spec["integrationId"] = integration.Id.(interface{})
 	}
+	integration, promptErr := common.PromptForIntegration(client)
+	if promptErr != nil {
+		return promptErr
+	}
+	self.Spec["integrationId"] = integration.Id.(interface{})
 	return nil
 }
 
