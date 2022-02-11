@@ -1,4 +1,0 @@
-kind: Refactor
-body: Fix code so client objects are not built unless needed allow commands like `opslevel
-  version` to execute without an OPSLEVEL_API_TOKEN present
-time: 2022-02-07T21:37:52.107962-06:00
