@@ -68,7 +68,7 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &list[index], nil
+	return &filteredList[index], nil
 }
 
 func PromptForFilter(client *opslevel.Client) (*opslevel.Filter, error) {
@@ -172,5 +172,5 @@ func PromptForIntegration(client *opslevel.Client) (*opslevel.Integration, error
 	if err != nil {
 		return nil, err
 	}
-	return &list[index], nil
+	return &filteredList[index], nil
 }
