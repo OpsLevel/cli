@@ -404,7 +404,13 @@ func flattenPredicate(key string, value *opslevel.Predicate) string {
 `
 	if value != nil {
 		if value.Type == "matches_regex" {
-			value.Value = "<<-EOT\n" + value.Value + "\nEOT"
+			config = `
+  %s {
+    type = "%s"
+	  value = <<-EOT
+%s
+EOT			
+  }`
 		}
 		return templateConfig(config, key, value.Type, strings.ReplaceAll(value.Value, "\"", "\\\""))
 	}
@@ -422,7 +428,15 @@ func flattenFilterPredicate(value *opslevel.FilterPredicate) string {
 `
 	if value != nil {
 		if value.Type == "matches_regex" {
-			value.Value = "<<-EOT\n" + value.Value + "\nEOT"
+			config = `
+  predicate {
+	  key = "%s"
+	  key_data = "%s"
+	  type = "%s"
+	  value = <<-EOT
+%s
+EOT
+  }`
 		}
 		return templateConfig(config, value.Key, value.KeyData, value.Type, value.Value)
 	}
