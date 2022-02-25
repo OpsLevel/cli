@@ -1,3 +1,0 @@
-kind: Bugfix
-body: Fix bug when exporting regex predicates to terraform
-time: 2022-02-23T10:52:11.626318-06:00
