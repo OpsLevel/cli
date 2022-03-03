@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/opslevel/cli/cmd"
 )
 
@@ -12,5 +10,5 @@ var (
 )
 
 func main() {
-	cmd.Execute(fmt.Sprintf("%s-%0.12s", version, commit))
+	cmd.Execute(version, commit)
 }

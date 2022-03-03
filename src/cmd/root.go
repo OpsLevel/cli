@@ -22,8 +22,9 @@ var rootCmd = &cobra.Command{
 	Long:  `Opslevel Commandline Tool`,
 }
 
-func Execute(v string) {
+func Execute(v string, commit string) {
 	version = v
+	commit = commit
 	cobra.CheckErr(rootCmd.Execute())
 }
 
