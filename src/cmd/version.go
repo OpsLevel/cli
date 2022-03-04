@@ -22,8 +22,8 @@ type Build struct {
 }
 
 type OpslevelVersion struct {
-	Commit  string `json:"deployed_commit"`
-	Version string `json:"deployed_version"`
+	Commit  string `json:"app_commit,omitempty"`
+	Version string `json:"app_version,omitempty"`
 }
 
 type GoInfo struct {
