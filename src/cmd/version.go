@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -51,7 +50,6 @@ func initBuild() {
 	build.OpslevelVersion = getOpslevelVersion()
 }
 
-// Probably don't need this but added it for testing
 func getGoInfo() GoInfo {
 	return GoInfo{
 		Version:  runtime.Version(),
@@ -62,9 +60,8 @@ func getGoInfo() GoInfo {
 }
 
 func getOpslevelVersion() OpslevelVersion {
-	// Need to refactor api-url to work here so that we don't have to modify the url
-	apiUrl := strings.ReplaceAll(viper.GetString("api-url"), "api.", "app.")
-	apiUrl = strings.ReplaceAll(apiUrl, "/graphql", "/api/ping")
+	// Need to update all of this when we switch over to resty client
+	apiUrl := viper.GetString("base-url") + "/api/ping"
 	response, err := http.Get(apiUrl)
 	if err != nil {
 		fmt.Print(err.Error())
