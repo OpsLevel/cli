@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"runtime"
 
 	"github.com/spf13/cobra"
@@ -63,21 +61,14 @@ func getGoInfo() GoInfo {
 func getOpslevelVersion() OpslevelVersion {
 	// Need to update all of this when we switch over to resty client
 	url, err := url.Parse(viper.GetString("app-url"))
-	if err != nil {
-		fmt.Print(err.Error())
-		os.Exit(1)
-	}
+	cobra.CheckErr(err)
+
 	url.Path = "/api/ping"
 	response, err := http.Get(url.String())
-	if err != nil {
-		fmt.Print(err.Error())
-		os.Exit(1)
-	}
+	cobra.CheckErr(err)
 
 	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
+	cobra.CheckErr(err)
 
 	var opslevelVersion OpslevelVersion
 	json.Unmarshal(responseData, &opslevelVersion)
