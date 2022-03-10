@@ -22,11 +22,21 @@ func init() {
 	viper.BindPFlags(createCmd.Flags())
 }
 
+func hasStdin() bool {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+	return stat.Size() > 0
+}
+
 func readCreateConfigFile() {
 	if createDataFile != "" {
 		if createDataFile == "-" {
 			viper.SetConfigType("yaml")
-			viper.ReadConfig(os.Stdin)
+			if hasStdin() {
+				viper.ReadConfig(os.Stdin)
+			}
 			return
 		} else if createDataFile == "." {
 			viper.SetConfigFile("./data.yaml")
