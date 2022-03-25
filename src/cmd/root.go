@@ -22,6 +22,10 @@ var rootCmd = &cobra.Command{
 	Long:  `Opslevel Commandline Tool`,
 }
 
+func GetRootCmd() *cobra.Command {
+	return rootCmd
+}
+
 func Execute(v string, commit string) {
 	version = v
 	commit = commit
