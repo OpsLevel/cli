@@ -19,9 +19,37 @@ var createServiceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readServiceCreateInput()
 		cobra.CheckErr(err)
-		service, err := getClientGQL().CreateService(*input)
+		result, err := getClientGQL().CreateService(*input)
 		cobra.CheckErr(err)
-		fmt.Println(service.Id)
+		common.PrettyPrint(result.Id)
+	},
+}
+
+var createServiceTagCmd = &cobra.Command{
+	Use:   "tag ID|ALIAS",
+	Short: "Create a service tag",
+	Long: `Create a service tag
+	
+cat << EOF | opslevel create service tag my-service
+key: "foo"
+value: "bar"
+EOF
+`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		input, err := readTagCreateInput()
+		if common.IsID(key) {
+			input.Id = key
+		} else {
+			input.Alias = key
+		}
+		input.Type = opslevel.TaggableResourceService
+		cobra.CheckErr(err)
+		result, err := getClientGQL().CreateTag(*input)
+		cobra.CheckErr(err)
+		common.PrettyPrint(result)
 	},
 }
 
@@ -33,17 +61,17 @@ var getServiceCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		var service *opslevel.Service
+		var result *opslevel.Service
 		var err error
 		if common.IsID(key) {
-			service, err = getClientGQL().GetService(key)
+			result, err = getClientGQL().GetService(key)
 			cobra.CheckErr(err)
 		} else {
-			service, err = getClientGQL().GetServiceWithAlias(key)
+			result, err = getClientGQL().GetServiceWithAlias(key)
 			cobra.CheckErr(err)
 		}
 		cobra.CheckErr(err)
-		common.PrettyPrint(service)
+		common.PrettyPrint(result)
 	},
 }
 
@@ -109,11 +137,23 @@ func init() {
 	listCmd.AddCommand(listServiceCmd)
 	updateCmd.AddCommand(updateServiceCmd)
 	deleteCmd.AddCommand(deleteServiceCmd)
+
+	createServiceCmd.AddCommand(createServiceTagCmd)
 }
 
 func readServiceCreateInput() (*opslevel.ServiceCreateInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.ServiceCreateInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
+}
+
+func readTagCreateInput() (*opslevel.TagCreateInput, error) {
+	readCreateConfigFile()
+	evt := &opslevel.TagCreateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
