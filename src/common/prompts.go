@@ -51,8 +51,8 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 	}
 
 	filteredList := []opslevel.Level{}
-	for _, val := range list {
-		if val.Alias != "beginner" {
+	for i, val := range list {
+		if i != 0 {
 			filteredList = append(filteredList, val)
 		}
 	}
@@ -86,7 +86,7 @@ func PromptForFilter(client *opslevel.Client) (*opslevel.Filter, error) {
 
 	noneValue := opslevel.Filter{
 		Name: "None",
-		Id: nil,
+		Id:   nil,
 	}
 	list = append([]opslevel.Filter{noneValue}, list...)
 
