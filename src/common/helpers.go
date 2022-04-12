@@ -23,6 +23,7 @@ func WasFound(condition bool, key string) {
 	}
 }
 
+// TODO: we should probably move this into opslevel-go
 func IsID(value string) bool {
 	decoded, err := b64.RawURLEncoding.DecodeString(value)
 	if err != nil {
