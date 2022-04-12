@@ -16,7 +16,7 @@ var createGroupCmd = &cobra.Command{
 	Short: "Create a group",
 	Long: `Create a group
 
-cat << EOF | opslevel create group
+cat << EOF | opslevel create group -f -
 name: "My Group"
 description: "Hello World Group"
 parent:
@@ -47,7 +47,7 @@ var updateGroupCmd = &cobra.Command{
 	Short: "Update a group",
 	Long: `Update a group
 
-cat << EOF | opslevel update group "my-group-alias"
+cat << EOF | opslevel update group "my-group-alias" -f -
 description: My updated group description
 parent:
   alias: "next-group-alias"
