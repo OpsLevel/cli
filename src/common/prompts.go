@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/manifoldco/promptui"
 	"github.com/opslevel/opslevel-go"
@@ -56,6 +57,7 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 			filteredList = append(filteredList, val)
 		}
 	}
+	sort.Slice(filteredList, func(i, j int) bool { return filteredList[i].Index < filteredList[j].Index })
 
 	prompt := promptui.Select{
 		Label:     "Select Level",
