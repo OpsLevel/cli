@@ -445,7 +445,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	shell.WriteString("# Checks\n")
 
 	baseCheckConfig := `resource "opslevel_check_%s" "%s" {
-  name = "%s"
+  name = %q
   enabled = %v
   category = opslevel_rubric_category.%s.id
   level = opslevel_rubric_level.%s.id
