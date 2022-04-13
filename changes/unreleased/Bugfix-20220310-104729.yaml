@@ -1,3 +1,0 @@
-kind: Bugfix
-body: Create deploy was hanging when no stdin was passed
-time: 2022-03-10T10:47:29.757576-06:00
