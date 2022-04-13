@@ -57,15 +57,9 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		identifier := opslevel.IdentifierInput{}
 		input, err := readGroupInput()
 		cobra.CheckErr(err)
-		if common.IsID(key) {
-			identifier.Id = key
-		} else {
-			identifier.Alias = opslevel.NewString(key)
-		}
-		filter, err := getClientGQL().UpdateGroup(identifier, *input)
+		filter, err := getClientGQL().UpdateGroup(key, *input)
 		cobra.CheckErr(err)
 		fmt.Println(filter.Id)
 	},
