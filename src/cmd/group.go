@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/creasty/defaults"
@@ -38,9 +39,161 @@ EOF
 	},
 }
 
-// TODO: Get Group
+var getGroupCommand = &cobra.Command{
+	Use:        "group ID|ALIAS",
+	Short:      "Get details about a group",
+	Long:       `Get details about a group`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		var group *opslevel.Group
+		var err error
+		if common.IsID(key) {
+			group, err = getClientGQL().GetGroup(key)
+		} else {
+			group, err = getClientGQL().GetGroupWithAlias(key)
+		}
+		cobra.CheckErr(err)
+		common.PrettyPrint(group)
+		common.WasFound(group.Id == nil, key)
+	},
+}
 
-// TODO: List Groups
+var getMembersCommand = &cobra.Command{
+	Use:        "members ID|ALIAS",
+	Short:      "Get members for a group",
+	Long:       `Get members for a group`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		var group *opslevel.Group
+		var err error
+		if common.IsID(key) {
+			group, err = getClientGQL().GetGroup(key)
+		} else {
+			group, err = getClientGQL().GetGroupWithAlias(key)
+		}
+		cobra.CheckErr(err)
+		members, err := group.Members(getClientGQL())
+		cobra.CheckErr(err)
+		common.PrettyPrint(members)
+		common.WasFound(group.Id == nil, key)
+	},
+}
+
+var getDescendantRepositoriesCommand = &cobra.Command{
+	Use:        "repositories ID|ALIAS",
+	Short:      "Get descendant repositories for a group",
+	Long:       `Get descendant repositories for a group`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		var group *opslevel.Group
+		var err error
+		if common.IsID(key) {
+			group, err = getClientGQL().GetGroup(key)
+		} else {
+			group, err = getClientGQL().GetGroupWithAlias(key)
+		}
+		cobra.CheckErr(err)
+		descendantRepositories, err := group.DescendantRepositories(getClientGQL())
+		cobra.CheckErr(err)
+		common.PrettyPrint(descendantRepositories)
+		common.WasFound(group.Id == nil, key)
+	},
+}
+
+var getDescendantServicesCommand = &cobra.Command{
+	Use:        "services ID|ALIAS",
+	Short:      "Get descendant services for a group",
+	Long:       `Get descendant services for a group`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		var group *opslevel.Group
+		var err error
+		if common.IsID(key) {
+			group, err = getClientGQL().GetGroup(key)
+		} else {
+			group, err = getClientGQL().GetGroupWithAlias(key)
+		}
+		cobra.CheckErr(err)
+		descendantServices, err := group.DescendantServices(getClientGQL())
+		cobra.CheckErr(err)
+		common.PrettyPrint(descendantServices)
+		common.WasFound(group.Id == nil, key)
+	},
+}
+
+var getDescendantSubgroupsCommand = &cobra.Command{
+	Use:        "subgroups ID|ALIAS",
+	Short:      "Get descendant subgroups for a group",
+	Long:       `Get descendant subgroups for a group`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		var group *opslevel.Group
+		var err error
+		if common.IsID(key) {
+			group, err = getClientGQL().GetGroup(key)
+		} else {
+			group, err = getClientGQL().GetGroupWithAlias(key)
+		}
+		cobra.CheckErr(err)
+		descendantSubgroups, err := group.DescendantSubgroups(getClientGQL())
+		cobra.CheckErr(err)
+		common.PrettyPrint(descendantSubgroups)
+		common.WasFound(group.Id == nil, key)
+	},
+}
+
+var getDescendantTeamsCommand = &cobra.Command{
+	Use:        "teams ID|ALIAS",
+	Short:      "Get descendant teams for a group",
+	Long:       `Get descendant teams for a group`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		var group *opslevel.Group
+		var err error
+		if common.IsID(key) {
+			group, err = getClientGQL().GetGroup(key)
+		} else {
+			group, err = getClientGQL().GetGroupWithAlias(key)
+		}
+		cobra.CheckErr(err)
+		descendantTeams, err := group.DescendantTeams(getClientGQL())
+		cobra.CheckErr(err)
+		common.PrettyPrint(descendantTeams)
+		common.WasFound(group.Id == nil, key)
+	},
+}
+
+var listGroupCmd = &cobra.Command{
+	Use:     "group",
+	Aliases: []string{"groups"},
+	Short:   "Lists the groups",
+	Long:    `Lists the groups`,
+	Run: func(cmd *cobra.Command, args []string) {
+		list, err := getClientGQL().ListGroups()
+		cobra.CheckErr(err)
+		if isJsonOutput() {
+			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else {
+			w := common.NewTabWriter("NAME", "ALIAS", "ID")
+			for _, item := range list {
+				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Alias, item.Id)
+			}
+			w.Flush()
+		}
+	},
+}
 
 var updateGroupCmd = &cobra.Command{
 	Use:   "group ID|ALIAS",
@@ -86,6 +239,13 @@ var deleteGroupCmd = &cobra.Command{
 
 func init() {
 	createCmd.AddCommand(createGroupCmd)
+	getCmd.AddCommand(getGroupCommand)
+	getGroupCommand.AddCommand(getMembersCommand)
+	getGroupCommand.AddCommand(getDescendantRepositoriesCommand)
+	getGroupCommand.AddCommand(getDescendantServicesCommand)
+	getGroupCommand.AddCommand(getDescendantSubgroupsCommand)
+	getGroupCommand.AddCommand(getDescendantTeamsCommand)
+	listCmd.AddCommand(listGroupCmd)
 	updateCmd.AddCommand(updateGroupCmd)
 	deleteCmd.AddCommand(deleteGroupCmd)
 }
