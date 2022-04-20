@@ -8,6 +8,7 @@ import (
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -59,9 +60,10 @@ Examples:
 	opslevel create check -f my_cec.yaml
 `,
 	Run: func(cmd *cobra.Command, args []string) {
+		usePrompts := hasStdin() == false
 		input, err := readCheckCreateInput()
 		cobra.CheckErr(err)
-		check, err := createCheck(*input)
+		check, err := createCheck(*input, usePrompts)
 		cobra.CheckErr(err)
 		fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
 	},
@@ -94,7 +96,7 @@ type CheckCreateType struct {
 	Spec    map[string]interface{}
 }
 
-func (self *CheckCreateType) resolveCategoryAliases(client *opslevel.Client) (error) {
+func (self *CheckCreateType) resolveCategoryAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["category"]; ok {
 		delete(self.Spec, "category")
 		if value, ok := opslevel.Cache.TryGetCategory(item.(string)); ok {
@@ -104,15 +106,19 @@ func (self *CheckCreateType) resolveCategoryAliases(client *opslevel.Client) (er
 			fmt.Printf("%s is not a valid category, please select a valid category\n", item.(string))
 		}
 	}
-	category, promptErr := common.PromptForCategories(client)
-	if promptErr != nil {
-		return promptErr
+	if usePrompt {
+		category, promptErr := common.PromptForCategories(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		self.Spec["categoryId"] = category.Id.(interface{})
+	} else {
+		return fmt.Errorf("no valid value supplied for field 'category'")
 	}
-	self.Spec["categoryId"] = category.Id.(interface{})
 	return nil
 }
 
-func (self *CheckCreateType) resolveLevelAliases(client *opslevel.Client) (error) {
+func (self *CheckCreateType) resolveLevelAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["level"]; ok {
 		delete(self.Spec, "level")
 		if value, ok := opslevel.Cache.TryGetLevel(item.(string)); ok {
@@ -122,15 +128,19 @@ func (self *CheckCreateType) resolveLevelAliases(client *opslevel.Client) (error
 			fmt.Printf("%s is not a valid level, please select a valid level\n", item.(string))
 		}
 	}
-	level, promptErr := common.PromptForLevels(client)
-	if promptErr != nil {
-		return promptErr
+	if usePrompt {
+		level, promptErr := common.PromptForLevels(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		self.Spec["levelId"] = level.Id.(interface{})
+	} else {
+		return fmt.Errorf("no valid value supplied for field 'level'")
 	}
-	self.Spec["levelId"] = level.Id.(interface{})
 	return nil
 }
 
-func (self *CheckCreateType) resolveTeamAliases(client *opslevel.Client) (error) {
+func (self *CheckCreateType) resolveTeamAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["owner"]; ok {
 		delete(self.Spec, "owner")
 		if value, ok := opslevel.Cache.TryGetTeam(item.(string)); ok {
@@ -140,17 +150,21 @@ func (self *CheckCreateType) resolveTeamAliases(client *opslevel.Client) (error)
 			fmt.Printf("%s is not a valid team, please select a valid team\n", item.(string))
 		}
 	}
-	team, promptErr := common.PromptForTeam(client)
-	if promptErr != nil {
-		return promptErr
-	}
-	if team.Id != nil {
-		self.Spec["ownerId"] = team.Id.(interface{})
+	if usePrompt {
+		team, promptErr := common.PromptForTeam(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		if team.Id != nil {
+			self.Spec["ownerId"] = team.Id.(interface{})
+		}
+	} else {
+		log.Warn().Msg("no value supplied for field 'owner'")
 	}
 	return nil
 }
 
-func (self *CheckCreateType) resolveFilterAliases(client *opslevel.Client) (error) {
+func (self *CheckCreateType) resolveFilterAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["filter"]; ok {
 		delete(self.Spec, "filter")
 		if value, ok := opslevel.Cache.TryGetFilter(item.(string)); ok {
@@ -160,12 +174,16 @@ func (self *CheckCreateType) resolveFilterAliases(client *opslevel.Client) (erro
 			fmt.Printf("%s is not a valid filter, please select a valid filter\n", item.(string))
 		}
 	}
-	filter, promptErr := common.PromptForFilter(client)
-	if promptErr != nil {
-		return promptErr
-	}
-	if filter.Id != nil {
-		self.Spec["filterId"] = filter.Id.(interface{})
+	if usePrompt {
+		filter, promptErr := common.PromptForFilter(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		if filter.Id != nil {
+			self.Spec["filterId"] = filter.Id.(interface{})
+		}
+	} else {
+		log.Warn().Msg("no value supplied for field 'filter'")
 	}
 	return nil
 }
@@ -230,7 +248,7 @@ func (self *CheckCreateType) AsManualCreateInput() *opslevel.CheckManualCreateIn
 	return payload
 }
 
-func (self *CheckCreateType) resolveIntegrationAliases(client *opslevel.Client) error {
+func (self *CheckCreateType) resolveIntegrationAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["integration"]; ok {
 		delete(self.Spec, "integration")
 		if value, ok := opslevel.Cache.TryGetIntegration(item.(string)); ok {
@@ -240,11 +258,15 @@ func (self *CheckCreateType) resolveIntegrationAliases(client *opslevel.Client) 
 			fmt.Printf("%s is not a valid integration, please select a valid integration\n", item.(string))
 		}
 	}
-	integration, promptErr := common.PromptForIntegration(client)
-	if promptErr != nil {
-		return promptErr
+	if usePrompt {
+		integration, promptErr := common.PromptForIntegration(client)
+		if promptErr != nil {
+			return promptErr
+		}
+		self.Spec["integrationId"] = integration.Id.(interface{})
+	} else {
+		return fmt.Errorf("no valid value supplied for field 'integration'")
 	}
-	self.Spec["integrationId"] = integration.Id.(interface{})
 	return nil
 }
 
@@ -255,7 +277,7 @@ func (self *CheckCreateType) AsCustomEventCreateInput() *opslevel.CheckCustomEve
 	return payload
 }
 
-func createCheck(input CheckCreateType) (*opslevel.Check, error) {
+func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error) {
 	var output *opslevel.Check
 	var err error
 	clientGQL := getClientGQL()
@@ -263,13 +285,13 @@ func createCheck(input CheckCreateType) (*opslevel.Check, error) {
 	opslevel.Cache.CacheLevels(clientGQL)
 	opslevel.Cache.CacheTeams(clientGQL)
 	opslevel.Cache.CacheFilters(clientGQL)
-	err = input.resolveCategoryAliases(clientGQL)
+	err = input.resolveCategoryAliases(clientGQL, usePrompts)
 	cobra.CheckErr(err)
-	err = input.resolveLevelAliases(clientGQL)
+	err = input.resolveLevelAliases(clientGQL, usePrompts)
 	cobra.CheckErr(err)
-	err = input.resolveTeamAliases(clientGQL)
+	err = input.resolveTeamAliases(clientGQL, usePrompts)
 	cobra.CheckErr(err)
-	err = input.resolveFilterAliases(clientGQL)
+	err = input.resolveFilterAliases(clientGQL, usePrompts)
 	cobra.CheckErr(err)
 	switch input.Kind {
 	case opslevel.CheckTypeHasOwner:
@@ -301,7 +323,7 @@ func createCheck(input CheckCreateType) (*opslevel.Check, error) {
 
 	case opslevel.CheckTypeGeneric:
 		opslevel.Cache.CacheIntegrations(clientGQL)
-		err = input.resolveIntegrationAliases(clientGQL)
+		err = input.resolveIntegrationAliases(clientGQL, usePrompts)
 		cobra.CheckErr(err)
 		output, err = clientGQL.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
 	}
