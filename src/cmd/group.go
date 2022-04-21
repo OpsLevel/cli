@@ -55,15 +55,15 @@ var getGroupCommand = &cobra.Command{
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.PrettyPrint(group)
 		common.WasFound(group.Id == nil, key)
+		common.PrettyPrint(group)
 	},
 }
 
-var getMembersCommand = &cobra.Command{
+var getGroupMembersCommand = &cobra.Command{
 	Use:        "members ID|ALIAS",
 	Short:      "Get members for a group",
-	Long:       `Get members for a group`,
+	Long:       `The users who are members of the group.`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -76,17 +76,25 @@ var getMembersCommand = &cobra.Command{
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
+		common.WasFound(group.Id == nil, key)
 		members, err := group.Members(getClientGQL())
 		cobra.CheckErr(err)
-		common.PrettyPrint(members)
-		common.WasFound(group.Id == nil, key)
+		if isJsonOutput() {
+			common.PrettyPrint(members)
+		} else {
+			w := common.NewTabWriter("EMAIL", "ID")
+			for _, item := range members {
+				fmt.Fprintf(w, "%s\t%s\t\n", item.Email, item.Id)
+			}
+			w.Flush()
+		}
 	},
 }
 
-var getDescendantRepositoriesCommand = &cobra.Command{
+var getGroupDescendantRepositoriesCommand = &cobra.Command{
 	Use:        "repositories ID|ALIAS",
 	Short:      "Get descendant repositories for a group",
-	Long:       `Get descendant repositories for a group`,
+	Long:       `All the repositories that fall under this group - ex. this group's child repositories, all the child repositories of this group's descendants, etc.`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -99,17 +107,25 @@ var getDescendantRepositoriesCommand = &cobra.Command{
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
+		common.WasFound(group.Id == nil, key)
 		descendantRepositories, err := group.DescendantRepositories(getClientGQL())
 		cobra.CheckErr(err)
-		common.PrettyPrint(descendantRepositories)
-		common.WasFound(group.Id == nil, key)
+		if isJsonOutput() {
+			common.PrettyPrint(descendantRepositories)
+		} else {
+			w := common.NewTabWriter("ALIAS", "ID")
+			for _, item := range descendantRepositories {
+				fmt.Fprintf(w, "%s\t%s\t\n", item.DefaultAlias, item.Id)
+			}
+			w.Flush()
+		}
 	},
 }
 
-var getDescendantServicesCommand = &cobra.Command{
+var getGroupDescendantServicesCommand = &cobra.Command{
 	Use:        "services ID|ALIAS",
 	Short:      "Get descendant services for a group",
-	Long:       `Get descendant services for a group`,
+	Long:       `All the services that fall under this group - ex. this group's child services, all the child services of this group's descendants, etc.`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -122,17 +138,25 @@ var getDescendantServicesCommand = &cobra.Command{
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
+		common.WasFound(group.Id == nil, key)
 		descendantServices, err := group.DescendantServices(getClientGQL())
 		cobra.CheckErr(err)
-		common.PrettyPrint(descendantServices)
-		common.WasFound(group.Id == nil, key)
+		if isJsonOutput() {
+			common.PrettyPrint(descendantServices)
+		} else {
+			w := common.NewTabWriter("ID")
+			for _, item := range descendantServices {
+				fmt.Fprintf(w, "%s\t\n", item.Id)
+			}
+			w.Flush()
+		}
 	},
 }
 
-var getDescendantSubgroupsCommand = &cobra.Command{
+var getGroupDescendantSubgroupsCommand = &cobra.Command{
 	Use:        "subgroups ID|ALIAS",
 	Short:      "Get descendant subgroups for a group",
-	Long:       `Get descendant subgroups for a group`,
+	Long:       `All the groups that fall under this group - ex. this group's child groups, children of those groups, etc.`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -145,17 +169,25 @@ var getDescendantSubgroupsCommand = &cobra.Command{
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
+		common.WasFound(group.Id == nil, key)
 		descendantSubgroups, err := group.DescendantSubgroups(getClientGQL())
 		cobra.CheckErr(err)
-		common.PrettyPrint(descendantSubgroups)
-		common.WasFound(group.Id == nil, key)
+		if isJsonOutput() {
+			common.PrettyPrint(descendantSubgroups)
+		} else {
+			w := common.NewTabWriter("ALIAS", "ID")
+			for _, item := range descendantSubgroups {
+				fmt.Fprintf(w, "%s\t%s\t\n", item.Alias, item.Id)
+			}
+			w.Flush()
+		}
 	},
 }
 
-var getDescendantTeamsCommand = &cobra.Command{
+var getGroupDescendantTeamsCommand = &cobra.Command{
 	Use:        "teams ID|ALIAS",
 	Short:      "Get descendant teams for a group",
-	Long:       `Get descendant teams for a group`,
+	Long:       `All the teams that fall under this group - ex. this group's child teams, all the child teams of this group's descendants, etc.`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -168,10 +200,18 @@ var getDescendantTeamsCommand = &cobra.Command{
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
+		common.WasFound(group.Id == nil, key)
 		descendantTeams, err := group.DescendantTeams(getClientGQL())
 		cobra.CheckErr(err)
-		common.PrettyPrint(descendantTeams)
-		common.WasFound(group.Id == nil, key)
+		if isJsonOutput() {
+			common.PrettyPrint(descendantTeams)
+		} else {
+			w := common.NewTabWriter("ALIAS", "ID")
+			for _, item := range descendantTeams {
+				fmt.Fprintf(w, "%s\t%s\t\n", item.Alias, item.Id)
+			}
+			w.Flush()
+		}
 	},
 }
 
@@ -240,11 +280,11 @@ var deleteGroupCmd = &cobra.Command{
 func init() {
 	createCmd.AddCommand(createGroupCmd)
 	getCmd.AddCommand(getGroupCommand)
-	getGroupCommand.AddCommand(getMembersCommand)
-	getGroupCommand.AddCommand(getDescendantRepositoriesCommand)
-	getGroupCommand.AddCommand(getDescendantServicesCommand)
-	getGroupCommand.AddCommand(getDescendantSubgroupsCommand)
-	getGroupCommand.AddCommand(getDescendantTeamsCommand)
+	getGroupCommand.AddCommand(getGroupMembersCommand)
+	getGroupCommand.AddCommand(getGroupDescendantRepositoriesCommand)
+	getGroupCommand.AddCommand(getGroupDescendantServicesCommand)
+	getGroupCommand.AddCommand(getGroupDescendantSubgroupsCommand)
+	getGroupCommand.AddCommand(getGroupDescendantTeamsCommand)
 	listCmd.AddCommand(listGroupCmd)
 	updateCmd.AddCommand(updateGroupCmd)
 	deleteCmd.AddCommand(deleteGroupCmd)
