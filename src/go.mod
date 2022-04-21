@@ -7,7 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/gosimple/slug v1.12.0
 	github.com/manifoldco/promptui v0.9.0
-	github.com/opslevel/opslevel-go v0.4.5-0.20220225194148-bc75f2c38d93
+	github.com/opslevel/opslevel-go v0.4.5-0.20220421184629-b79d62d1dba4
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
@@ -55,4 +55,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/opslevel/opslevel-go => ./submodules/opslevel-go
+//replace github.com/opslevel/opslevel-go => ./submodules/opslevel-go

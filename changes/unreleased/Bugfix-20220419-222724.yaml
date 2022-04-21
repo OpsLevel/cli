@@ -1,4 +1,0 @@
-kind: Bugfix
-body: When passing data via stdin to `create check` the command was failing with prompt-ui
-  errors - a fix has been implemented
-time: 2022-04-19T22:27:24.91967-05:00
