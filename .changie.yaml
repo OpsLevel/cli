@@ -4,9 +4,9 @@ headerPath: header.tpl.md
 versionHeaderPath: ""
 changelogPath: CHANGELOG.md
 versionExt: md
-versionFormat: '## [{{.Version}}] - {{.Time.Format "2006-01-02"}}'
+versionFormat: '## [{{.Version}}](https://github.com/OpsLevel/cli/compare/{{.PreviousVersion}}...{{.Version}}) - {{.Time.Format "January 02, 2006"}}'
 kindFormat: '### {{.Kind}}'
-changeFormat: '* {{.Body}}'
+changeFormat: '- {{.Body}}'
 kinds:
 - label: Feature
 - label: Refactor
