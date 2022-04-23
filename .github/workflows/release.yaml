@@ -73,3 +73,8 @@ jobs:
       #   run: ci/deploy-rpm.sh
       # - name: Create deb repository
       #   run: ci/deploy-deb.sh
+      - name: Report Release
+        uses: opslevel/report-deploy-github-actions@v0.1.0
+        with:
+          integration_url: ${{ secrets.DEPLOY_INTEGRATION_URL }}
+          service: "opslevel_cli"
