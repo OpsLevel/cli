@@ -8,6 +8,7 @@ require (
 	github.com/gosimple/slug v1.12.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/opslevel/opslevel-go v0.4.5-0.20220421184629-b79d62d1dba4
+	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
