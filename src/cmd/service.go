@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/creasty/defaults"
@@ -86,10 +88,12 @@ var listServiceCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else if isCsvOutput() {
-			fmt.Printf("%s\n", strings.Join([]string{"NAME", "ID", "ALIASES"}, ","))
+			w := csv.NewWriter(os.Stdout)
+			w.Write([]string{"NAME", "ID", "ALIASES"})
 			for _, item := range list {
-				fmt.Printf("%s,%s,[%s]\n", item.Name, item.Id, strings.Join(item.Aliases, ","))
+				w.Write([]string{item.Name, item.Id.(string), strings.Join(item.Aliases, ",")})
 			}
+			w.Flush()
 		} else {
 			w := common.NewTabWriter("NAME", "ID", "ALIASES")
 			for _, item := range list {
