@@ -85,6 +85,11 @@ var listServiceCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else if isCsvOutput() {
+			fmt.Printf("%s\n", strings.Join([]string{"NAME", "ID", "ALIASES"}, ","))
+			for _, item := range list {
+				fmt.Printf("%s,%s,[%s]\n", item.Name, item.Id, strings.Join(item.Aliases, ","))
+			}
 		} else {
 			w := common.NewTabWriter("NAME", "ID", "ALIASES")
 			for _, item := range list {
