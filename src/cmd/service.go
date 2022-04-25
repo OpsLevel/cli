@@ -91,7 +91,7 @@ var listServiceCmd = &cobra.Command{
 			w := csv.NewWriter(os.Stdout)
 			w.Write([]string{"NAME", "ID", "ALIASES"})
 			for _, item := range list {
-				w.Write([]string{item.Name, item.Id.(string), strings.Join(item.Aliases, ",")})
+				w.Write([]string{item.Name, item.Id.(string), strings.Join(item.Aliases, "/")})
 			}
 			w.Flush()
 		} else {
