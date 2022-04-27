@@ -16,10 +16,14 @@ var listCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(listCmd)
 
-	listCmd.PersistentFlags().StringVarP(&listOutputType, "output", "o", "text", "Output format.  One of: json|text [default: text]")
+	listCmd.PersistentFlags().StringVarP(&listOutputType, "output", "o", "text", "Output format.  One of: json|csv|text [default: text]")
 	viper.BindPFlags(listCmd.Flags())
 }
 
 func isJsonOutput() bool {
 	return listOutputType == "json"
+}
+
+func isCsvOutput() bool {
+	return listOutputType == "csv"
 }
