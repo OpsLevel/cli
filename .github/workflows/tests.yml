@@ -26,6 +26,9 @@ jobs:
           cd src/
           go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
       - name: Upload Coverage
-        run: |-
-          cd src/
-          bash <(curl -s https://codecov.io/bash)
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./src/coverage.txt
+          fail_ci_if_error: false
+          verbose: true
