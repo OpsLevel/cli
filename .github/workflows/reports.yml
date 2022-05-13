@@ -10,10 +10,14 @@ jobs:
   snyk:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
+    - name: Checkout
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: 'true'
     - name: Snyk Test
       uses: snyk/actions/golang@master
+      continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
