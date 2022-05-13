@@ -32,5 +32,7 @@ jobs:
       - name: Report Coverage To OpsLevel
         if: github.ref == 'refs/heads/main'
         run: |-
+          sleep 5
           export DATA=$(curl -s -X GET -H "Authorization: ${CODECOV_TOKEN}" https://codecov.io/api/gh/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})
+          echo ${DATA}
           echo ${DATA} | curl -s -X POST ${{ secrets.OL_COVERAGE_INTEGRATION_URL }} -H 'content-type: application/json' -d @-
