@@ -3,6 +3,7 @@ module github.com/opslevel/cli
 go 1.17
 
 require (
+	github.com/alecthomas/jsonschema v0.0.0-20210526225647-edb03dcab7bc
 	github.com/creasty/defaults v1.5.1
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/gosimple/slug v1.12.0
