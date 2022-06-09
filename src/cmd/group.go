@@ -41,6 +41,7 @@ EOF
 
 var getGroupCommand = &cobra.Command{
 	Use:        "group ID|ALIAS",
+	Aliases:    []string{"groups"},
 	Short:      "Get details about a group",
 	Long:       `Get details about a group`,
 	Args:       cobra.ExactArgs(1),
@@ -61,7 +62,8 @@ var getGroupCommand = &cobra.Command{
 }
 
 var getGroupMembersCommand = &cobra.Command{
-	Use:        "members ID|ALIAS",
+	Use:        "member ID|ALIAS",
+	Aliases:    []string{"members"},
 	Short:      "Get members for a group",
 	Long:       `The users who are members of the group.`,
 	Args:       cobra.ExactArgs(1),
@@ -92,7 +94,8 @@ var getGroupMembersCommand = &cobra.Command{
 }
 
 var getGroupDescendantRepositoriesCommand = &cobra.Command{
-	Use:        "repositories ID|ALIAS",
+	Use:        "repository ID|ALIAS",
+	Aliases:    []string{"repositories"},
 	Short:      "Get descendant repositories for a group",
 	Long:       `All the repositories that fall under this group - ex. this group's child repositories, all the child repositories of this group's descendants, etc.`,
 	Args:       cobra.ExactArgs(1),
@@ -123,7 +126,8 @@ var getGroupDescendantRepositoriesCommand = &cobra.Command{
 }
 
 var getGroupDescendantServicesCommand = &cobra.Command{
-	Use:        "services ID|ALIAS",
+	Use:        "service ID|ALIAS",
+	Aliases:    []string{"services"},
 	Short:      "Get descendant services for a group",
 	Long:       `All the services that fall under this group - ex. this group's child services, all the child services of this group's descendants, etc.`,
 	Args:       cobra.ExactArgs(1),
@@ -144,9 +148,9 @@ var getGroupDescendantServicesCommand = &cobra.Command{
 		if isJsonOutput() {
 			common.PrettyPrint(descendantServices)
 		} else {
-			w := common.NewTabWriter("ID")
+			w := common.NewTabWriter("ALIAS", "ID")
 			for _, item := range descendantServices {
-				fmt.Fprintf(w, "%s\t\n", item.Id)
+				fmt.Fprintf(w, "%s\t%s\t\n", item.Aliases[0], item.Id)
 			}
 			w.Flush()
 		}
@@ -154,7 +158,8 @@ var getGroupDescendantServicesCommand = &cobra.Command{
 }
 
 var getGroupDescendantSubgroupsCommand = &cobra.Command{
-	Use:        "subgroups ID|ALIAS",
+	Use:        "subgroup ID|ALIAS",
+	Aliases:    []string{"subgroups"},
 	Short:      "Get descendant subgroups for a group",
 	Long:       `All the groups that fall under this group - ex. this group's child groups, children of those groups, etc.`,
 	Args:       cobra.ExactArgs(1),
@@ -185,7 +190,8 @@ var getGroupDescendantSubgroupsCommand = &cobra.Command{
 }
 
 var getGroupDescendantTeamsCommand = &cobra.Command{
-	Use:        "teams ID|ALIAS",
+	Use:        "team ID|ALIAS",
+	Aliases:    []string{"teams"},
 	Short:      "Get descendant teams for a group",
 	Long:       `All the teams that fall under this group - ex. this group's child teams, all the child teams of this group's descendants, etc.`,
 	Args:       cobra.ExactArgs(1),
