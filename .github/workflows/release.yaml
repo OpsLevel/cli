@@ -74,7 +74,7 @@ jobs:
       # - name: Create deb repository
       #   run: ci/deploy-deb.sh
       - name: Report Release
-        uses: opslevel/report-deploy-github-actions@v0.2.0
+        uses: opslevel/report-deploy-github-actions@v0.1.0
         with:
           integration_url: ${{ secrets.DEPLOY_INTEGRATION_URL }}
           service: "opslevel_cli"
