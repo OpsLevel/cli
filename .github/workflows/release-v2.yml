@@ -26,29 +26,31 @@ jobs:
         with:
           go-version: 1.17
       - name: Ensure Changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if test -f ./.changes/${{ github.event.inputs.release-version }}.md
           then
             echo "Skip Changie..."
+            echo "Ensure Release Does Not Exist"
+            gh release delete ${{ github.event.inputs.release-version }} || true
+            echo "Ensure Tag Does Not Exist"
+            if [ "$(git tag -l ${{ github.event.inputs.release-version }})" == "${{ github.event.inputs.release-version }}" ]; then
+              git tag -d ${{ github.event.inputs.release-version }}
+              git push --delete origin ${{ github.event.inputs.release-version }}
+            fi
           else
             go install github.com/miniscruff/changie@latest
             changie batch ${{ github.event.inputs.release-version }}
             changie merge
+            git config user.name "OpsLevel Bots"
+            git config user.email "bots@opslevel.com"
+            git add .
+            git commit -m "Cut Release '${{ github.event.inputs.release-version }}'"
+            git tag -f ${{ github.event.inputs.release-version }} -m "Cut Release '${{ github.event.inputs.release-version }}'"
+            git push origin HEAD
+            git push origin refs/tags/${{ github.event.inputs.release-version }}
           fi
-      - name: Commit & Tag Release
-        run: |
-          git config user.name "OpsLevel Bots"
-          git config user.email "bots@opslevel.com"
-          git add .
-          git commit -m "Cut Release '${{ github.event.inputs.release-version }}'"
-          git tag -f ${{ github.event.inputs.release-version }} -m "Cut Release '${{ github.event.inputs.release-version }}'"
-          git push origin HEAD
-          git push origin refs/tags/${{ github.event.inputs.release-version }}
-      - name: Ensure Release Does Not Exist
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release delete ${{ github.event.inputs.release-version }} || true
       - name: Import GPG Key
         id: import_gpg
         uses: hashicorp/ghaction-import-gpg@v2.1.0
