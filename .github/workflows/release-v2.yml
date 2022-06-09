@@ -32,6 +32,8 @@ jobs:
           gh release delete ${{ github.event.inputs.release-version }} || true
       - name: Ensure Changelog
         run: |
+          git config user.name "OpsLevel Bots"
+          git config user.email "bots@opslevel.com"
           if test -f ./.changes/${{ github.event.inputs.release-version }}.md
           then
             echo "Skip Changie..."
@@ -39,8 +41,6 @@ jobs:
             go install github.com/miniscruff/changie@latest
             changie batch ${{ github.event.inputs.release-version }}
             changie merge
-            git config user.name "OpsLevel Bots"
-            git config user.email "bots@opslevel.com"
             git add .
             git commit -m "Cut Release '${{ github.event.inputs.release-version }}'"
             git push origin HEAD
