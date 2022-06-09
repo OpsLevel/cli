@@ -69,7 +69,7 @@ jobs:
             git push origin HEAD
           fi
           git tag -f ${{ github.event.inputs.release-version }} -m "Cut Release '${{ github.event.inputs.release-version }}'"
-          git push origin refs/tags/${{ github.event.inputs.release-version }}
+          git push -f origin refs/tags/${{ github.event.inputs.release-version }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2.7.0
         with:
