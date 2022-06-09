@@ -56,4 +56,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-//replace github.com/opslevel/opslevel-go => ./submodules/opslevel-go
+replace github.com/opslevel/opslevel-go => ./submodules/opslevel-go

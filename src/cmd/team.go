@@ -78,7 +78,7 @@ var createContactCmd = &cobra.Command{
 		case string(opslevel.ContactTypeWeb):
 			contactInput = opslevel.CreateContactWeb(address, displayName)
 		}
-		contact, err := getClientGQL().AddContact(&team.TeamId, contactInput)
+		contact, err := getClientGQL().AddContact(team.TeamId.Alias, contactInput)
 		cobra.CheckErr(err)
 		if contact.Id == nil {
 			cobra.CheckErr(fmt.Errorf("unable to create contact '%+v'", contactInput))
