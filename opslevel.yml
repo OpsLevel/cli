@@ -1,0 +1,11 @@
+---
+version: 1
+service:
+  name: Opslevel CLI
+  lifecycle: beta
+  tier: tier_2
+  product: 
+  owner: platform
+  language: Go
+  framework: Cobra
+  description: "`opslevel` is the command line tool for interacting with [OpsLevel](https://www.opslevel.com/)"
