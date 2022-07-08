@@ -1,0 +1,4 @@
+kind: Feature
+body: Add flag `--assign` to `create service tag` to use `tagAssign` mutation instead
+  of `tagCreate`
+time: 2022-07-07T20:45:44.479559-05:00
