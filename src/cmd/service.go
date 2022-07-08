@@ -76,40 +76,6 @@ opslevel create service tag --assign my-service foo bar
 	},
 }
 
-var getServiceTagCmd = &cobra.Command{
-	Use:   "tag ID|ALIAS TAG_KEY",
-	Short: "Get a service's tag",
-	Long: `Get a service's' tag
-	
-opslevel get service tag my-service my-tag
-`,
-	Args:       cobra.ExactArgs(2),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
-	Run: func(cmd *cobra.Command, args []string) {
-		serviceKey := args[0]
-		tagKey := args[1]
-		var result *opslevel.Service
-		var err error
-		if common.IsID(serviceKey) {
-			result, err = getClientGQL().GetService(serviceKey)
-			cobra.CheckErr(err)
-		} else {
-			result, err = getClientGQL().GetServiceWithAlias(serviceKey)
-			cobra.CheckErr(err)
-		}
-		if result.Id == nil {
-			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
-		}
-		for _, tag := range result.Tags.Nodes {
-			if tagKey == tag.Key {
-				fmt.Println(tag.Value)
-				return
-			}
-		}
-		cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on service '%s'", tagKey, serviceKey))
-	},
-}
-
 var getServiceCmd = &cobra.Command{
 	Use:        "service ID|ALIAS",
 	Short:      "Get details about a service",
@@ -129,6 +95,49 @@ var getServiceCmd = &cobra.Command{
 		}
 		cobra.CheckErr(err)
 		common.PrettyPrint(result)
+	},
+}
+
+var getServiceTagCmd = &cobra.Command{
+	Use:   "tag ID|ALIAS TAG_KEY",
+	Short: "Get a service's tag",
+	Long: `Get a service's' tag
+
+opslevel get service tag my-service | jq 'from_entries'
+opslevel get service tag my-service my-tag
+`,
+	Args:       cobra.MinimumNArgs(1),
+	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+	Run: func(cmd *cobra.Command, args []string) {
+		serviceKey := args[0]
+		singleTag := len(args) == 2
+		var tagKey string
+		if singleTag {
+			tagKey = args[1]
+		}
+
+		var result *opslevel.Service
+		var err error
+		if common.IsID(serviceKey) {
+			result, err = getClientGQL().GetService(serviceKey)
+			cobra.CheckErr(err)
+		} else {
+			result, err = getClientGQL().GetServiceWithAlias(serviceKey)
+			cobra.CheckErr(err)
+		}
+		if result.Id == nil {
+			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
+		}
+		output := []opslevel.Tag{}
+		for _, tag := range result.Tags.Nodes {
+			if singleTag == false || tagKey == tag.Key {
+				output = append(output, tag)
+			}
+		}
+		if len(output) == 0 {
+			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on service '%s'", tagKey, serviceKey))
+		}
+		common.PrettyPrint(output)
 	},
 }
 
