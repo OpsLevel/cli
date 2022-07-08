@@ -67,16 +67,11 @@ func WithHTTPClient(hc *http.Client) ClientOption {
 	}
 }
 
-func (c *Client) Do(method string, contentType string, url string, body interface{}, recv interface{}) error {
+func (c *Client) Do(method string, contentType string, url string, body []byte, recv interface{}) error {
 	var err error
 
-	b, err := json.Marshal(body)
-	if err != nil {
-		return err
-	}
-
-	log.Debug().Msgf("%s\n%s", url, string(b))
-	req, err := http.NewRequest(method, url, bytes.NewReader(b))
+	log.Debug().Msgf("%s\n%s", url, string(body))
+	req, err := http.NewRequest(method, url, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
