@@ -1,3 +1,0 @@
-kind: Refactor
-body: '`create service tag` usage signature changed to make it easier to work with'
-time: 2022-07-07T20:53:52.311094-05:00
