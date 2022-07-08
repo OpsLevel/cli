@@ -28,31 +28,48 @@ var createServiceCmd = &cobra.Command{
 }
 
 var createServiceTagCmd = &cobra.Command{
-	Use:   "tag ID|ALIAS",
+	Use:   "tag ID|ALIAS TAG_KEY TAG_VALUE",
 	Short: "Create a service tag",
 	Long: `Create a service tag
 	
-cat << EOF | opslevel create service tag my-service
-key: "foo"
-value: "bar"
-EOF
-
-cat << EOF | opslevel create service tag --assign my-service
-key: "foo"
-value: "bar"
-EOF
+opslevel create service tag my-service foo bar
+opslevel create service tag --assign my-service foo bar
 `,
-	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"ID", "ALIAS"},
+	Args:       cobra.ExactArgs(3),
+	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY", "TAG_VALUE"},
 	Run: func(cmd *cobra.Command, args []string) {
 		var result interface{}
 		var err error
-		assign, err := cmd.Flags().GetBool("assign")
+		serviceKey := args[0]
+		tagKey := args[1]
+		tagValue := args[2]
+		tagAssign, err := cmd.Flags().GetBool("assign")
 		cobra.CheckErr(err)
-		if assign {
-			result, err = assignTag(args[0])
+		if tagAssign {
+			input := opslevel.TagAssignInput{
+				Tags: []opslevel.TagInput{
+					{Key: tagKey, Value: tagValue},
+				},
+			}
+			if common.IsID(serviceKey) {
+				input.Id = serviceKey
+			} else {
+				input.Alias = serviceKey
+			}
+			input.Type = opslevel.TaggableResourceService
+			result, err = getClientGQL().AssignTags(input)
 		} else {
-			result, err = createTag(args[0])
+			input := opslevel.TagCreateInput{
+				Key:   tagKey,
+				Value: tagValue,
+			}
+			if common.IsID(serviceKey) {
+				input.Id = serviceKey
+			} else {
+				input.Alias = serviceKey
+			}
+			input.Type = opslevel.TaggableResourceService
+			result, err = getClientGQL().CreateTag(input)
 		}
 		cobra.CheckErr(err)
 		common.PrettyPrint(result)
@@ -178,6 +195,37 @@ var deleteServiceCmd = &cobra.Command{
 	},
 }
 
+var deleteServiceTagCmd = &cobra.Command{
+	Use:        "tag ID|ALIAS TAG_KEY",
+	Short:      "Delete a service's tag",
+	Long:       `Delete a service's tag'`,
+	Args:       cobra.ExactArgs(2),
+	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+	Run: func(cmd *cobra.Command, args []string) {
+		serviceKey := args[0]
+		tagKey := args[1]
+		var result *opslevel.Service
+		var err error
+		if common.IsID(serviceKey) {
+			result, err = getClientGQL().GetService(serviceKey)
+			cobra.CheckErr(err)
+		} else {
+			result, err = getClientGQL().GetServiceWithAlias(serviceKey)
+			cobra.CheckErr(err)
+		}
+		if result.Id == nil {
+			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
+		}
+		for _, tag := range result.Tags.Nodes {
+			if tagKey == tag.Key {
+				getClientGQL().DeleteTag(tag.Id)
+				fmt.Println("Deleted Tag")
+				common.PrettyPrint(tag)
+			}
+		}
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createServiceCmd)
 	getCmd.AddCommand(getServiceCmd)
@@ -187,6 +235,7 @@ func init() {
 
 	createServiceCmd.AddCommand(createServiceTagCmd)
 	getServiceCmd.AddCommand(getServiceTagCmd)
+	deleteServiceCmd.AddCommand(deleteServiceTagCmd)
 
 	createServiceTagCmd.Flags().Bool("assign", false, "Use the `tagAssign` mutation instead of `tagCreate`")
 }
@@ -194,16 +243,6 @@ func init() {
 func readServiceCreateInput() (*opslevel.ServiceCreateInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.ServiceCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
-}
-
-func readTagCreateInput() (*opslevel.TagCreateInput, error) {
-	readCreateConfigFile()
-	evt := &opslevel.TagCreateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
@@ -219,38 +258,4 @@ func readServiceUpdateInput() (*opslevel.ServiceUpdateInput, error) {
 		return nil, err
 	}
 	return evt, nil
-}
-
-func assignTag(key string) (interface{}, error) {
-	data, err := readTagCreateInput()
-	if err != nil {
-		return nil, err
-	}
-	input := opslevel.TagAssignInput{
-		Tags: []opslevel.TagInput{
-			{Key: data.Key, Value: data.Value},
-		},
-	}
-	if common.IsID(key) {
-		input.Id = key
-	} else {
-		input.Alias = key
-	}
-	input.Type = opslevel.TaggableResourceService
-	cobra.CheckErr(err)
-	return getClientGQL().AssignTags(input)
-}
-
-func createTag(key string) (interface{}, error) {
-	input, err := readTagCreateInput()
-	if err != nil {
-		return nil, err
-	}
-	if common.IsID(key) {
-		input.Id = key
-	} else {
-		input.Alias = key
-	}
-	input.Type = opslevel.TaggableResourceService
-	return getClientGQL().CreateTag(*input)
 }
