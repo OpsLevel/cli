@@ -67,7 +67,7 @@ func WithHTTPClient(hc *http.Client) ClientOption {
 	}
 }
 
-func (c *Client) Do(method string, url string, body interface{}, recv interface{}) error {
+func (c *Client) Do(method string, contentType string, url string, body interface{}, recv interface{}) error {
 	var err error
 
 	b, err := json.Marshal(body)
@@ -81,7 +81,7 @@ func (c *Client) Do(method string, url string, body interface{}, recv interface{
 		return err
 	}
 
-	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Type", contentType)
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Debug().Msgf("Failed to send request to OpsLevel: %s", err.Error())

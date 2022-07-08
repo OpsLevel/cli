@@ -59,7 +59,7 @@ var deployCreateCmd = &cobra.Command{
 			var resp struct {
 				Result string `json:"result"`
 			}
-			err = getClientRest().Do("POST", integrationUrl, evt, &resp)
+			err = getClientRest().Do("POST", "application/json", integrationUrl, evt, &resp)
 			cobra.CheckErr(err)
 			log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
 		}
