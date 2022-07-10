@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"github.com/opslevel/opslevel-go/v2022"
 	"time"
 
 	"github.com/creasty/defaults"
@@ -58,10 +59,12 @@ var deployCreateCmd = &cobra.Command{
 		} else {
 			body, err := json.Marshal(evt)
 			cobra.CheckErr(evt)
-			var resp struct {
-				Result string `json:"result"`
-			}
-			err = getClientRest().Do("POST", "application/json", integrationUrl, body, &resp)
+			response := &opslevel.RestResponse{}
+			_, err = getClientRest().R().
+				SetHeader("Content-Type", "application/json").
+				SetBody(body).
+				SetResult(response).
+				Post(integrationUrl)
 			cobra.CheckErr(err)
 			log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
 		}

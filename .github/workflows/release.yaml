@@ -1,24 +1,30 @@
-name: Release
+name: "Release"
+
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release-version:
+        required: true
+        description: "The release version to use IE: v2022.05.12"
+
+permissions:
+  contents: write
+
 jobs:
-  goreleaser:
-    runs-on: ubuntu-18.04 # 20.04 doesn't provide createrepo for now
+  release:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Fetch all tags
+          submodules: 'true'
+      - name: Fetch All Tags
         run: git fetch --force --tags
-      - name: Get the tag name
-        run: echo "TAG=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.18
       - name: Cache Go modules
         uses: actions/cache@v2
         with:
@@ -26,11 +32,10 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Import GPG key
+      - name: Import GPG Key
         id: import_gpg
         uses: hashicorp/ghaction-import-gpg@v2.1.0
         env:
-          # These secrets will need to be configured for the repository:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Login to Public ECR
@@ -42,39 +47,40 @@ jobs:
         env:
           AWS_REGION: us-east-1
       - name: Cache Docker Layers
-        run: docker pull public.ecr.aws/opslevel/cli:v0.3.0 || true
+        run: docker pull public.ecr.aws/opslevel/cli:v2022.04.22 || true
+      - name: Ensure Release Does Not Exist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete ${{ github.event.inputs.release-version }} || true
+      - name: Ensure Changelog
+        run: |
+          git config user.name "OpsLevel Bots"
+          git config user.email "bots@opslevel.com"
+          if test -f ./.changes/${{ github.event.inputs.release-version }}.md
+          then
+            echo "Skip Changie..."
+          else
+            go install github.com/miniscruff/changie@latest
+            changie batch ${{ github.event.inputs.release-version }}
+            changie merge
+            git add .
+            git commit -m "Cut Release '${{ github.event.inputs.release-version }}'"
+            git push origin HEAD
+          fi
+          git tag -f ${{ github.event.inputs.release-version }} -m "Cut Release '${{ github.event.inputs.release-version }}'"
+          git push -f origin refs/tags/${{ github.event.inputs.release-version }}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v2.7.0
         with:
-          version: latest
-          args: release --rm-dist  --release-notes=../changes/${{ env.TAG }}.md
+          args: release --rm-dist --release-notes=../.changes/${{ github.event.inputs.release-version }}.md
           workdir: ./src
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          # GitHub sets this automatically
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
-      # - name: Checkout cli-repo
-      #   uses: actions/checkout@v2
-      #   with:
-      #     repository: ${{ github.repository_owner }}/cli-repo
-      #     path: cli-repo
-      #     fetch-depth: 0
-      #     token: ${{ secrets.ORG_GITHUB_TOKEN }}
-      # - name: Setup git settings
-      #   run: |
-      #     git config --global user.email "info@opslevel.com"
-      #     git config --global user.name "OpsLevel"
-      # - name: Install DEB/RPM dependencies
-      #   run: |
-      #     sudo apt-get -y update
-      #     sudo apt-get -y install rpm reprepro createrepo distro-info
-      # - name: Create rpm repository
-      #   run: ci/deploy-rpm.sh
-      # - name: Create deb repository
-      #   run: ci/deploy-deb.sh
-      - name: Report Release
-        uses: opslevel/report-deploy-github-actions@v0.1.0
+      - name: Report Release To OpsLevel
+        uses: opslevel/report-deploy-github-action@v0.2.0
         with:
           integration_url: ${{ secrets.DEPLOY_INTEGRATION_URL }}
           service: "opslevel_cli"

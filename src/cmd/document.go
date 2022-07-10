@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"io/ioutil"
@@ -22,13 +23,15 @@ opslevel create document my-service -i xxxxx -f swagger.json
 		integrationURL := fmt.Sprintf("https://app.opslevel.com/integrations/api_docs/%s/%s", integrationID, serviceAlias)
 		fileContents, err := ioutil.ReadFile(createDataFile)
 		cobra.CheckErr(err)
-		var resp struct {
-			Result string `json:"result"`
-		}
-		err = getClientRest().Do("POST", "application/octet-stream", integrationURL, fileContents, &resp)
+		response := &opslevel.RestResponse{}
+		_, err = getClientRest().R().
+			SetHeader("Content-Type", "application/octet-stream").
+			SetBody(fileContents).
+			SetResult(response).
+			Post(integrationURL)
 		cobra.CheckErr(err)
 		log.Info().Msgf("Successfully registered api-doc for '%s'", serviceAlias)
-		log.Info().Msgf("%v", resp)
+		log.Info().Msgf("%v", response)
 
 	},
 }

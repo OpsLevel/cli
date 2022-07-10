@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go"
+	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/spf13/cobra"
 )
 

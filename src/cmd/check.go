@@ -7,7 +7,7 @@ import (
 
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go"
+	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

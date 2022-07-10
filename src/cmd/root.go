@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/go-resty/resty/v2"
 	"os"
 	"strings"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go"
+	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/spf13/cobra"
 
 	"github.com/rs/zerolog"
@@ -13,7 +14,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var _clientRest *common.Client
+var _clientRest *resty.Client
 var _clientGQL *opslevel.Client
 
 var rootCmd = &cobra.Command{
@@ -31,7 +32,7 @@ func Execute(v string, commit string) {
 func init() {
 	rootCmd.PersistentFlags().String("log-format", "TEXT", "overrides environment variable 'OPSLEVEL_LOG_FORMAT' (options [\"JSON\", \"TEXT\"])")
 	rootCmd.PersistentFlags().String("log-level", "INFO", "overrides environment variable 'OPSLEVEL_LOG_LEVEL' (options [\"ERROR\", \"WARN\", \"INFO\", \"DEBUG\"])")
-	rootCmd.PersistentFlags().String("api-url", "https://api.opslevel.com/graphql", "The OpsLevel API Url. Overrides environment variable 'OPSLEVEL_API_URL'")
+	rootCmd.PersistentFlags().String("api-url", "https://api.opslevel.com", "The OpsLevel API Url. Overrides environment variable 'OPSLEVEL_API_URL'")
 	rootCmd.PersistentFlags().String("app-url", "https://app.opslevel.com", "The OpsLevel App Url. Overrides environment variable 'OPSLEVEL_APP_URL'")
 	rootCmd.PersistentFlags().String("api-token", "", "The OpsLevel API Token. Overrides environment variable 'OPSLEVEL_API_TOKEN'")
 
@@ -73,9 +74,9 @@ func setupLogging() {
 	}
 }
 
-func getClientRest() *common.Client {
+func getClientRest() *resty.Client {
 	if _clientRest == nil {
-		_clientRest = common.NewRestClient()
+		_clientRest = opslevel.NewRestClient()
 	}
 	return _clientRest
 }

@@ -3,13 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 	"runtime"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type Build struct {
@@ -59,19 +55,10 @@ func getGoInfo() GoInfo {
 }
 
 func getOpslevelVersion() OpslevelVersion {
-	// Need to update all of this when we switch over to resty client
-	url, err := url.Parse(viper.GetString("app-url"))
+	opslevelVersion := OpslevelVersion{}
+	_, err := getClientRest().R().SetResult(&opslevelVersion).Get("api/ping")
 	cobra.CheckErr(err)
 
-	url.Path = "/api/ping"
-	response, err := http.Get(url.String())
-	cobra.CheckErr(err)
-
-	responseData, err := ioutil.ReadAll(response.Body)
-	cobra.CheckErr(err)
-
-	var opslevelVersion OpslevelVersion
-	json.Unmarshal(responseData, &opslevelVersion)
 	if len(opslevelVersion.Commit) >= 12 {
 		opslevelVersion.Commit = opslevelVersion.Commit[:12]
 	}
