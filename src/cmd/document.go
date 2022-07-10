@@ -27,8 +27,11 @@ opslevel create document my-service -i xxxxx -f swagger.json
 			SetHeader("Content-Type", "application/octet-stream").
 			Post(integrationURL)
 		cobra.CheckErr(err)
-		log.Info().Msgf("%v", response)
-		log.Info().Msgf("Successfully registered api-doc for '%s'", serviceAlias)
+		if response.IsSuccess() {
+			log.Info().Msgf("Successfully registered api-doc for '%s'", serviceAlias)
+		} else {
+			log.Error().Msgf("%s", response)
+		}
 	},
 }
 
