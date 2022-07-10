@@ -76,7 +76,7 @@ func setupLogging() {
 
 func getClientRest() *resty.Client {
 	if _clientRest == nil {
-		_clientRest = opslevel.NewRestClient()
+		_clientRest = opslevel.NewRestClient(opslevel.SetURL(viper.GetString("app-url")))
 	}
 	return _clientRest
 }

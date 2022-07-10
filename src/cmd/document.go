@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"io/ioutil"
@@ -20,19 +19,16 @@ opslevel create document my-service -i xxxxx -f swagger.json
 		serviceAlias := args[0]
 		integrationID, err := cmd.Flags().GetString("integration-id")
 		cobra.CheckErr(err)
-		integrationURL := fmt.Sprintf("https://app.opslevel.com/integrations/api_docs/%s/%s", integrationID, serviceAlias)
+		integrationURL := fmt.Sprintf("integrations/api_docs/%s/%s", integrationID, serviceAlias)
 		fileContents, err := ioutil.ReadFile(createDataFile)
 		cobra.CheckErr(err)
-		response := &opslevel.RestResponse{}
-		_, err = getClientRest().R().
-			SetHeader("Content-Type", "application/octet-stream").
+		response, err := getClientRest().R().
 			SetBody(fileContents).
-			SetResult(response).
+			SetHeader("Content-Type", "application/octet-stream").
 			Post(integrationURL)
 		cobra.CheckErr(err)
-		log.Info().Msgf("Successfully registered api-doc for '%s'", serviceAlias)
 		log.Info().Msgf("%v", response)
-
+		log.Info().Msgf("Successfully registered api-doc for '%s'", serviceAlias)
 	},
 }
 
@@ -40,7 +36,4 @@ func init() {
 	createCmd.AddCommand(createDocumentCmd)
 
 	createDocumentCmd.Flags().StringP("integration-id", "i", "", "OpsLevel integration ID")
-
-	//	createCmd.PersistentFlags().StringVarP(&createDataFile, "file", "f", "-", "File to read data from. If '.' then reads from './data.yaml'. Defaults to reading from stdin.")
-	//	viper.BindPFlags(createCmd.Flags())
 }
