@@ -19,7 +19,7 @@ opslevel create document my-service -i xxxxx -f swagger.json
 		serviceAlias := args[0]
 		integrationID, err := cmd.Flags().GetString("integration-id")
 		cobra.CheckErr(err)
-		integrationURL := fmt.Sprintf("integrations/api_docs/%s/%s", integrationID, serviceAlias)
+		integrationURL := fmt.Sprintf("integrations/api_doc/%s/%s", integrationID, serviceAlias)
 		fileContents, err := ioutil.ReadFile(createDataFile)
 		cobra.CheckErr(err)
 		response, err := getClientRest().R().
