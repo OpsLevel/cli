@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/manifoldco/promptui"
-	"github.com/opslevel/opslevel-go"
+	"github.com/opslevel/opslevel-go/v2022"
 )
 
 func PromptForCategories(client *opslevel.Client) (*opslevel.Category, error) {

@@ -5,9 +5,10 @@ go 1.18
 require (
 	github.com/creasty/defaults v1.5.1
 	github.com/go-git/go-git/v5 v5.4.2
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gosimple/slug v1.12.0
 	github.com/manifoldco/promptui v0.9.0
-	github.com/opslevel/opslevel-go v0.4.5-0.20220421184629-b79d62d1dba4
+	github.com/opslevel/opslevel-go/v2022 v2022.0.0-00010101000000-000000000000
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cobra v1.2.1
@@ -26,6 +27,8 @@ require (
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gosimple/unidecode v1.0.1 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -45,7 +48,7 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
 	golang.org/x/crypto v0.0.0-20211215165025-cf75a172585e // indirect
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
+	golang.org/x/net v0.0.0-20211029224645-99673261e6eb // indirect
 	golang.org/x/oauth2 v0.0.0-20210427180440-81ed05c6b58c // indirect
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	golang.org/x/text v0.3.6 // indirect
@@ -56,4 +59,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/opslevel/opslevel-go => ./submodules/opslevel-go
+replace github.com/opslevel/opslevel-go/v2022 => ./submodules/opslevel-go

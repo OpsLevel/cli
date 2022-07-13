@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go"
+	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/spf13/cobra"
 	"sort"
 )
 
 var createUserCmd = &cobra.Command{
-	Use:        "user EMAIL NAME",
-	Short:      "Create a User",
-	Long:       `Create a User`,
-	Args:       cobra.ExactArgs(2),
+	Use:   "user EMAIL NAME",
+	Short: "Create a User",
+	Long:  `Create a User`,
+	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		email := args[0]
 		name := args[1]
@@ -50,10 +50,10 @@ var listUserCmd = &cobra.Command{
 }
 
 var deleteUserCmd = &cobra.Command{
-	Use:        "user ID",
-	Short:      "Delete a User",
-	Long:       `Delete a User`,
-	Args:       cobra.ExactArgs(1),
+	Use:   "user ID",
+	Short: "Delete a User",
+	Long:  `Delete a User`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 
