@@ -94,6 +94,7 @@ var getServiceCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 		cobra.CheckErr(err)
+		common.WasFound(result.Id == nil, key)
 		common.PrettyPrint(result)
 	},
 }

@@ -103,8 +103,8 @@ var getTeamCmd = &cobra.Command{
 			team, err = getClientGQL().GetTeamWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.PrettyPrint(team)
 		common.WasFound(team.Id == nil, key)
+		common.PrettyPrint(team)
 	},
 }
 
