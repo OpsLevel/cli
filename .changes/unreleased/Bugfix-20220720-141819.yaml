@@ -1,0 +1,3 @@
+kind: Bugfix
+body: bump opslevel-go to fix a bug with our REST client for `create document` command
+time: 2022-07-20T14:18:19.956915-05:00
