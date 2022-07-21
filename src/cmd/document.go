@@ -38,7 +38,6 @@ opslevel create document my-service -r services -t openapi -i xxxxx -f swagger.j
 			SetHeader("Content-Type", "application/octet-stream").
 			Post(integrationURL)
 		cobra.CheckErr(err)
-		fmt.Println(result)
 		if result.Result == "invalid_format" {
 			log.Warn().Msgf("%s", result.Message)
 		} else if response.IsSuccess() {
