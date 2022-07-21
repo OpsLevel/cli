@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"strings"
+
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"io/ioutil"
-	"strings"
 )
 
 var createDocumentCmd = &cobra.Command{
@@ -34,7 +36,12 @@ opslevel create document my-service -r services -t openapi -i xxxxx -f swagger.j
 			SetHeader("Content-Type", "application/octet-stream").
 			Post(integrationURL)
 		cobra.CheckErr(err)
-		if response.IsSuccess() {
+		var jsonResponse map[string]string
+		err = json.Unmarshal(response.Body(), &jsonResponse)
+		cobra.CheckErr(err)
+		if jsonResponse["result"] == "invalid_format" {
+			log.Warn().Msgf("%s", jsonResponse["message"])
+		} else if response.IsSuccess() {
 			log.Info().Msgf("Successfully registered api-doc for '%s'", serviceAlias)
 		} else {
 			log.Error().Msgf("%s", response)
