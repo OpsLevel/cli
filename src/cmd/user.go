@@ -106,19 +106,20 @@ var importUsersCmd = &cobra.Command{
 				log.Error().Err(err).Msgf("error inviting user '%s' with email '%s'", name, email)
 				continue
 			}
-			fmt.Printf("Invited user '%s' with email '%s'\n", user.Name, user.Email)
+			log.Info().Msgf("Invited user '%s' with email '%s'\n", user.Name, user.Email)
 			team := reader.Text("Team")
 			if team != "" {
-				teamResult, err := GetTeam(team)
+				t, err := GetTeam(team)
 				if err != nil {
-					log.Error().Err(err).Msgf("error finding team '%s' for user '%s'", team, email)
+					log.Error().Err(err).Msgf("error finding team '%s' for user '%s'", team, user.Email)
 					continue
 				}
-				_, err = getClientGQL().AddMember(&teamResult.TeamId, email)
+				_, err = getClientGQL().AddMember(&t.TeamId, user.Email)
 				if err != nil {
-					log.Error().Err(err).Msgf("error adding user '%s' to team '%s'", email, teamResult.Name)
+					log.Error().Err(err).Msgf("error adding user '%s' to team '%s'", user.Email, t.Name)
 					continue
 				}
+				log.Info().Msgf("added user '%s' to team '%s'", user.Email, t.Name)
 			}
 
 		}
