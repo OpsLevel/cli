@@ -106,7 +106,7 @@ var importUsersCmd = &cobra.Command{
 				log.Error().Err(err).Msgf("error inviting user '%s' with email '%s'", name, email)
 				continue
 			}
-			log.Info().Msgf("Invited user '%s' with email '%s'\n", user.Name, user.Email)
+			log.Info().Msgf("invited user '%s' with email '%s'", user.Name, user.Email)
 			team := reader.Text("Team")
 			if team != "" {
 				t, err := GetTeam(team)

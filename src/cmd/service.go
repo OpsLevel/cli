@@ -284,7 +284,7 @@ var importServicesCmd = &cobra.Command{
 				log.Error().Err(err).Msgf("error creating service '%s'", name)
 				continue
 			}
-			log.Info().Msgf("created service '%s' with id '%s'\n", service.Name, service.Id)
+			log.Info().Msgf("created service '%s' with id '%s'", service.Name, service.Id)
 		}
 	},
 }

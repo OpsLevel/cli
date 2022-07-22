@@ -285,7 +285,7 @@ var deleteGroupCmd = &cobra.Command{
 }
 
 var importGroupsCmd = &cobra.Command{
-	Use:     "group CSV_FILEPATH",
+	Use:     "group",
 	Aliases: []string{"groups"},
 	Short:   "Imports groups from a CSV",
 	Long: `Imports a list of groups from a CSV file with the column headers
@@ -310,7 +310,7 @@ var importGroupsCmd = &cobra.Command{
 				log.Error().Err(err).Msgf("error creating group '%s'", name)
 				continue
 			}
-			log.Info().Msgf("created group '%s' with id '%s'\n", group.Name, group.Id)
+			log.Info().Msgf("created group '%s' with id '%s'", group.Name, group.Id)
 		}
 	},
 }

@@ -217,7 +217,7 @@ var importTeamsCmd = &cobra.Command{
 				log.Error().Err(err).Msgf("error creating team '%s'", name)
 				continue
 			}
-			log.Info().Msgf("created team '%s' with id '%s'\n", team.Name, team.Id)
+			log.Info().Msgf("created team '%s' with id '%s'", team.Name, team.Id)
 		}
 	},
 }
