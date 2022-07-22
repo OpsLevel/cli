@@ -86,7 +86,7 @@ Example:
 cat << EOF | opslevel import user -f -
 Name,Email,Role,Team
 Kyle Rockman,kyle@opslevel.com,Admin,platform
-Edger Ochoa,edgar@opslevel.com,Admin,platform
+Edgar Ochoa,edgar@opslevel.com,Admin,platform
 Adam Del Gobbo,adam@opslevel.com,User,sales
 EOF
 `,
