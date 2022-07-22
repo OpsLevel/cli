@@ -288,9 +288,17 @@ var importGroupsCmd = &cobra.Command{
 	Use:     "group",
 	Aliases: []string{"groups"},
 	Short:   "Imports groups from a CSV",
-	Long: `Imports a list of groups from a CSV file with the column headers
+	Long: `Imports a list of groups from a CSV file with the column headers:
+Name,Description,Parent
 
-    Name,Description,Parent
+Example:
+
+cat << EOF | opslevel import group -f -
+Name,Description,Parent
+Engineering,All of Engineering,
+Product,All of Product,engineering
+Sales,Sales BU,product
+EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		reader, err := readImportFilepathAsCSV()

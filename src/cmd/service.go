@@ -241,9 +241,17 @@ var importServicesCmd = &cobra.Command{
 	Use:     "service",
 	Aliases: []string{"services"},
 	Short:   "Imports services from a CSV",
-	Long: `Imports a list of services from a CSV file with the column headers
+	Long: `Imports a list of services from a CSV file with the column headers:
+Name,Description,Product,Language,Framework,Tier,Lifecycle,Owner
 
-    Name,Description,Product,Language,Framework,Tier,Lifecycle,Owner
+Example:
+
+cat << EOF | opslevel import services -f -
+Name,Description,Product,Language,Framework,Tier,Lifecycle,Owner
+Service A,,,Go,Cobra,tier_1,pre_alpha,
+Service B,,,Python,Django,tier_3,beta,sales
+Service C,Test,Home,,,,,platform
+EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		reader, err := readImportFilepathAsCSV()

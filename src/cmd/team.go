@@ -194,9 +194,16 @@ var importTeamsCmd = &cobra.Command{
 	Use:     "team",
 	Aliases: []string{"teams"},
 	Short:   "Imports teams from a CSV",
-	Long: `Imports a list of teams from a CSV file with the column headers
+	Long: `Imports a list of teams from a CSV file with the column headers:
+Name,Manager,Responsibilities,Group
 
-    Name,Manager,Responsibilities,Group
+Example:
+
+cat << EOF | opslevel import teams -f -
+Name,Manager,Responsibilities,Group
+Platform,kyle@opslevel.com,Makes Tools,engineering
+Sales,john@opslevel.com,Sells Tools,product
+EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		reader, err := readImportFilepathAsCSV()
