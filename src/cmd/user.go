@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2022"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"sort"
 )
@@ -64,8 +65,72 @@ var deleteUserCmd = &cobra.Command{
 	},
 }
 
+func Contains[T comparable](s []T, e T) bool {
+	for _, v := range s {
+		if v == e {
+			return true
+		}
+	}
+	return false
+}
+
+var importUsersCmd = &cobra.Command{
+	Use:        "user CSV_FILEPATH",
+	Aliases:    []string{"users"},
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"CSV_FILEPATH"},
+	Short:      "Imports users from a CSV",
+	Long: `Imports a list of users from a CSV file with the column headers
+
+    Name,Email,Role,Team
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		filepath := args[0]
+		reader, err := common.ReadCSVFile(filepath)
+		cobra.CheckErr(err)
+		for reader.Rows() {
+			name := reader.Text("Name")
+			email := reader.Text("Email")
+			role := reader.Text("Role")
+			if email == "" {
+				log.Error().Msgf("user '%s' has invalid email '%s'", name, email)
+				continue
+			}
+			userRole := opslevel.UserRoleUser
+			if Contains(opslevel.AllUserRole(), role) {
+				userRole = opslevel.UserRole(role)
+			}
+			input := opslevel.UserInput{
+				Name: name,
+				Role: userRole,
+			}
+			user, err := getClientGQL().InviteUser(email, input)
+			if err != nil {
+				log.Error().Err(err).Msgf("error inviting user '%s' with email '%s'", name, email)
+				continue
+			}
+			fmt.Printf("Invited user '%s' with email '%s'\n", user.Name, user.Email)
+			team := reader.Text("Team")
+			if team != "" {
+				teamResult, err := GetTeam(team)
+				if err != nil {
+					log.Error().Err(err).Msgf("error finding team '%s' for user '%s'", team, email)
+					continue
+				}
+				_, err = getClientGQL().AddMember(&teamResult.TeamId, email)
+				if err != nil {
+					log.Error().Err(err).Msgf("error adding user '%s' to team '%s'", email, teamResult.Name)
+					continue
+				}
+			}
+
+		}
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createUserCmd)
 	listCmd.AddCommand(listUserCmd)
 	deleteCmd.AddCommand(deleteUserCmd)
+	importCmd.AddCommand(importUsersCmd)
 }

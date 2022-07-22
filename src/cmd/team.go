@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rs/zerolog/log"
 
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2022"
@@ -95,17 +96,19 @@ var getTeamCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		var team *opslevel.Team
-		var err error
-		if common.IsID(key) {
-			team, err = getClientGQL().GetTeam(key)
-		} else {
-			team, err = getClientGQL().GetTeamWithAlias(key)
-		}
+		team, err := GetTeam(key)
 		cobra.CheckErr(err)
 		common.WasFound(team.Id == nil, key)
 		common.PrettyPrint(team)
 	},
+}
+
+func GetTeam(key string) (*opslevel.Team, error) {
+	if common.IsID(key) {
+		return getClientGQL().GetTeam(key)
+	} else {
+		return getClientGQL().GetTeamWithAlias(key)
+	}
 }
 
 var listTeamCmd = &cobra.Command{
@@ -187,6 +190,41 @@ var deleteContactCmd = &cobra.Command{
 	},
 }
 
+var importTeamsCmd = &cobra.Command{
+	Use:        "team CSV_FILEPATH",
+	Aliases:    []string{"teams"},
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"CSV_FILEPATH"},
+	Short:      "Imports teams from a CSV",
+	Long: `Imports a list of teams from a CSV file with the column headers
+
+    Name,Manager,Responsibilities,Group
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		filepath := args[0]
+		reader, err := common.ReadCSVFile(filepath)
+		cobra.CheckErr(err)
+		for reader.Rows() {
+			name := reader.Text("Name")
+			input := opslevel.TeamCreateInput{
+				Name:             name,
+				ManagerEmail:     reader.Text("Manager"),
+				Responsibilities: reader.Text("Responsibilities"),
+			}
+			group := reader.Text("Group")
+			if group != "" {
+				input.Group = opslevel.NewIdentifier(group)
+			}
+			team, err := getClientGQL().CreateTeam(input)
+			if err != nil {
+				log.Error().Err(err).Msgf("error creating team '%s'", name)
+				continue
+			}
+			log.Info().Msgf("created team '%s' with id '%s'\n", team.Name, team.Id)
+		}
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createTeamCmd)
 	createCmd.AddCommand(createMemberCmd)
@@ -196,6 +234,7 @@ func init() {
 	deleteCmd.AddCommand(deleteTeamCmd)
 	deleteCmd.AddCommand(deleteMemberCmd)
 	deleteCmd.AddCommand(deleteContactCmd)
+	importCmd.AddCommand(importTeamsCmd)
 
 	createContactCmd.Flags().StringVarP(&contactType, "type", "t", "slack", "The contact type. One of: slack|email|web [default: slack]")
 }
