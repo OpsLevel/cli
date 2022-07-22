@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rs/zerolog/log"
 
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
@@ -283,6 +284,45 @@ var deleteGroupCmd = &cobra.Command{
 	},
 }
 
+var importGroupsCmd = &cobra.Command{
+	Use:     "group",
+	Aliases: []string{"groups"},
+	Short:   "Imports groups from a CSV",
+	Long: `Imports a list of groups from a CSV file with the column headers:
+Name,Description,Parent
+
+Example:
+
+cat << EOF | opslevel import group -f -
+Name,Description,Parent
+Engineering,All of Engineering,
+Product,All of Product,engineering
+Sales,Sales BU,product
+EOF
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		reader, err := readImportFilepathAsCSV()
+		cobra.CheckErr(err)
+		for reader.Rows() {
+			name := reader.Text("Name")
+			input := opslevel.GroupInput{
+				Name:        name,
+				Description: reader.Text("Description"),
+			}
+			parent := reader.Text("Parent")
+			if parent != "" {
+				input.Parent = opslevel.NewIdentifier(parent)
+			}
+			group, err := getClientGQL().CreateGroup(input)
+			if err != nil {
+				log.Error().Err(err).Msgf("error creating group '%s'", name)
+				continue
+			}
+			log.Info().Msgf("created group '%s' with id '%s'", group.Name, group.Id)
+		}
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createGroupCmd)
 	getCmd.AddCommand(getGroupCommand)
@@ -294,6 +334,7 @@ func init() {
 	listCmd.AddCommand(listGroupCmd)
 	updateCmd.AddCommand(updateGroupCmd)
 	deleteCmd.AddCommand(deleteGroupCmd)
+	importCmd.AddCommand(importGroupsCmd)
 }
 
 func readGroupInput() (*opslevel.GroupInput, error) {

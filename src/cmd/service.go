@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"os"
 	"strings"
 
@@ -236,6 +237,66 @@ var deleteServiceTagCmd = &cobra.Command{
 	},
 }
 
+var importServicesCmd = &cobra.Command{
+	Use:     "service",
+	Aliases: []string{"services"},
+	Short:   "Imports services from a CSV",
+	Long: `Imports a list of services from a CSV file with the column headers:
+Name,Description,Product,Language,Framework,Tier,Lifecycle,Owner
+
+Example:
+
+cat << EOF | opslevel import services -f -
+Name,Description,Product,Language,Framework,Tier,Lifecycle,Owner
+Service A,,,Go,Cobra,tier_1,pre_alpha,
+Service B,,,Python,Django,tier_3,beta,sales
+Service C,Test,Home,,,,,platform
+EOF
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		reader, err := readImportFilepathAsCSV()
+		client := getClientGQL()
+		opslevel.Cache.CacheLifecycles(client)
+		opslevel.Cache.CacheTiers(client)
+		opslevel.Cache.CacheTeams(client)
+		cobra.CheckErr(err)
+		for reader.Rows() {
+			name := reader.Text("Name")
+			input := opslevel.ServiceCreateInput{
+				Name:        name,
+				Description: reader.Text("Description"),
+				Product:     reader.Text("Product"),
+				Language:    reader.Text("Language"),
+				Framework:   reader.Text("Framework"),
+			}
+			tier := reader.Text("Tier")
+			if tier != "" {
+				if item, ok := opslevel.Cache.Tiers[tier]; ok {
+					input.Tier = item.Alias
+				}
+			}
+			lifecycle := reader.Text("Lifecycle")
+			if tier != "" {
+				if item, ok := opslevel.Cache.Lifecycles[lifecycle]; ok {
+					input.Lifecycle = item.Alias
+				}
+			}
+			owner := reader.Text("Owner")
+			if tier != "" {
+				if item, ok := opslevel.Cache.Teams[owner]; ok {
+					input.Owner = item.Alias
+				}
+			}
+			service, err := getClientGQL().CreateService(input)
+			if err != nil {
+				log.Error().Err(err).Msgf("error creating service '%s'", name)
+				continue
+			}
+			log.Info().Msgf("created service '%s' with id '%s'", service.Name, service.Id)
+		}
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createServiceCmd)
 	getCmd.AddCommand(getServiceCmd)
@@ -246,6 +307,8 @@ func init() {
 	createServiceCmd.AddCommand(createServiceTagCmd)
 	getServiceCmd.AddCommand(getServiceTagCmd)
 	deleteServiceCmd.AddCommand(deleteServiceTagCmd)
+
+	importCmd.AddCommand(importServicesCmd)
 
 	createServiceTagCmd.Flags().Bool("assign", false, "Use the `tagAssign` mutation instead of `tagCreate`")
 }

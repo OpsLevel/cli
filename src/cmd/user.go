@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2022"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"sort"
 )
@@ -64,8 +65,78 @@ var deleteUserCmd = &cobra.Command{
 	},
 }
 
+func Contains[T comparable](s []T, e T) bool {
+	for _, v := range s {
+		if v == e {
+			return true
+		}
+	}
+	return false
+}
+
+var importUsersCmd = &cobra.Command{
+	Use:     "user",
+	Aliases: []string{"users"},
+	Short:   "Imports users from a CSV",
+	Long: `Imports a list of users from a CSV file with the column headers:
+Name,Email,Role,Team
+
+Example:
+
+cat << EOF | opslevel import user -f -
+Name,Email,Role,Team
+Kyle Rockman,kyle@opslevel.com,Admin,platform
+Edgar Ochoa,edgar@opslevel.com,Admin,platform
+Adam Del Gobbo,adam@opslevel.com,User,sales
+EOF
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		reader, err := readImportFilepathAsCSV()
+		cobra.CheckErr(err)
+		for reader.Rows() {
+			name := reader.Text("Name")
+			email := reader.Text("Email")
+			role := reader.Text("Role")
+			if email == "" {
+				log.Error().Msgf("user '%s' has invalid email '%s'", name, email)
+				continue
+			}
+			userRole := opslevel.UserRoleUser
+			if Contains(opslevel.AllUserRole(), role) {
+				userRole = opslevel.UserRole(role)
+			}
+			input := opslevel.UserInput{
+				Name: name,
+				Role: userRole,
+			}
+			user, err := getClientGQL().InviteUser(email, input)
+			if err != nil {
+				log.Error().Err(err).Msgf("error inviting user '%s' with email '%s'", name, email)
+				continue
+			}
+			log.Info().Msgf("invited user '%s' with email '%s'", user.Name, user.Email)
+			team := reader.Text("Team")
+			if team != "" {
+				t, err := GetTeam(team)
+				if err != nil {
+					log.Error().Err(err).Msgf("error finding team '%s' for user '%s'", team, user.Email)
+					continue
+				}
+				_, err = getClientGQL().AddMember(&t.TeamId, user.Email)
+				if err != nil {
+					log.Error().Err(err).Msgf("error adding user '%s' to team '%s'", user.Email, t.Name)
+					continue
+				}
+				log.Info().Msgf("added user '%s' to team '%s'", user.Email, t.Name)
+			}
+
+		}
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createUserCmd)
 	listCmd.AddCommand(listUserCmd)
 	deleteCmd.AddCommand(deleteUserCmd)
+	importCmd.AddCommand(importUsersCmd)
 }
