@@ -238,18 +238,15 @@ var deleteServiceTagCmd = &cobra.Command{
 }
 
 var importServicesCmd = &cobra.Command{
-	Use:        "service CSV_FILEPATH",
-	Aliases:    []string{"services"},
-	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"CSV_FILEPATH"},
-	Short:      "Imports services from a CSV",
+	Use:     "service",
+	Aliases: []string{"services"},
+	Short:   "Imports services from a CSV",
 	Long: `Imports a list of services from a CSV file with the column headers
 
     Name,Description,Product,Language,Framework,Tier,Lifecycle,Owner
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		filepath := args[0]
-		reader, err := common.ReadCSVFile(filepath)
+		reader, err := readImportFilepathAsCSV()
 		client := getClientGQL()
 		opslevel.Cache.CacheLifecycles(client)
 		opslevel.Cache.CacheTiers(client)

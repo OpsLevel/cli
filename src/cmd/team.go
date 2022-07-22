@@ -191,18 +191,15 @@ var deleteContactCmd = &cobra.Command{
 }
 
 var importTeamsCmd = &cobra.Command{
-	Use:        "team CSV_FILEPATH",
-	Aliases:    []string{"teams"},
-	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"CSV_FILEPATH"},
-	Short:      "Imports teams from a CSV",
+	Use:     "team",
+	Aliases: []string{"teams"},
+	Short:   "Imports teams from a CSV",
 	Long: `Imports a list of teams from a CSV file with the column headers
 
     Name,Manager,Responsibilities,Group
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		filepath := args[0]
-		reader, err := common.ReadCSVFile(filepath)
+		reader, err := readImportFilepathAsCSV()
 		cobra.CheckErr(err)
 		for reader.Rows() {
 			name := reader.Text("Name")

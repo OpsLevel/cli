@@ -285,18 +285,15 @@ var deleteGroupCmd = &cobra.Command{
 }
 
 var importGroupsCmd = &cobra.Command{
-	Use:        "group CSV_FILEPATH",
-	Aliases:    []string{"groups"},
-	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"CSV_FILEPATH"},
-	Short:      "Imports groups from a CSV",
+	Use:     "group CSV_FILEPATH",
+	Aliases: []string{"groups"},
+	Short:   "Imports groups from a CSV",
 	Long: `Imports a list of groups from a CSV file with the column headers
 
     Name,Description,Parent
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		filepath := args[0]
-		reader, err := common.ReadCSVFile(filepath)
+		reader, err := readImportFilepathAsCSV()
 		cobra.CheckErr(err)
 		for reader.Rows() {
 			name := reader.Text("Name")

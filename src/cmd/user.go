@@ -75,18 +75,15 @@ func Contains[T comparable](s []T, e T) bool {
 }
 
 var importUsersCmd = &cobra.Command{
-	Use:        "user CSV_FILEPATH",
-	Aliases:    []string{"users"},
-	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"CSV_FILEPATH"},
-	Short:      "Imports users from a CSV",
+	Use:     "user",
+	Aliases: []string{"users"},
+	Short:   "Imports users from a CSV",
 	Long: `Imports a list of users from a CSV file with the column headers
 
     Name,Email,Role,Team
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		filepath := args[0]
-		reader, err := common.ReadCSVFile(filepath)
+		reader, err := readImportFilepathAsCSV()
 		cobra.CheckErr(err)
 		for reader.Rows() {
 			name := reader.Text("Name")
