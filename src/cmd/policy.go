@@ -47,7 +47,7 @@ opslevel run policy -f policy.rego | jq
 		)
 		rs, err := rego.Eval(context.Background())
 		cobra.CheckErr(err)
-		b, err := json.Marshal(rs[0].Expressions[0].Value) //TODO: need more advanced handling of multiple things in json
+		b, err := json.Marshal(rs[0].Expressions[0].Value) //TODO: need more advanced handling of multiple things in json and reading from stdin
 		cobra.CheckErr(err)
 		fmt.Println(string(b))
 
