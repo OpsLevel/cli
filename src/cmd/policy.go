@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
-	"github.com/spf13/cobra"
+	"github.com/open-policy-agent/opa/types"
+	cobra "github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -43,6 +45,12 @@ opslevel run policy -f policy.rego | jq
 			rego.Module("test.rego",
 				string(policy),
 			),
+			rego.Function1(
+				&rego.Function{
+					Name: "opslevel.read_file",
+					Decl: types.NewFunction(types.Args(types.S), types.S),
+				},
+				RegoFuncReadFile),
 			rego.Input(input),
 		)
 		rs, err := rego.Eval(context.Background())
@@ -52,6 +60,15 @@ opslevel run policy -f policy.rego | jq
 		fmt.Println(string(b))
 
 	},
+}
+
+func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
+	if str, ok := a.Value.(ast.String); ok {
+		contents, err := os.ReadFile(string(str))
+		cobra.CheckErr(err)
+		return ast.StringTerm(string(contents)), nil
+	}
+	return nil, nil
 }
 
 func init() {
