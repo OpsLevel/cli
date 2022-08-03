@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -68,9 +69,16 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 		if _, err := os.Stat(string(str)); err != nil {
 			log.Warn().Msgf("%s", err)
 		} else {
-			contents, err := os.ReadFile(string(str))
+			file, err := os.Open(string(str))
 			cobra.CheckErr(err)
-			return ast.StringTerm(string(contents)), nil
+			defer file.Close()
+
+			var lines []*ast.Term
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				lines = append(lines, ast.StringTerm(scanner.Text()))
+			}
+			return ast.ArrayTerm(lines...), nil
 		}
 	}
 	return nil, nil
