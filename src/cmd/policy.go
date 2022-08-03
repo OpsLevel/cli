@@ -7,6 +7,7 @@ import (
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
+	"github.com/rs/zerolog/log"
 	cobra "github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
@@ -64,9 +65,13 @@ opslevel run policy -f policy.rego | jq
 
 func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 	if str, ok := a.Value.(ast.String); ok {
-		contents, err := os.ReadFile(string(str))
-		cobra.CheckErr(err)
-		return ast.StringTerm(string(contents)), nil
+		if _, err := os.Stat(string(str)); err != nil {
+			log.Warn().Msgf("%s", err)
+		} else {
+			contents, err := os.ReadFile(string(str))
+			cobra.CheckErr(err)
+			return ast.StringTerm(string(contents)), nil
+		}
 	}
 	return nil, nil
 }
