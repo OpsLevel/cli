@@ -70,8 +70,8 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 			log.Warn().Msgf("%s", err)
 		} else {
 			file, err := os.Open(string(str))
-			cobra.CheckErr(err)
 			defer file.Close()
+			cobra.CheckErr(err)
 
 			var lines []*ast.Term
 			scanner := bufio.NewScanner(file)
