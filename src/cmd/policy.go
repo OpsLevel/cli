@@ -53,6 +53,13 @@ opslevel run policy -f policy.rego | jq
 					Decl: types.NewFunction(types.Args(types.S), types.S),
 				},
 				RegoFuncReadFile),
+			rego.Function2(
+				&rego.Function{
+					Name:    "opslevel.repo.github",
+					Decl:    types.NewFunction(types.Args(types.S, types.S), types.A),
+					Memoize: true,
+				},
+				RegoFuncGetGithubRepo),
 			rego.Input(input),
 		)
 		rs, err := rego.Eval(context.Background())
@@ -82,6 +89,26 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 		}
 	}
 	return nil, nil
+}
+
+func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, error) {
+
+	var org, repo string
+
+	if err := ast.As(a.Value, &org); err != nil {
+		return nil, err
+	} else if ast.As(b.Value, &repo); err != nil {
+		return nil, err
+	}
+	fmt.Println(org)
+	fmt.Println(repo)
+
+	response, err := getClientRest().R().
+		Get("https://httpbin.org/get")
+
+	cobra.CheckErr(err)
+
+	return ast.StringTerm(response.String()), nil
 }
 
 func init() {
