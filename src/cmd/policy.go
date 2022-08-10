@@ -100,11 +100,15 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 	} else if ast.As(b.Value, &repo); err != nil {
 		return nil, err
 	}
-	fmt.Println(org)
-	fmt.Println(repo)
+
+	flags := runCmd.Flags()
+	githubToken, err := flags.GetString("github-token")
+	cobra.CheckErr(err)
 
 	response, err := getClientRest().R().
-		Get("https://httpbin.org/get")
+		SetHeader("Accept", "application/vnd.github+json").
+		SetHeader("Authorization", fmt.Sprintf("token %v", githubToken)).
+		Get(fmt.Sprintf("https://api.github.com/repos/%v/%v", org, repo))
 
 	cobra.CheckErr(err)
 
