@@ -110,6 +110,9 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 
 	flags := runCmd.Flags()
 	githubToken, err := flags.GetString("github-token")
+	if githubToken == "" {
+		githubToken = os.Getenv("GITHUB_API_TOKEN")
+	}
 	cobra.CheckErr(err)
 
 	response, err := getClientRest().R().
