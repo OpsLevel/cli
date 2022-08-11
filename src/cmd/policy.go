@@ -13,10 +13,17 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type regoInput struct {
 	Files []string `json:"files"`
+}
+
+type GithubRepo struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Language    string `json:"language"`
 }
 
 var policyCmd = &cobra.Command{
@@ -109,10 +116,16 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		SetHeader("Accept", "application/vnd.github+json").
 		SetHeader("Authorization", fmt.Sprintf("token %v", githubToken)).
 		Get(fmt.Sprintf("https://api.github.com/repos/%v/%v", org, repo))
-
 	cobra.CheckErr(err)
 
-	return ast.StringTerm(response.String()), nil
+	if response.IsError() == true {
+		log.Error().Msgf("%d: %s", response.StatusCode(), response)
+		return nil, err
+	}
+
+	reader := strings.NewReader(response.String())
+	v, err := ast.ValueFromReader(reader)
+	return ast.NewTerm(v), nil
 }
 
 func init() {
