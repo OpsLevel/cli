@@ -117,7 +117,7 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 
 	response, err := getClientRest().R().
 		SetHeader("Accept", "application/vnd.github+json").
-		SetHeader("Authorization", fmt.Sprintf("token %v", githubToken)).
+		SetHeader("Authorization", fmt.Sprintf("token %s", githubToken)).
 		Get(fmt.Sprintf("https://api.github.com/repos/%v/%v", org, repo))
 	cobra.CheckErr(err)
 
