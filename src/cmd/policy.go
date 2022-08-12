@@ -96,11 +96,15 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, error) {
 
 	var org, repo string
-
 	if err := ast.As(a.Value, &org); err != nil {
 		return nil, err
 	} else if ast.As(b.Value, &repo); err != nil {
 		return nil, err
+	}
+
+	if org == "" || repo == "" {
+		log.Error().Msgf("Please provide a valid org and repo")
+		return nil, nil
 	}
 
 	githubToken := viper.GetString("github-token")
@@ -115,7 +119,7 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 
 	if response.IsError() == true {
 		log.Error().Msgf("%d: %s", response.StatusCode(), response)
-		return nil, err
+		return nil, nil
 	}
 
 	reader := strings.NewReader(response.String())
