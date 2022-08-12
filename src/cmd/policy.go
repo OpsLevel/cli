@@ -102,8 +102,13 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		return nil, err
 	}
 
-	if org == "" || repo == "" {
-		log.Error().Msgf("Please provide a valid org and repo")
+	if org == "" {
+		log.Error().Msgf("Please provide a valid org")
+		return nil, nil
+	}
+
+	if repo == "" {
+		log.Error().Msgf("Please provide a valid repo")
 		return nil, nil
 	}
 
