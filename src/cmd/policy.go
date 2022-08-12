@@ -98,7 +98,8 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 	var org, repo string
 	if err := ast.As(a.Value, &org); err != nil {
 		return nil, err
-	} else if ast.As(b.Value, &repo); err != nil {
+	}
+	if err := ast.As(b.Value, &repo); err != nil {
 		return nil, err
 	}
 
