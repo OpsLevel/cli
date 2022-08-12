@@ -9,7 +9,8 @@ import (
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
 	"github.com/rs/zerolog/log"
-	cobra "github.com/spf13/cobra"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -18,12 +19,6 @@ import (
 
 type regoInput struct {
 	Files []string `json:"files"`
-}
-
-type GithubRepo struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Language    string `json:"language"`
 }
 
 var policyCmd = &cobra.Command{
@@ -108,17 +103,14 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		return nil, err
 	}
 
-	flags := runCmd.Flags()
-	githubToken, err := flags.GetString("github-token")
-	if githubToken == "" {
-		githubToken = os.Getenv("GITHUB_API_TOKEN")
-	}
-	cobra.CheckErr(err)
+	githubToken := viper.GetString("github-token")
+	authorizationHeader := fmt.Sprintf("token %s", githubToken)
+	githubAPIUrl := fmt.Sprintf("https://api.github.com/repos/%v/%v", org, repo)
 
 	response, err := getClientRest().R().
 		SetHeader("Accept", "application/vnd.github+json").
-		SetHeader("Authorization", fmt.Sprintf("token %s", githubToken)).
-		Get(fmt.Sprintf("https://api.github.com/repos/%v/%v", org, repo))
+		SetHeader("Authorization", authorizationHeader).
+		Get(githubAPIUrl)
 	cobra.CheckErr(err)
 
 	if response.IsError() == true {

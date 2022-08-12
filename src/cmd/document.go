@@ -7,7 +7,7 @@ import (
 
 	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/rs/zerolog/log"
-	cobra "github.com/spf13/cobra"
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
