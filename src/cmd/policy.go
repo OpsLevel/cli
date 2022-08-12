@@ -103,12 +103,12 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 	}
 
 	if org == "" {
-		log.Error().Msgf("Please provide a valid org")
+		log.Error().Msgf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid org", org, repo)
 		return nil, nil
 	}
 
 	if repo == "" {
-		log.Error().Msgf("Please provide a valid repo")
+		log.Error().Msgf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid repo", org, repo)
 		return nil, nil
 	}
 
@@ -123,7 +123,7 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 	cobra.CheckErr(err)
 
 	if response.IsError() == true {
-		log.Error().Msgf("%d: %s", response.StatusCode(), response)
+		log.Error().Msgf("error requesting Github repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
 		return nil, nil
 	}
 
