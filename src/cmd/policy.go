@@ -137,4 +137,8 @@ func init() {
 	runCmd.AddCommand(policyCmd)
 
 	policyCmd.Flags().StringP("file", "f", "-", "File to read Rego policy from. Defaults to reading from stdin.")
+	policyCmd.PersistentFlags().String("github-token", "", "The Github API token to use when calling opslevel.repo.github function within a Rego policy. Overrides environment variable 'GITHUB_API_TOKEN'")
+
+	viper.BindPFlags(policyCmd.PersistentFlags())
+	viper.BindEnv("github-token", "GITHUB_API_TOKEN")
 }
