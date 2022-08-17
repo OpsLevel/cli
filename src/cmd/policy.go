@@ -9,10 +9,12 @@ import (
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
 	"github.com/rs/zerolog/log"
-	cobra "github.com/spf13/cobra"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type regoInput struct {
@@ -53,6 +55,13 @@ opslevel run policy -f policy.rego | jq
 					Decl: types.NewFunction(types.Args(types.S), types.S),
 				},
 				RegoFuncReadFile),
+			rego.Function2(
+				&rego.Function{
+					Name:    "opslevel.repo.github",
+					Decl:    types.NewFunction(types.Args(types.S, types.S), types.A),
+					Memoize: true,
+				},
+				RegoFuncGetGithubRepo),
 			rego.Input(input),
 		)
 		rs, err := rego.Eval(context.Background())
@@ -84,8 +93,52 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 	return nil, nil
 }
 
+func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, error) {
+
+	var org, repo string
+	if err := ast.As(a.Value, &org); err != nil {
+		return nil, err
+	}
+	if err := ast.As(b.Value, &repo); err != nil {
+		return nil, err
+	}
+
+	if org == "" {
+		log.Error().Msgf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid org", org, repo)
+		return nil, nil
+	}
+
+	if repo == "" {
+		log.Error().Msgf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid repo", org, repo)
+		return nil, nil
+	}
+
+	githubToken := viper.GetString("github-token")
+	authorizationHeader := fmt.Sprintf("token %s", githubToken)
+	githubAPIUrl := fmt.Sprintf("https://api.github.com/repos/%v/%v", org, repo)
+
+	response, err := getClientRest().R().
+		SetHeader("Accept", "application/vnd.github+json").
+		SetHeader("Authorization", authorizationHeader).
+		Get(githubAPIUrl)
+	cobra.CheckErr(err)
+
+	if response.IsError() == true {
+		log.Error().Msgf("error requesting Github repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
+		return nil, nil
+	}
+
+	reader := strings.NewReader(response.String())
+	v, err := ast.ValueFromReader(reader)
+	return ast.NewTerm(v), nil
+}
+
 func init() {
 	runCmd.AddCommand(policyCmd)
 
 	policyCmd.Flags().StringP("file", "f", "-", "File to read Rego policy from. Defaults to reading from stdin.")
+	policyCmd.PersistentFlags().String("github-token", "", "The Github API token to use when calling opslevel.repo.github function within a Rego policy. Overrides environment variable 'GITHUB_API_TOKEN'")
+
+	viper.BindPFlags(policyCmd.PersistentFlags())
+	viper.BindEnv("github-token", "GITHUB_API_TOKEN")
 }
