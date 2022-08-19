@@ -149,7 +149,7 @@ func RegoFuncGetMaturity(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, er
 		return nil, err
 	}
 	client := getClientGQL()
-	service, err := client.GetServiceWithAlias(alias)
+	service, err := client.GetServiceMaturityWithAlias(alias)
 	cobra.CheckErr(err)
 	serviceLevel := service.MaturityReport.OverallLevel.Alias
 	if serviceLevel == level {
