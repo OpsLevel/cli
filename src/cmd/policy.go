@@ -148,6 +148,17 @@ func RegoFuncGetMaturity(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, er
 	if err := ast.As(b.Value, &level); err != nil {
 		return nil, err
 	}
+
+	if alias == "" {
+		log.Error().Msgf("opslevel.service_maturity_is(\"%s\", \"%s\") failed: Please provide a valid alias", alias, level)
+		return nil, nil
+	}
+
+	if level == "" {
+		log.Error().Msgf("opslevel.service_maturity_is(\"%s\", \"%s\") failed: Please provide a valid repo", alias, level)
+		return nil, nil
+	}
+
 	client := getClientGQL()
 	service, err := client.GetServiceMaturityWithAlias(alias)
 	cobra.CheckErr(err)
