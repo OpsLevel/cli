@@ -62,6 +62,12 @@ opslevel run policy -f policy.rego | jq
 					Memoize: true,
 				},
 				RegoFuncGetGithubRepo),
+			rego.Function2(
+				&rego.Function{
+					Name: "opslevel.service_maturity_is",
+					Decl: types.NewFunction(types.Args(types.S, types.S), types.B),
+				},
+				RegoFuncGetMaturity),
 			rego.Input(input),
 		)
 		rs, err := rego.Eval(context.Background())
@@ -131,6 +137,26 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 	reader := strings.NewReader(response.String())
 	v, err := ast.ValueFromReader(reader)
 	return ast.NewTerm(v), nil
+}
+
+func RegoFuncGetMaturity(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, error) {
+
+	var alias, level string
+	if err := ast.As(a.Value, &alias); err != nil {
+		return nil, err
+	}
+	if err := ast.As(b.Value, &level); err != nil {
+		return nil, err
+	}
+	client := getClientGQL()
+	service, err := client.GetServiceWithAlias(alias)
+	cobra.CheckErr(err)
+	serviceLevel := service.MaturityReport.OverallLevel.Alias
+	if serviceLevel == level {
+		return ast.BooleanTerm(true), nil
+	}
+
+	return ast.BooleanTerm(false), nil
 }
 
 func init() {
