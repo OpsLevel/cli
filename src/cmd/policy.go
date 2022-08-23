@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -62,6 +63,13 @@ opslevel run policy -f policy.rego | jq
 					Memoize: true,
 				},
 				RegoFuncGetGithubRepo),
+			rego.Function1(
+				&rego.Function{
+					Name:    "opslevel.repo.gitlab",
+					Decl:    types.NewFunction(types.Args(types.S), types.A),
+					Memoize: true,
+				},
+				RegoFuncGetGitlabRepo),
 			rego.Function1(
 				&rego.Function{
 					Name: "opslevel.service_maturity_level",
@@ -136,6 +144,61 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 
 	reader := strings.NewReader(response.String())
 	v, err := ast.ValueFromReader(reader)
+
+	return ast.NewTerm(v), nil
+}
+
+func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
+
+	var path string
+	if err := ast.As(a.Value, &path); err != nil {
+		return nil, err
+	}
+
+	if path == "" {
+		log.Error().Msgf("opslevel.repo.gitlab(\"%s\") failed: Please provide a valid Gitlab project path", path)
+		return nil, nil
+	}
+
+	escapedPath := url.QueryEscape(path)
+	gitlabToken := viper.GetString("gitlab-token")
+	gitlabAPIUrl := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s", escapedPath)
+
+	type GitlabRepoMetadata struct {
+		Name        string             `json:"name,omitempty"`
+		Description string             `json:"description,omitempty"`
+		Languages   map[string]float32 `json:"languages,omitempty"`
+	}
+
+	var repoMetadata GitlabRepoMetadata
+
+	response, err := getClientRest().R().
+		SetHeader("PRIVATE-TOKEN", gitlabToken).
+		SetResult(&repoMetadata).
+		Get(gitlabAPIUrl)
+	cobra.CheckErr(err)
+
+	if response.IsError() == true {
+		log.Error().Msgf("error requesting Gitlab repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
+		return nil, nil
+	}
+
+	languagesResponse, err := getClientRest().R().
+		SetHeader("PRIVATE-TOKEN", gitlabToken).
+		SetResult(&repoMetadata.Languages).
+		Get(gitlabAPIUrl + "/languages")
+	cobra.CheckErr(err)
+
+	if languagesResponse.IsError() == true {
+		log.Error().Msgf("error requesting Gitlab repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
+		return nil, nil
+	}
+
+	repoMetadataMarshal, err := json.Marshal(repoMetadata)
+	cobra.CheckErr(err)
+	reader := strings.NewReader(string(repoMetadataMarshal))
+	v, err := ast.ValueFromReader(reader)
+	cobra.CheckErr(err)
 	return ast.NewTerm(v), nil
 }
 
@@ -167,7 +230,9 @@ func init() {
 
 	policyCmd.Flags().StringP("file", "f", "-", "File to read Rego policy from. Defaults to reading from stdin.")
 	policyCmd.PersistentFlags().String("github-token", "", "The Github API token to use when calling opslevel.repo.github function within a Rego policy. Overrides environment variable 'GITHUB_API_TOKEN'")
+	policyCmd.PersistentFlags().String("gitlab-token", "", "The Gitlab API token to use when calling opslevel.repo.gitlab function within a Rego policy. Overrides environment variable 'GITLAB_API_TOKEN'")
 
 	viper.BindPFlags(policyCmd.PersistentFlags())
 	viper.BindEnv("github-token", "GITHUB_API_TOKEN")
+	viper.BindEnv("gitlab-token", "GITLAB_API_TOKEN")
 }
