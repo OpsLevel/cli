@@ -62,6 +62,12 @@ opslevel run policy -f policy.rego | jq
 					Memoize: true,
 				},
 				RegoFuncGetGithubRepo),
+			rego.Function1(
+				&rego.Function{
+					Name: "opslevel.service_maturity_level",
+					Decl: types.NewFunction(types.Args(types.S), types.A),
+				},
+				RegoFuncGetMaturity),
 			rego.Input(input),
 		)
 		rs, err := rego.Eval(context.Background())
@@ -130,6 +136,29 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 
 	reader := strings.NewReader(response.String())
 	v, err := ast.ValueFromReader(reader)
+	return ast.NewTerm(v), nil
+}
+
+func RegoFuncGetMaturity(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
+
+	var alias string
+	if err := ast.As(a.Value, &alias); err != nil {
+		return nil, err
+	}
+
+	if alias == "" {
+		log.Error().Msgf("opslevel.service_maturity_level(\"%s\") failed: Please provide a valid alias", alias)
+		return nil, nil
+	}
+
+	client := getClientGQL()
+	service, err := client.GetServiceMaturityWithAlias(alias)
+	cobra.CheckErr(err)
+	serviceLevel, err := json.Marshal(service.MaturityReport.OverallLevel)
+	cobra.CheckErr(err)
+	reader := strings.NewReader(string(serviceLevel))
+	v, err := ast.ValueFromReader(reader)
+	cobra.CheckErr(err)
 	return ast.NewTerm(v), nil
 }
 
