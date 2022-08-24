@@ -8,10 +8,12 @@ import (
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
+	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
+	"math"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -20,6 +22,63 @@ import (
 
 type regoInput struct {
 	Files []string `json:"files"`
+}
+
+type gitlabRepoMetadata struct {
+	Name        string             `json:"name,omitempty"`
+	Description string             `json:"description,omitempty"`
+	Language    string             `json:"language,omitempty"`
+	Languages   map[string]float64 `json:"languages,omitempty"`
+}
+
+type githubRepoMetadata struct {
+	Name        string             `json:"name,omitempty"`
+	Description string             `json:"description,omitempty"`
+	Language    string             `json:"language,omitempty"`
+	Languages   map[string]float64 `json:"languages,omitempty"`
+}
+
+type genericStruct interface {
+	gitlabRepoMetadata | githubRepoMetadata | opslevel.Level
+}
+
+func structToValue[S genericStruct](s S) ast.Value {
+	marshalData, err := json.Marshal(s)
+	cobra.CheckErr(err)
+	reader := strings.NewReader(string(marshalData))
+	v, err := ast.ValueFromReader(reader)
+	cobra.CheckErr(err)
+	return v
+}
+
+func getMaxFromMap(m map[string]float64) string {
+	max := float64(0)
+	var output string
+	for k, v := range m {
+		if v > max {
+			max = v
+			output = k
+		}
+	}
+	return output
+}
+
+func convertToPercentage(m map[string]float64) map[string]float64 {
+	total := float64(0)
+	output := make(map[string]float64)
+	for _, v := range m {
+		total += v
+	}
+
+	for k, v := range m {
+		output[k] = roundFloat((v/total)*100, 1)
+	}
+	return output
+}
+
+func roundFloat(val float64, precision uint) float64 {
+	ratio := math.Pow(10, float64(precision))
+	return math.Round(val*ratio) / ratio
 }
 
 var policyCmd = &cobra.Command{
@@ -131,9 +190,12 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 	authorizationHeader := fmt.Sprintf("token %s", githubToken)
 	githubAPIUrl := fmt.Sprintf("https://api.github.com/repos/%v/%v", org, repo)
 
+	var repoMetadata githubRepoMetadata
+
 	response, err := getClientRest().R().
 		SetHeader("Accept", "application/vnd.github+json").
 		SetHeader("Authorization", authorizationHeader).
+		SetResult(&repoMetadata).
 		Get(githubAPIUrl)
 	cobra.CheckErr(err)
 
@@ -142,9 +204,21 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		return nil, nil
 	}
 
-	reader := strings.NewReader(response.String())
-	v, err := ast.ValueFromReader(reader)
+	languagesResponse, err := getClientRest().R().
+		SetHeader("Accept", "application/vnd.github+json").
+		SetHeader("Authorization", authorizationHeader).
+		SetResult(&repoMetadata.Languages).
+		Get(githubAPIUrl + "/languages")
+	cobra.CheckErr(err)
 
+	if languagesResponse.IsError() == true {
+		log.Error().Msgf("error requesting Github repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
+		return nil, nil
+	}
+
+	repoMetadata.Languages = convertToPercentage(repoMetadata.Languages)
+
+	v := structToValue(repoMetadata)
 	return ast.NewTerm(v), nil
 }
 
@@ -164,13 +238,7 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 	gitlabToken := viper.GetString("gitlab-token")
 	gitlabAPIUrl := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s", escapedPath)
 
-	type GitlabRepoMetadata struct {
-		Name        string             `json:"name,omitempty"`
-		Description string             `json:"description,omitempty"`
-		Languages   map[string]float32 `json:"languages,omitempty"`
-	}
-
-	var repoMetadata GitlabRepoMetadata
+	var repoMetadata gitlabRepoMetadata
 
 	response, err := getClientRest().R().
 		SetHeader("PRIVATE-TOKEN", gitlabToken).
@@ -194,11 +262,9 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 		return nil, nil
 	}
 
-	repoMetadataMarshal, err := json.Marshal(repoMetadata)
-	cobra.CheckErr(err)
-	reader := strings.NewReader(string(repoMetadataMarshal))
-	v, err := ast.ValueFromReader(reader)
-	cobra.CheckErr(err)
+	repoMetadata.Language = getMaxFromMap(repoMetadata.Languages)
+
+	v := structToValue(repoMetadata)
 	return ast.NewTerm(v), nil
 }
 
@@ -217,11 +283,8 @@ func RegoFuncGetMaturity(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error
 	client := getClientGQL()
 	service, err := client.GetServiceMaturityWithAlias(alias)
 	cobra.CheckErr(err)
-	serviceLevel, err := json.Marshal(service.MaturityReport.OverallLevel)
-	cobra.CheckErr(err)
-	reader := strings.NewReader(string(serviceLevel))
-	v, err := ast.ValueFromReader(reader)
-	cobra.CheckErr(err)
+
+	v := structToValue(service.MaturityReport.OverallLevel)
 	return ast.NewTerm(v), nil
 }
 
