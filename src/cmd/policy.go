@@ -24,34 +24,63 @@ type regoInput struct {
 	Files []string `json:"files"`
 }
 
-type gitlabRepoMetadata struct {
+type gitlabResponse struct {
 	Name        string             `json:"name,omitempty"`
 	Description string             `json:"description,omitempty"`
 	Language    string             `json:"language,omitempty"`
 	Languages   map[string]float64 `json:"languages,omitempty"`
 }
 
-type githubRepoMetadata struct {
+type githubResponse struct {
 	Name        string             `json:"name,omitempty"`
 	Description string             `json:"description,omitempty"`
 	Language    string             `json:"language,omitempty"`
 	Languages   map[string]float64 `json:"languages,omitempty"`
 }
 
-type genericStruct interface {
-	gitlabRepoMetadata | githubRepoMetadata | opslevel.Level
+type commonRepoMetadata struct {
+	Name        string             `json:"name,omitempty"`
+	Description string             `json:"description,omitempty"`
+	Language    string             `json:"language,omitempty"`
+	Languages   map[string]float64 `json:"languages,omitempty"`
 }
 
-func structToValue[S genericStruct](s S) ast.Value {
-	marshalData, err := json.Marshal(s)
-	cobra.CheckErr(err)
+type astMarshallable interface {
+	commonRepoMetadata | opslevel.Level
+}
+
+func githubResponseToRepoMetadata(response githubResponse) commonRepoMetadata {
+	metadata := commonRepoMetadata{}
+	metadata.Name = response.Name
+	metadata.Description = response.Description
+	metadata.Language = response.Language
+	metadata.Languages = response.Languages
+	return metadata
+}
+
+func gitlabResponseToRepoMetadata(response gitlabResponse) commonRepoMetadata {
+	metadata := commonRepoMetadata{}
+	metadata.Name = response.Name
+	metadata.Description = response.Description
+	metadata.Language = response.Language
+	metadata.Languages = response.Languages
+	return metadata
+}
+
+func toASTValue[T astMarshallable](input T) (ast.Value, error) {
+	marshalData, err := json.Marshal(input)
+	if err != nil {
+		return nil, err
+	}
 	reader := strings.NewReader(string(marshalData))
 	v, err := ast.ValueFromReader(reader)
-	cobra.CheckErr(err)
-	return v
+	if err != nil {
+		return nil, err
+	}
+	return v, nil
 }
 
-func getMaxFromMap(m map[string]float64) string {
+func getKeyFromMapByMaxValue(m map[string]float64) string {
 	max := float64(0)
 	var output string
 	for k, v := range m {
@@ -71,14 +100,9 @@ func convertToPercentage(m map[string]float64) map[string]float64 {
 	}
 
 	for k, v := range m {
-		output[k] = roundFloat((v/total)*100, 1)
+		output[k] = math.Floor(v/total*100*100) / 100
 	}
 	return output
-}
-
-func roundFloat(val float64, precision uint) float64 {
-	ratio := math.Pow(10, float64(precision))
-	return math.Round(val*ratio) / ratio
 }
 
 var policyCmd = &cobra.Command{
@@ -153,7 +177,9 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 		} else {
 			file, err := os.Open(string(str))
 			defer file.Close()
-			cobra.CheckErr(err)
+			if err != nil {
+				return nil, err
+			}
 
 			var lines []*ast.Term
 			scanner := bufio.NewScanner(file)
@@ -177,48 +203,60 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 	}
 
 	if org == "" {
-		log.Error().Msgf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid org", org, repo)
-		return nil, nil
+		err := fmt.Errorf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid org", org, repo)
+		log.Error().Err(err).Msgf("")
+		return nil, err
 	}
 
 	if repo == "" {
-		log.Error().Msgf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid repo", org, repo)
-		return nil, nil
+		err := fmt.Errorf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid repo", org, repo)
+		log.Error().Err(err).Msg("")
+		return nil, err
 	}
 
 	githubToken := viper.GetString("github-token")
 	authorizationHeader := fmt.Sprintf("token %s", githubToken)
 	githubAPIUrl := fmt.Sprintf("https://api.github.com/repos/%v/%v", org, repo)
 
-	var repoMetadata githubRepoMetadata
+	var result githubResponse
 
 	response, err := getClientRest().R().
 		SetHeader("Accept", "application/vnd.github+json").
 		SetHeader("Authorization", authorizationHeader).
-		SetResult(&repoMetadata).
+		SetResult(&result).
 		Get(githubAPIUrl)
-	cobra.CheckErr(err)
+	if err != nil {
+		return nil, err
+	}
 
 	if response.IsError() == true {
-		log.Error().Msgf("error requesting Github repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
-		return nil, nil
+		err := fmt.Errorf("error requesting Github repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
+		log.Error().Err(err).Msgf("")
+		return nil, err
 	}
 
 	languagesResponse, err := getClientRest().R().
 		SetHeader("Accept", "application/vnd.github+json").
 		SetHeader("Authorization", authorizationHeader).
-		SetResult(&repoMetadata.Languages).
+		SetResult(&result.Languages).
 		Get(githubAPIUrl + "/languages")
-	cobra.CheckErr(err)
-
-	if languagesResponse.IsError() == true {
-		log.Error().Msgf("error requesting Github repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
-		return nil, nil
+	if err != nil {
+		return nil, err
 	}
 
-	repoMetadata.Languages = convertToPercentage(repoMetadata.Languages)
+	if languagesResponse.IsError() == true {
+		err := fmt.Errorf("error requesting Github repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
+		log.Error().Err(err).Msgf("")
+		return nil, err
+	}
 
-	v := structToValue(repoMetadata)
+	result.Languages = convertToPercentage(result.Languages)
+	repoMetadata := githubResponseToRepoMetadata(result)
+
+	v, err := toASTValue(repoMetadata)
+	if err != nil {
+		return nil, err
+	}
 	return ast.NewTerm(v), nil
 }
 
@@ -230,41 +268,51 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 	}
 
 	if path == "" {
-		log.Error().Msgf("opslevel.repo.gitlab(\"%s\") failed: Please provide a valid Gitlab project path", path)
-		return nil, nil
+		err := fmt.Errorf("opslevel.repo.gitlab(\"%s\") failed: Please provide a valid Gitlab project path", path)
+		log.Error().Err(err).Msgf("")
+		return nil, err
 	}
 
 	escapedPath := url.QueryEscape(path)
 	gitlabToken := viper.GetString("gitlab-token")
 	gitlabAPIUrl := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s", escapedPath)
 
-	var repoMetadata gitlabRepoMetadata
+	var result gitlabResponse
 
 	response, err := getClientRest().R().
 		SetHeader("PRIVATE-TOKEN", gitlabToken).
-		SetResult(&repoMetadata).
+		SetResult(&result).
 		Get(gitlabAPIUrl)
-	cobra.CheckErr(err)
+	if err != nil {
+		return nil, err
+	}
 
 	if response.IsError() == true {
-		log.Error().Msgf("error requesting Gitlab repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
-		return nil, nil
+		err := fmt.Errorf("error requesting Gitlab repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
+		log.Error().Err(err).Msgf("")
+		return nil, err
 	}
 
 	languagesResponse, err := getClientRest().R().
 		SetHeader("PRIVATE-TOKEN", gitlabToken).
-		SetResult(&repoMetadata.Languages).
+		SetResult(&result.Languages).
 		Get(gitlabAPIUrl + "/languages")
-	cobra.CheckErr(err)
-
-	if languagesResponse.IsError() == true {
-		log.Error().Msgf("error requesting Gitlab repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
-		return nil, nil
+	if err != nil {
+		return nil, err
 	}
 
-	repoMetadata.Language = getMaxFromMap(repoMetadata.Languages)
+	if languagesResponse.IsError() == true {
+		err := fmt.Errorf("error requesting Gitlab repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
+		log.Error().Err(err).Msgf("")
+		return nil, err
+	}
 
-	v := structToValue(repoMetadata)
+	result.Language = getKeyFromMapByMaxValue(result.Languages)
+	repoMetadata := gitlabResponseToRepoMetadata(result)
+	v, err := toASTValue(repoMetadata)
+	if err != nil {
+		return nil, err
+	}
 	return ast.NewTerm(v), nil
 }
 
@@ -276,15 +324,21 @@ func RegoFuncGetMaturity(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error
 	}
 
 	if alias == "" {
-		log.Error().Msgf("opslevel.service_maturity_level(\"%s\") failed: Please provide a valid alias", alias)
+		err := fmt.Errorf("opslevel.service_maturity_level(\"%s\") failed: Please provide a valid alias", alias)
+		log.Error().Err(err).Msgf("")
 		return nil, nil
 	}
 
 	client := getClientGQL()
 	service, err := client.GetServiceMaturityWithAlias(alias)
-	cobra.CheckErr(err)
+	if err != nil {
+		return nil, err
+	}
 
-	v := structToValue(service.MaturityReport.OverallLevel)
+	v, err := toASTValue(service.MaturityReport.OverallLevel)
+	if err != nil {
+		return nil, err
+	}
 	return ast.NewTerm(v), nil
 }
 
