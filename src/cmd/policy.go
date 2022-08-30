@@ -8,10 +8,13 @@ import (
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
+	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
+	"math"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +22,87 @@ import (
 
 type regoInput struct {
 	Files []string `json:"files"`
+}
+
+type gitlabResponse struct {
+	Name        string             `json:"name,omitempty"`
+	Description string             `json:"description,omitempty"`
+	Language    string             `json:"language,omitempty"`
+	Languages   map[string]float64 `json:"languages,omitempty"`
+}
+
+type githubResponse struct {
+	Name        string             `json:"name,omitempty"`
+	Description string             `json:"description,omitempty"`
+	Language    string             `json:"language,omitempty"`
+	Languages   map[string]float64 `json:"languages,omitempty"`
+}
+
+type commonRepoMetadata struct {
+	Name        string             `json:"name,omitempty"`
+	Description string             `json:"description,omitempty"`
+	Language    string             `json:"language,omitempty"`
+	Languages   map[string]float64 `json:"languages,omitempty"`
+}
+
+type astMarshallable interface {
+	commonRepoMetadata | opslevel.Level
+}
+
+func (r *githubResponse) toRepoMetadata() commonRepoMetadata {
+	return commonRepoMetadata{
+		Name:        r.Name,
+		Description: r.Description,
+		Language:    r.Language,
+		Languages:   r.Languages,
+	}
+}
+
+func (r *gitlabResponse) toRepoMetadata() commonRepoMetadata {
+	return commonRepoMetadata{
+		Name:        r.Name,
+		Description: r.Description,
+		Language:    r.Language,
+		Languages:   r.Languages,
+	}
+}
+
+func toASTValue[T astMarshallable](input T) (ast.Value, error) {
+	marshalData, err := json.Marshal(input)
+	if err != nil {
+		return nil, err
+	}
+	reader := strings.NewReader(string(marshalData))
+	v, err := ast.ValueFromReader(reader)
+	if err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+func getKeyFromMapByMaxValue(m map[string]float64) string {
+	max := float64(0)
+	var output string
+	for k, v := range m {
+		if v > max {
+			max = v
+			output = k
+		}
+	}
+	return output
+}
+
+func convertToPercentage(m map[string]float64) map[string]float64 {
+	total := float64(0)
+	output := make(map[string]float64)
+	for _, v := range m {
+		total += v
+	}
+
+	for k, v := range m {
+		output[k] = math.Floor(v/total*100*100) / 100
+	}
+	return output
 }
 
 var policyCmd = &cobra.Command{
@@ -64,6 +148,13 @@ opslevel run policy -f policy.rego | jq
 				RegoFuncGetGithubRepo),
 			rego.Function1(
 				&rego.Function{
+					Name:    "opslevel.repo.gitlab",
+					Decl:    types.NewFunction(types.Args(types.S), types.A),
+					Memoize: true,
+				},
+				RegoFuncGetGitlabRepo),
+			rego.Function1(
+				&rego.Function{
 					Name: "opslevel.service_maturity_level",
 					Decl: types.NewFunction(types.Args(types.S), types.A),
 				},
@@ -86,7 +177,10 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 		} else {
 			file, err := os.Open(string(str))
 			defer file.Close()
-			cobra.CheckErr(err)
+			if err != nil {
+				log.Error().Err(err).Msg("")
+				return nil, err
+			}
 
 			var lines []*ast.Term
 			scanner := bufio.NewScanner(file)
@@ -103,39 +197,132 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 
 	var org, repo string
 	if err := ast.As(a.Value, &org); err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 	if err := ast.As(b.Value, &repo); err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
 	if org == "" {
-		log.Error().Msgf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid org", org, repo)
-		return nil, nil
+		err := fmt.Errorf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid org", org, repo)
+		log.Error().Err(err).Msgf("")
+		return nil, err
 	}
 
 	if repo == "" {
-		log.Error().Msgf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid repo", org, repo)
-		return nil, nil
+		err := fmt.Errorf("opslevel.repo.github(\"%s\", \"%s\") failed: Please provide a valid repo", org, repo)
+		log.Error().Err(err).Msg("")
+		return nil, err
 	}
 
 	githubToken := viper.GetString("github-token")
 	authorizationHeader := fmt.Sprintf("token %s", githubToken)
 	githubAPIUrl := fmt.Sprintf("https://api.github.com/repos/%v/%v", org, repo)
 
+	var result githubResponse
+
 	response, err := getClientRest().R().
 		SetHeader("Accept", "application/vnd.github+json").
 		SetHeader("Authorization", authorizationHeader).
+		SetResult(&result).
 		Get(githubAPIUrl)
-	cobra.CheckErr(err)
-
-	if response.IsError() == true {
-		log.Error().Msgf("error requesting Github repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
-		return nil, nil
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
 	}
 
-	reader := strings.NewReader(response.String())
-	v, err := ast.ValueFromReader(reader)
+	if response.IsError() == true {
+		err := fmt.Errorf("error requesting Github repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
+		log.Error().Err(err).Msgf("")
+		return nil, err
+	}
+
+	languagesResponse, err := getClientRest().R().
+		SetHeader("Accept", "application/vnd.github+json").
+		SetHeader("Authorization", authorizationHeader).
+		SetResult(&result.Languages).
+		Get(githubAPIUrl + "/languages")
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+
+	if languagesResponse.IsError() == true {
+		err := fmt.Errorf("error requesting Github repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
+		log.Error().Err(err).Msgf("")
+		return nil, err
+	}
+
+	result.Languages = convertToPercentage(result.Languages)
+	repoMetadata := result.toRepoMetadata()
+
+	v, err := toASTValue(repoMetadata)
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+	return ast.NewTerm(v), nil
+}
+
+func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
+
+	var path string
+	if err := ast.As(a.Value, &path); err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+
+	if path == "" {
+		err := fmt.Errorf("opslevel.repo.gitlab(\"%s\") failed: Please provide a valid Gitlab project path", path)
+		log.Error().Err(err).Msgf("")
+		return nil, err
+	}
+
+	escapedPath := url.QueryEscape(path)
+	gitlabToken := viper.GetString("gitlab-token")
+	gitlabAPIUrl := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s", escapedPath)
+
+	var result gitlabResponse
+
+	response, err := getClientRest().R().
+		SetHeader("PRIVATE-TOKEN", gitlabToken).
+		SetResult(&result).
+		Get(gitlabAPIUrl)
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+
+	if response.IsError() == true {
+		err := fmt.Errorf("error requesting Gitlab repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
+		log.Error().Err(err).Msgf("")
+		return nil, err
+	}
+
+	languagesResponse, err := getClientRest().R().
+		SetHeader("PRIVATE-TOKEN", gitlabToken).
+		SetResult(&result.Languages).
+		Get(gitlabAPIUrl + "/languages")
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+
+	if languagesResponse.IsError() == true {
+		err := fmt.Errorf("error requesting Gitlab repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
+		log.Error().Err(err).Msgf("")
+		return nil, err
+	}
+
+	result.Language = getKeyFromMapByMaxValue(result.Languages)
+	repoMetadata := result.toRepoMetadata()
+	v, err := toASTValue(repoMetadata)
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
 	return ast.NewTerm(v), nil
 }
 
@@ -143,22 +330,28 @@ func RegoFuncGetMaturity(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error
 
 	var alias string
 	if err := ast.As(a.Value, &alias); err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
 	if alias == "" {
-		log.Error().Msgf("opslevel.service_maturity_level(\"%s\") failed: Please provide a valid alias", alias)
+		err := fmt.Errorf("opslevel.service_maturity_level(\"%s\") failed: Please provide a valid alias", alias)
+		log.Error().Err(err).Msgf("")
 		return nil, nil
 	}
 
 	client := getClientGQL()
 	service, err := client.GetServiceMaturityWithAlias(alias)
-	cobra.CheckErr(err)
-	serviceLevel, err := json.Marshal(service.MaturityReport.OverallLevel)
-	cobra.CheckErr(err)
-	reader := strings.NewReader(string(serviceLevel))
-	v, err := ast.ValueFromReader(reader)
-	cobra.CheckErr(err)
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+
+	v, err := toASTValue(service.MaturityReport.OverallLevel)
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
 	return ast.NewTerm(v), nil
 }
 
@@ -167,7 +360,9 @@ func init() {
 
 	policyCmd.Flags().StringP("file", "f", "-", "File to read Rego policy from. Defaults to reading from stdin.")
 	policyCmd.PersistentFlags().String("github-token", "", "The Github API token to use when calling opslevel.repo.github function within a Rego policy. Overrides environment variable 'GITHUB_API_TOKEN'")
+	policyCmd.PersistentFlags().String("gitlab-token", "", "The Gitlab API token to use when calling opslevel.repo.gitlab function within a Rego policy. Overrides environment variable 'GITLAB_API_TOKEN'")
 
 	viper.BindPFlags(policyCmd.PersistentFlags())
 	viper.BindEnv("github-token", "GITHUB_API_TOKEN")
+	viper.BindEnv("gitlab-token", "GITLAB_API_TOKEN")
 }
