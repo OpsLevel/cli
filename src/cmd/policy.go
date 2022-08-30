@@ -49,22 +49,22 @@ type astMarshallable interface {
 	commonRepoMetadata | opslevel.Level
 }
 
-func githubResponseToRepoMetadata(response githubResponse) commonRepoMetadata {
-	metadata := commonRepoMetadata{}
-	metadata.Name = response.Name
-	metadata.Description = response.Description
-	metadata.Language = response.Language
-	metadata.Languages = response.Languages
-	return metadata
+func (r *githubResponse) toRepoMetadata() commonRepoMetadata {
+	return commonRepoMetadata{
+		Name:        r.Name,
+		Description: r.Description,
+		Language:    r.Language,
+		Languages:   r.Languages,
+	}
 }
 
-func gitlabResponseToRepoMetadata(response gitlabResponse) commonRepoMetadata {
-	metadata := commonRepoMetadata{}
-	metadata.Name = response.Name
-	metadata.Description = response.Description
-	metadata.Language = response.Language
-	metadata.Languages = response.Languages
-	return metadata
+func (r *gitlabResponse) toRepoMetadata() commonRepoMetadata {
+	return commonRepoMetadata{
+		Name:        r.Name,
+		Description: r.Description,
+		Language:    r.Language,
+		Languages:   r.Languages,
+	}
 }
 
 func toASTValue[T astMarshallable](input T) (ast.Value, error) {
@@ -178,6 +178,7 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 			file, err := os.Open(string(str))
 			defer file.Close()
 			if err != nil {
+				log.Error().Err(err).Msg("")
 				return nil, err
 			}
 
@@ -196,9 +197,11 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 
 	var org, repo string
 	if err := ast.As(a.Value, &org); err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 	if err := ast.As(b.Value, &repo); err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
@@ -226,6 +229,7 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		SetResult(&result).
 		Get(githubAPIUrl)
 	if err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
@@ -241,6 +245,7 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		SetResult(&result.Languages).
 		Get(githubAPIUrl + "/languages")
 	if err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
@@ -251,10 +256,11 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 	}
 
 	result.Languages = convertToPercentage(result.Languages)
-	repoMetadata := githubResponseToRepoMetadata(result)
+	repoMetadata := result.toRepoMetadata()
 
 	v, err := toASTValue(repoMetadata)
 	if err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 	return ast.NewTerm(v), nil
@@ -264,6 +270,7 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 
 	var path string
 	if err := ast.As(a.Value, &path); err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
@@ -284,6 +291,7 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 		SetResult(&result).
 		Get(gitlabAPIUrl)
 	if err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
@@ -298,6 +306,7 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 		SetResult(&result.Languages).
 		Get(gitlabAPIUrl + "/languages")
 	if err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
@@ -308,9 +317,10 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 	}
 
 	result.Language = getKeyFromMapByMaxValue(result.Languages)
-	repoMetadata := gitlabResponseToRepoMetadata(result)
+	repoMetadata := result.toRepoMetadata()
 	v, err := toASTValue(repoMetadata)
 	if err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 	return ast.NewTerm(v), nil
@@ -320,6 +330,7 @@ func RegoFuncGetMaturity(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error
 
 	var alias string
 	if err := ast.As(a.Value, &alias); err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
@@ -332,11 +343,13 @@ func RegoFuncGetMaturity(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error
 	client := getClientGQL()
 	service, err := client.GetServiceMaturityWithAlias(alias)
 	if err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 
 	v, err := toASTValue(service.MaturityReport.OverallLevel)
 	if err != nil {
+		log.Error().Err(err).Msg("")
 		return nil, err
 	}
 	return ast.NewTerm(v), nil
