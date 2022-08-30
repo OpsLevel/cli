@@ -399,13 +399,11 @@ func flattenPredicate(key string, value *opslevel.Predicate) string {
 	config := `
   %s {
     type = "%s"
-    value = <<-EOT
-%s
-EOT
+    %s
   }
 `
 	if value != nil {
-		return templateConfig(config, key, value.Type, strings.ReplaceAll(value.Value, "\"", "\\\""))
+		return templateConfig(config, key, value.Type, buildMultilineStringArg("value", strings.ReplaceAll(value.Value, "\"", "\\\"")))
 	}
 	return ""
 }
@@ -416,13 +414,11 @@ func flattenFilterPredicate(value *opslevel.FilterPredicate) string {
     key = "%s"
     key_data = "%s"
     type = "%s"
-    value = <<-EOT
-%s
-EOT
+    %s
   }
 `
 	if value != nil {
-		return templateConfig(config, value.Key, value.KeyData, value.Type, value.Value)
+		return templateConfig(config, value.Key, value.KeyData, value.Type, buildMultilineStringArg("value", value.Value))
 	}
 	return ""
 }
