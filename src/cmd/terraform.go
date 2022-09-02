@@ -473,7 +473,10 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	toolUsageCheckConfig := `tool_category = "%s"
   %s
   %s`
+	alertSourceUsageCheckConfig := `%s
+  alert_source_type = "%s"`
 
+	alertSourceUsageCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_alert_source_usage.tf", directory), false)
 	customEventCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_custom_event.tf", directory), false)
 	manualCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_manual.tf", directory), false)
 	repoFileCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_repository_file.tf", directory), false)
@@ -485,6 +488,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	tagDefinedCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_tag_defined.tf", directory), false)
 	toolUsageCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_tool_usage.tf", directory), false)
 
+	defer alertSourceUsageCheckFile.Close()
 	defer customEventCheckFile.Close()
 	defer manualCheckFile.Close()
 	defer repoFileCheckFile.Close()
@@ -504,6 +508,11 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 		checkTypeTerraformName := ""
 		checkExtras := ""
 		switch check.Type {
+		case opslevel.CheckTypeAlertSourceUsage:
+			casted := check.AlertSourceUsageCheckFragment
+			activeFile = alertSourceUsageCheckFile
+			checkTypeTerraformName = "alert_source_usage"
+			checkExtras = templateConfig(alertSourceUsageCheckConfig, flattenPredicate("alert_source_name_predicate", &casted.AlertSourceNamePredicate), casted.AlertSourceType)
 		case opslevel.CheckTypeGeneric:
 			casted := check.CustomEventCheckFragment
 			activeFile = customEventCheckFile
