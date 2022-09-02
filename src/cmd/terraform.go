@@ -469,8 +469,10 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	toolUsageCheckConfig := `tool_category = "%s"
   %s
   %s`
+	hasRecentDeployCheckConfig := `days = "%d"`
 
 	customEventCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_custom_event.tf", directory), false)
+	hasRecentDeployCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_has_recent_deploy.tf", directory), false)
 	manualCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_manual.tf", directory), false)
 	repoFileCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_repository_file.tf", directory), false)
 	repoIntegratedCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_repository_integrated.tf", directory), false)
@@ -482,6 +484,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	toolUsageCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_tool_usage.tf", directory), false)
 
 	defer customEventCheckFile.Close()
+	defer hasRecentDeployCheckFile.Close()
 	defer manualCheckFile.Close()
 	defer repoFileCheckFile.Close()
 	defer repoIntegratedCheckFile.Close()
@@ -505,6 +508,11 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			activeFile = customEventCheckFile
 			checkTypeTerraformName = "custom_event"
 			checkExtras = templateConfig(customEventCheckConfig, getIntegrationTerraformName(casted.Integration), casted.ServiceSelector, casted.SuccessCondition, buildMultilineStringArg("message", casted.ResultMessage))
+		case opslevel.CheckTypeHasRecentDeploy:
+			casted := check.HasRecentDeployCheckFragment
+			activeFile = hasRecentDeployCheckFile
+			checkTypeTerraformName = "has_recent_deploy"
+			checkExtras = templateConfig(hasRecentDeployCheckConfig, casted.Days)
 		case opslevel.CheckTypeManual:
 			casted := check.ManualCheckFragment
 			activeFile = manualCheckFile
