@@ -469,6 +469,8 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	toolUsageCheckConfig := `tool_category = "%s"
   %s
   %s`
+	hasDocumentationCheckConfig := `document_type = "%s"
+  document_subtype = "%s"`
 
 	hasRecentDeployCheckConfig := `days = "%d"`
 
@@ -488,6 +490,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	servicePropertyCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_service_property.tf", directory), false)
 	tagDefinedCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_tag_defined.tf", directory), false)
 	toolUsageCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_tool_usage.tf", directory), false)
+	hasDocumenationCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_has_documentation.tf", directory), false)
 
 	defer alertSourceUsageCheckFile.Close()
 	defer customEventCheckFile.Close()
@@ -501,6 +504,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	defer servicePropertyCheckFile.Close()
 	defer tagDefinedCheckFile.Close()
 	defer toolUsageCheckFile.Close()
+	defer hasDocumenationCheckFile.Close()
 
 	var activeFile *os.File
 	checks, err := c.ListChecks()
@@ -568,6 +572,11 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			activeFile = toolUsageCheckFile
 			checkTypeTerraformName = "tool_usage"
 			checkExtras = templateConfig(toolUsageCheckConfig, casted.ToolCategory, flattenPredicate("tool_name_predicate", casted.ToolNamePredicate), flattenPredicate("environment_predicate", casted.EnvironmentPredicate))
+		case opslevel.CheckTypeHasDocumentation:
+			casted := check.HasDocumentationCheckFragment
+			activeFile = hasDocumenationCheckFile
+			checkTypeTerraformName = "has_documentation"
+			checkExtras = templateConfig(hasDocumentationCheckConfig, casted.DocumentType, casted.DocumentSubtype)
 		default:
 			continue
 		}
