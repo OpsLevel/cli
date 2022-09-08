@@ -19,7 +19,17 @@ import (
 var createServiceCmd = &cobra.Command{
 	Use:   "service",
 	Short: "Create a service",
-	Long:  `Create a service`,
+	Long: `Create a service
+
+cat << EOF | opslevel create service -f -
+name: "hello world"
+description: "Hello World Service"
+product: "OSS"
+language: "Go"
+tier: "tier_4"
+framework: "fasthttp"
+owner: "Platform"
+EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readServiceCreateInput()
 		cobra.CheckErr(err)
@@ -174,7 +184,13 @@ var listServiceCmd = &cobra.Command{
 var updateServiceCmd = &cobra.Command{
 	Use:   "service",
 	Short: "Update a service",
-	Long:  `Update a service`,
+	Long: `Update a service
+
+cat << EOF | opslevel update service -f -
+alias: "hello_world"
+description: "Hello World Service Updated"
+tier: "tier_3"
+EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readServiceUpdateInput()
 		cobra.CheckErr(err)
