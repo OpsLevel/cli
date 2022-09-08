@@ -228,11 +228,18 @@ var deleteServiceTagCmd = &cobra.Command{
 		if result.Id == nil {
 			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
 		}
-		for _, tag := range result.Tags.Nodes {
-			if tagKey == tag.Key || tagKey == tag.Id {
-				getClientGQL().DeleteTag(tag.Id)
-				fmt.Println("Deleted Tag")
-				common.PrettyPrint(tag)
+
+		if common.IsID(tagKey) {
+			err := getClientGQL().DeleteTag(tagKey)
+			cobra.CheckErr(err)
+			fmt.Println("Deleted Tag")
+		} else {
+			for _, tag := range result.Tags.Nodes {
+				if tagKey == tag.Key {
+					getClientGQL().DeleteTag(tag.Id)
+					fmt.Println("Deleted Tag")
+					common.PrettyPrint(tag)
+				}
 			}
 		}
 	},
