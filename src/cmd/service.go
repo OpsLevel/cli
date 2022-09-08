@@ -4,9 +4,10 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"os"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
@@ -207,11 +208,11 @@ var deleteServiceCmd = &cobra.Command{
 }
 
 var deleteServiceTagCmd = &cobra.Command{
-	Use:        "tag ID|ALIAS TAG_KEY",
+	Use:        "tag ID|ALIAS TAG_KEY|TAG_ID",
 	Short:      "Delete a service's tag",
 	Long:       `Delete a service's tag'`,
 	Args:       cobra.ExactArgs(2),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY", "TAG_ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceKey := args[0]
 		tagKey := args[1]
@@ -228,7 +229,7 @@ var deleteServiceTagCmd = &cobra.Command{
 			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
 		}
 		for _, tag := range result.Tags.Nodes {
-			if tagKey == tag.Key {
+			if tagKey == tag.Key || tagKey == tag.Id {
 				getClientGQL().DeleteTag(tag.Id)
 				fmt.Println("Deleted Tag")
 				common.PrettyPrint(tag)
