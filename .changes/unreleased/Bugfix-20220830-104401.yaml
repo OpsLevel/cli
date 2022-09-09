@@ -1,4 +1,0 @@
-kind: Bugfix
-body: Fix bug where Terraform export was exporting single line filters as multi-line
-  strings
-time: 2022-08-30T10:44:01.499802-05:00
