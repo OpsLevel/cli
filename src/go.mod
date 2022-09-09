@@ -9,7 +9,7 @@ require (
 	github.com/gosimple/slug v1.12.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.43.0
-	github.com/opslevel/opslevel-go/v2022 v2022.8.1
+	github.com/opslevel/opslevel-go/v2022 v2022.8.25
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.27.0
 	github.com/spf13/cobra v1.5.0
@@ -73,4 +73,4 @@ require (
 )
 
 //Only used for local development!
-replace github.com/opslevel/opslevel-go/v2022 => ./submodules/opslevel-go
+//replace github.com/opslevel/opslevel-go/v2022 => ./submodules/opslevel-go
