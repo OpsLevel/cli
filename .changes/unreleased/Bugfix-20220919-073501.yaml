@@ -1,0 +1,3 @@
+kind: Bugfix
+body: Fix error handling that prevented deploy events from working
+time: 2022-09-19T07:35:01.077608-05:00

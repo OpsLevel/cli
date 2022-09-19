@@ -58,7 +58,7 @@ var deployCreateCmd = &cobra.Command{
 			log.Info().Msgf("%s", string(b))
 		} else {
 			body, err := json.Marshal(evt)
-			cobra.CheckErr(evt)
+			cobra.CheckErr(err)
 			response := &opslevel.RestResponse{}
 			_, err = getClientRest().R().
 				SetHeader("Content-Type", "application/json").
