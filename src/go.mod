@@ -11,7 +11,7 @@ require (
 	github.com/open-policy-agent/opa v0.44.0
 	github.com/opslevel/opslevel-go/v2022 v2022.8.25
 	github.com/rocktavious/autopilot v0.1.5
-	github.com/rs/zerolog v1.27.0
+	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.8.1
