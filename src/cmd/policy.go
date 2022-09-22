@@ -22,6 +22,7 @@ import (
 
 type regoInput struct {
 	Files []string `json:"files"`
+	Data  map[string]interface{}
 }
 
 type gitlabResponse struct {
@@ -110,11 +111,23 @@ var policyCmd = &cobra.Command{
 	Short: "Invoked along with a Rego policy to create and output JSON",
 	Long: `We are extending OPA Rego to work with OpsLevel constructs:
 
-opslevel run policy -f policy.rego | jq
+Examples:
+    opslevel run policy -f policy.rego | jq
+    opslevel run policy -f policy.rego -i /tmp/input.json -o ./output.json
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		flags := cmd.Flags()
 		filePath, err := flags.GetString("file")
+		cobra.CheckErr(err)
+		inputFilePath, err := flags.GetString("input")
+		cobra.CheckErr(err)
+		inputJSON := &map[string]interface{}{}
+		if inputFilePath != "" {
+			inputRead, err := ioutil.ReadFile(inputFilePath)
+			cobra.CheckErr(err)
+			cobra.CheckErr(json.Unmarshal(inputRead, inputJSON))
+		}
+		outputFilePath, err := flags.GetString("output")
 		cobra.CheckErr(err)
 		policy, err := ioutil.ReadFile(filePath)
 		cobra.CheckErr(err)
@@ -128,6 +141,7 @@ opslevel run policy -f policy.rego | jq
 				return nil
 			})
 		cobra.CheckErr(err)
+		input.Data = *inputJSON
 		rego := rego.New(
 			rego.Query("data.opslevel"),
 			rego.Module("test.rego",
@@ -165,8 +179,14 @@ opslevel run policy -f policy.rego | jq
 		cobra.CheckErr(err)
 		b, err := json.Marshal(rs[0].Expressions[0].Value) //TODO: need more advanced handling of multiple things in json and reading from stdin
 		cobra.CheckErr(err)
-		fmt.Println(string(b))
 
+		if outputFilePath == "-" {
+			fmt.Println(string(b))
+		} else {
+			main := newFile(outputFilePath, false)
+			defer main.Close()
+			main.WriteString(string(b))
+		}
 	},
 }
 
@@ -359,6 +379,8 @@ func init() {
 	runCmd.AddCommand(policyCmd)
 
 	policyCmd.Flags().StringP("file", "f", "-", "File to read Rego policy from. Defaults to reading from stdin.")
+	policyCmd.Flags().StringP("input", "i", "", "File to read extra JSON data input to be used in Rego policy. Defaults to not reading anything.")
+	policyCmd.Flags().StringP("output", "o", "-", "File to write Rego policy output to. Defaults to writing to stdout.")
 	policyCmd.PersistentFlags().String("github-token", "", "The Github API token to use when calling opslevel.repo.github function within a Rego policy. Overrides environment variable 'GITHUB_API_TOKEN'")
 	policyCmd.PersistentFlags().String("gitlab-token", "", "The Gitlab API token to use when calling opslevel.repo.gitlab function within a Rego policy. Overrides environment variable 'GITLAB_API_TOKEN'")
 

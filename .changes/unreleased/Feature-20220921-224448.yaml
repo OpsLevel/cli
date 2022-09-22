@@ -1,0 +1,3 @@
+kind: Feature
+body: Add ability to pass arbitrary json as extra input to `run policy` command
+time: 2022-09-21T22:44:48.972438-05:00
