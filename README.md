@@ -15,16 +15,9 @@
         <img src="https://img.shields.io/github/downloads/OpsLevel/cli/total" /></a>
 </p>
 
-<p align="center">
- 
- <a href="#prerequisite">Prerequisite</a> |
- <a href="#installation">Installation</a> |
- <a href="#quickstart">Quickstart</a> |
- <a href="https://www.opslevel.com/docs/api/cli/">Documentation</a> |
- <a href="#troubleshooting">Troubleshooting</a>
-</p>
+[![Overall](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fapp.opslevel.com%2Fapi%2Fservice_level%2FEaWapOq9VQj5FvymQEgCPNJcbF-TOibHn89Arw7d_OY)](https://app.opslevel.com/services/opslevel_cli/maturity-report)
 
-`opslevel` is the command line tool for interacting with [OpsLevel](https://www.opslevel.com/)
+# The CLI for interacting with [OpsLevel](https://www.opslevel.com/)
 
 ### Prerequisite
 
