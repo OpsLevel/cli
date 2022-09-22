@@ -21,8 +21,8 @@ import (
 )
 
 type regoInput struct {
-	Files []string `json:"files"`
-	Data  map[string]interface{}
+	Files []string               `json:"files"`
+	Data  map[string]interface{} `json:"data"`
 }
 
 type gitlabResponse struct {
