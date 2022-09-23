@@ -9,6 +9,7 @@ import (
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
 	"github.com/opslevel/opslevel-go/v2022"
+	"github.com/relvacode/iso8601"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -173,6 +174,12 @@ Examples:
 					Decl: types.NewFunction(types.Args(types.S), types.A),
 				},
 				RegoFuncGetMaturity),
+			rego.Function2(
+				&rego.Function{
+					Name: "opslevel.time.diff",
+					Decl: types.NewFunction(types.Args(types.S, types.S), types.A),
+				},
+				RegoFuncTimeDiff),
 			rego.Input(input),
 		)
 		rs, err := rego.Eval(context.Background())
@@ -373,6 +380,33 @@ func RegoFuncGetMaturity(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error
 		return nil, err
 	}
 	return ast.NewTerm(v), nil
+}
+
+func RegoFuncTimeDiff(ctx rego.BuiltinContext, s *ast.Term, e *ast.Term) (*ast.Term, error) {
+	var start string
+	if err := ast.As(s.Value, &start); err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+
+	var end string
+	if err := ast.As(e.Value, &end); err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+
+	startTime, err := iso8601.ParseString(start)
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+	endTime, err := iso8601.ParseString(end)
+	if err != nil {
+		log.Error().Err(err).Msg("")
+		return nil, err
+	}
+	duration := endTime.Sub(startTime)
+	return ast.FloatNumberTerm(duration.Seconds()), nil
 }
 
 func init() {
