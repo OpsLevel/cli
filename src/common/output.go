@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -30,6 +31,8 @@ func NewTabWriter(headers ...string) *tabwriter.Writer {
 	}
 	headerFormat.WriteString("\n")
 	w := tabwriter.NewWriter(os.Stdout, longestHeader, longestHeader, 2, ' ', 0)
-	fmt.Fprintf(w, headerFormat.String(), headersCasted...)
+	if viper.GetBool("no-headers") == false {
+		fmt.Fprintf(w, headerFormat.String(), headersCasted...)
+	}
 	return w
 }
