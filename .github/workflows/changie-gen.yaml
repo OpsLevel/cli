@@ -1,4 +1,4 @@
-name: Bot Changelog
+name: Changie Gen
 
 on:
   pull_request:
