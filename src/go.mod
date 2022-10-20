@@ -6,7 +6,7 @@ require (
 	github.com/creasty/defaults v1.6.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/gosimple/slug v1.12.0
+	github.com/gosimple/slug v1.13.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.45.0
 	github.com/opslevel/opslevel-go/v2022 v2022.8.25
