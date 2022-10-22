@@ -318,6 +318,7 @@ EOF
 			}
 			log.Info().Msgf("created service '%s' with id '%s'", service.Name, service.Id)
 		}
+		reader.Close()
 	},
 }
 
