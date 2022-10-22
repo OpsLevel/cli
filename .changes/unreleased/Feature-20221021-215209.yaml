@@ -1,0 +1,4 @@
+kind: Feature
+body: add `git_branch_protection` and `service_dependency` checks to `export terraform`
+  command
+time: 2022-10-21T21:52:09.207876-05:00

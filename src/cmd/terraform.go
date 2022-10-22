@@ -439,7 +439,7 @@ func flattenUpdateFrequency(value *opslevel.ManualCheckFrequency) string {
 
 func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	shell.WriteString("# Checks\n")
-
+	// TODO: If we use golang templating here we can easily remove all the extra newlines
 	baseCheckConfig := `resource "opslevel_check_%s" "%s" {
   name = %q
   enabled = %v
@@ -477,7 +477,6 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	alertSourceUsageCheckConfig := `%s
   alert_source_type = "%s"`
 
-
 	alertSourceUsageCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_alert_source_usage.tf", directory), false)
 	customEventCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_custom_event.tf", directory), false)
 	hasRecentDeployCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_has_recent_deploy.tf", directory), false)
@@ -491,6 +490,8 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	tagDefinedCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_tag_defined.tf", directory), false)
 	toolUsageCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_tool_usage.tf", directory), false)
 	hasDocumenationCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_has_documentation.tf", directory), false)
+	gitBranchProtectionCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_git_branch_protection.tf", directory), false)
+	serviceDependencyCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_service_dependency.tf", directory), false)
 
 	defer alertSourceUsageCheckFile.Close()
 	defer customEventCheckFile.Close()
@@ -505,6 +506,8 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	defer tagDefinedCheckFile.Close()
 	defer toolUsageCheckFile.Close()
 	defer hasDocumenationCheckFile.Close()
+	defer gitBranchProtectionCheckFile.Close()
+	defer serviceDependencyCheckFile.Close()
 
 	var activeFile *os.File
 	checks, err := c.ListChecks()
@@ -577,6 +580,12 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			activeFile = hasDocumenationCheckFile
 			checkTypeTerraformName = "has_documentation"
 			checkExtras = templateConfig(hasDocumentationCheckConfig, casted.DocumentType, casted.DocumentSubtype)
+		case opslevel.CheckTypeGitBranchProtection:
+			activeFile = gitBranchProtectionCheckFile
+			checkTypeTerraformName = "git_branch_protection"
+		case opslevel.CheckTypeServiceDependency:
+			activeFile = serviceDependencyCheckFile
+			checkTypeTerraformName = "service_dependency"
 		default:
 			continue
 		}
