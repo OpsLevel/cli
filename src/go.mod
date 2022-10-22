@@ -9,7 +9,7 @@ require (
 	github.com/gosimple/slug v1.13.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.45.0
-	github.com/opslevel/opslevel-go/v2022 v2022.8.25
+	github.com/opslevel/opslevel-go/v2022 v2022.10.22
 	github.com/relvacode/iso8601 v1.1.0
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.28.0

@@ -200,6 +200,12 @@ func (self *CheckCreateType) AsServiceOwnershipCreateInput() *opslevel.CheckServ
 	return payload
 }
 
+func (self *CheckCreateType) AsHasRecentDeployCreateInput() *opslevel.CheckHasRecentDeployCreateInput {
+	payload := &opslevel.CheckHasRecentDeployCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
 func (self *CheckCreateType) AsServicePropertyCreateInput() *opslevel.CheckServicePropertyCreateInput {
 	payload := &opslevel.CheckServicePropertyCreateInput{}
 	json.Unmarshal(toJson(self.Spec), payload)
@@ -212,8 +218,8 @@ func (self *CheckCreateType) AsServiceConfigurationCreateInput() *opslevel.Check
 	return payload
 }
 
-func (self *CheckCreateType) AsRepositoryFileCreateInput() *opslevel.CheckRepositoryFileCreateInput {
-	payload := &opslevel.CheckRepositoryFileCreateInput{}
+func (self *CheckCreateType) AsHasDocumentationCreateInput() *opslevel.CheckHasDocumentationCreateInput {
+	payload := &opslevel.CheckHasDocumentationCreateInput{}
 	json.Unmarshal(toJson(self.Spec), payload)
 	return payload
 }
@@ -224,8 +230,8 @@ func (self *CheckCreateType) AsRepositoryIntegratedCreateInput() *opslevel.Check
 	return payload
 }
 
-func (self *CheckCreateType) AsRepositorySearchCreateInput() *opslevel.CheckRepositorySearchCreateInput {
-	payload := &opslevel.CheckRepositorySearchCreateInput{}
+func (self *CheckCreateType) AsToolUsageCreateInput() *opslevel.CheckToolUsageCreateInput {
+	payload := &opslevel.CheckToolUsageCreateInput{}
 	json.Unmarshal(toJson(self.Spec), payload)
 	return payload
 }
@@ -236,14 +242,38 @@ func (self *CheckCreateType) AsTagDefinedCreateInput() *opslevel.CheckTagDefined
 	return payload
 }
 
-func (self *CheckCreateType) AsToolUsageCreateInput() *opslevel.CheckToolUsageCreateInput {
-	payload := &opslevel.CheckToolUsageCreateInput{}
+func (self *CheckCreateType) AsRepositoryFileCreateInput() *opslevel.CheckRepositoryFileCreateInput {
+	payload := &opslevel.CheckRepositoryFileCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsRepositorySearchCreateInput() *opslevel.CheckRepositorySearchCreateInput {
+	payload := &opslevel.CheckRepositorySearchCreateInput{}
 	json.Unmarshal(toJson(self.Spec), payload)
 	return payload
 }
 
 func (self *CheckCreateType) AsManualCreateInput() *opslevel.CheckManualCreateInput {
 	payload := &opslevel.CheckManualCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsAlertSourceUsageCreateInput() *opslevel.CheckAlertSourceUsageCreateInput {
+	payload := &opslevel.CheckAlertSourceUsageCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsGitBranchProtectionCreateInput() *opslevel.CheckGitBranchProtectionCreateInput {
+	payload := &opslevel.CheckGitBranchProtectionCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
+func (self *CheckCreateType) AsServiceDependencyCreateInput() *opslevel.CheckServiceDependencyCreateInput {
+	payload := &opslevel.CheckServiceDependencyCreateInput{}
 	json.Unmarshal(toJson(self.Spec), payload)
 	return payload
 }
@@ -297,11 +327,17 @@ func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error
 	case opslevel.CheckTypeHasOwner:
 		output, err = clientGQL.CreateCheckServiceOwnership(*input.AsServiceOwnershipCreateInput())
 
+	case opslevel.CheckTypeHasRecentDeploy:
+		output, err = clientGQL.CreateCheckHasRecentDeploy(*input.AsHasRecentDeployCreateInput())
+
 	case opslevel.CheckTypeServiceProperty:
 		output, err = clientGQL.CreateCheckServiceProperty(*input.AsServicePropertyCreateInput())
 
 	case opslevel.CheckTypeHasServiceConfig:
 		output, err = clientGQL.CreateCheckServiceConfiguration(*input.AsServiceConfigurationCreateInput())
+
+	case opslevel.CheckTypeHasDocumentation:
+		output, err = clientGQL.CreateCheckHasDocumentation(*input.AsHasDocumentationCreateInput())
 
 	case opslevel.CheckTypeHasRepository:
 		output, err = clientGQL.CreateCheckRepositoryIntegrated(*input.AsRepositoryIntegratedCreateInput())
@@ -326,6 +362,15 @@ func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error
 		err = input.resolveIntegrationAliases(clientGQL, usePrompts)
 		cobra.CheckErr(err)
 		output, err = clientGQL.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
+
+	case opslevel.CheckTypeAlertSourceUsage:
+		output, err = clientGQL.CreateCheckAlertSourceUsage(*input.AsAlertSourceUsageCreateInput())
+
+	case opslevel.CheckTypeGitBranchProtection:
+		output, err = clientGQL.CreateCheckGitBranchProtection(*input.AsGitBranchProtectionCreateInput())
+
+	case opslevel.CheckTypeServiceDependency:
+		output, err = clientGQL.CreateCheckServiceDependency(*input.AsServiceDependencyCreateInput())
 	}
 	cobra.CheckErr(err)
 	if output == nil {
@@ -355,11 +400,18 @@ func marshalCheck(check opslevel.Check) *CheckCreateType {
 	switch check.Type {
 	case opslevel.CheckTypeHasOwner:
 
+	case opslevel.CheckTypeHasRecentDeploy:
+		output.Spec["days"] = check.HasRecentDeployCheckFragment.Days
+
 	case opslevel.CheckTypeServiceProperty:
 		output.Spec["serviceProperty"] = check.ServicePropertyCheckFragment.Property
 		output.Spec["propertyValuePredicate"] = check.ServicePropertyCheckFragment.Predicate
 
 	case opslevel.CheckTypeHasServiceConfig:
+
+	case opslevel.CheckTypeHasDocumentation:
+		output.Spec["documentType"] = check.HasDocumentationCheckFragment.DocumentType
+		output.Spec["documentSubtype"] = check.HasDocumentationCheckFragment.DocumentSubtype
 
 	case opslevel.CheckTypeHasRepository:
 
@@ -394,6 +446,15 @@ func marshalCheck(check opslevel.Check) *CheckCreateType {
 		output.Spec["serviceSelector"] = check.CustomEventCheckFragment.ServiceSelector
 		output.Spec["successCondition"] = check.CustomEventCheckFragment.SuccessCondition
 		output.Spec["message"] = check.CustomEventCheckFragment.ResultMessage
+
+	case opslevel.CheckTypeAlertSourceUsage:
+		output.Spec["alertSourceNamePredicate"] = check.AlertSourceUsageCheckFragment.AlertSourceNamePredicate
+		output.Spec["alertSourceType"] = check.AlertSourceUsageCheckFragment.AlertSourceType
+
+	case opslevel.CheckTypeGitBranchProtection:
+
+	case opslevel.CheckTypeServiceDependency:
+
 	}
 
 	return output
