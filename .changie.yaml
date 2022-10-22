@@ -12,10 +12,11 @@ footerFormat: |
 
     - `docker pull public.ecr.aws/opslevel/cli:{{.Version}}`
 kinds:
+- label: Bugfix
 - label: Feature
+- label: Security
 - label: Refactor
 - label: Deprecated
 - label: Removed
-- label: Bugfix
 - label: Docs
-- label: Security
+- label: Dependency
