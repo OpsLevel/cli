@@ -1,11 +1,7 @@
 name: "Release"
 
 on:
-  workflow_dispatch:
-    inputs:
-      release-version:
-        required: true
-        description: "The release version to use IE: v2022.05.12"
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -47,34 +43,38 @@ jobs:
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         env:
           AWS_REGION: us-east-1
+      - name: Set Release Version
+        id: version
+        run: |
+          echo "::set-output name=RELEASE_VERSION::$(date +v%Y.%-m.%-d)"
       - name: Cache Docker Layers
         run: docker pull public.ecr.aws/opslevel/cli:v2022.04.22 || true
       - name: Ensure Release Does Not Exist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete ${{ github.event.inputs.release-version }} || true
+          gh release delete ${{ steps.version.outputs.RELEASE_VERSION }} || true
       - name: Ensure Changelog
         run: |
           git config user.name "OpsLevel Bots"
           git config user.email "bots@opslevel.com"
-          if test -f ./.changes/${{ github.event.inputs.release-version }}.md
+          if test -f ./.changes/${{ steps.version.outputs.RELEASE_VERSION }}.md
           then
             echo "Skip Changie..."
           else
             go install github.com/miniscruff/changie@latest
-            changie batch ${{ github.event.inputs.release-version }}
+            changie batch ${{ steps.version.outputs.RELEASE_VERSION }}
             changie merge
             git add .
-            git commit -m "Cut Release '${{ github.event.inputs.release-version }}'"
+            git commit -m "Cut Release '${{ steps.version.outputs.RELEASE_VERSION }}'"
             git push origin HEAD
           fi
-          git tag -f ${{ github.event.inputs.release-version }} -m "Cut Release '${{ github.event.inputs.release-version }}'"
-          git push -f origin refs/tags/${{ github.event.inputs.release-version }}
+          git tag -f ${{ steps.version.outputs.RELEASE_VERSION }} -m "Cut Release '${{ steps.version.outputs.RELEASE_VERSION }}'"
+          git push -f origin refs/tags/${{ steps.version.outputs.RELEASE_VERSION }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2.7.0
         with:
-          args: release --rm-dist --release-notes=../.changes/${{ github.event.inputs.release-version }}.md
+          args: release --rm-dist --release-notes=../.changes/${{ steps.version.outputs.RELEASE_VERSION }}.md
           workdir: ./src
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
