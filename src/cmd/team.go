@@ -361,19 +361,18 @@ EOF
 
 func init() {
 	createCmd.AddCommand(createTeamCmd)
-	createCmd.AddCommand(createMemberCmd)
-	createCmd.AddCommand(createContactCmd)
+	createTeamCmd.AddCommand(createMemberCmd)
+	createTeamCmd.AddCommand(createContactCmd)
+	createTeamCmd.AddCommand(createTeamTagCmd)
 	getCmd.AddCommand(getTeamCmd)
+	getTeamCmd.AddCommand(getTeamTagCmd)
 	listCmd.AddCommand(listTeamCmd)
 	deleteCmd.AddCommand(deleteTeamCmd)
-	deleteCmd.AddCommand(deleteMemberCmd)
-	deleteCmd.AddCommand(deleteContactCmd)
+	deleteTeamCmd.AddCommand(deleteMemberCmd)
+	deleteTeamCmd.AddCommand(deleteContactCmd)
+	deleteTeamCmd.AddCommand(deleteTeamTagCmd)
 	importCmd.AddCommand(importTeamsCmd)
 
-	createTeamCmd.AddCommand(createTeamTagCmd)
-	getTeamCmd.AddCommand(getTeamTagCmd)
-	deleteTeamCmd.AddCommand(deleteTeamTagCmd)
-
-	createServiceTagCmd.Flags().Bool("assign", false, "Use the `tagAssign` mutation instead of `tagCreate`")
+	createTeamTagCmd.Flags().Bool("assign", false, "Use the `tagAssign` mutation instead of `tagCreate`")
 	createContactCmd.Flags().StringVarP(&contactType, "type", "t", "slack", "The contact type. One of: slack|email|web [default: slack]")
 }
