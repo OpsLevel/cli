@@ -88,6 +88,55 @@ var createContactCmd = &cobra.Command{
 	},
 }
 
+var createTeamTagCmd = &cobra.Command{
+	Use:   "tag ID|ALIAS TAG_KEY TAG_VALUE",
+	Short: "Create a team tag",
+	Long: `Create a team tag
+	
+opslevel create team tag my-team foo bar
+opslevel create team tag --assign my-team foo bar
+`,
+	Args:       cobra.ExactArgs(3),
+	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY", "TAG_VALUE"},
+	Run: func(cmd *cobra.Command, args []string) {
+		var result interface{}
+		var err error
+		teamKey := args[0]
+		tagKey := args[1]
+		tagValue := args[2]
+		tagAssign, err := cmd.Flags().GetBool("assign")
+		cobra.CheckErr(err)
+		if tagAssign {
+			input := opslevel.TagAssignInput{
+				Tags: []opslevel.TagInput{
+					{Key: tagKey, Value: tagValue},
+				},
+			}
+			if common.IsID(teamKey) {
+				input.Id = teamKey
+			} else {
+				input.Alias = teamKey
+			}
+			input.Type = opslevel.TaggableResourceTeam
+			result, err = getClientGQL().AssignTags(input)
+		} else {
+			input := opslevel.TagCreateInput{
+				Key:   tagKey,
+				Value: tagValue,
+			}
+			if common.IsID(teamKey) {
+				input.Id = teamKey
+			} else {
+				input.Alias = teamKey
+			}
+			input.Type = opslevel.TaggableResourceTeam
+			result, err = getClientGQL().CreateTag(input)
+		}
+		cobra.CheckErr(err)
+		common.PrettyPrint(result)
+	},
+}
+
 var getTeamCmd = &cobra.Command{
 	Use:        "team ID|ALIAS",
 	Short:      "Get details about a team",
@@ -128,6 +177,49 @@ var listTeamCmd = &cobra.Command{
 			}
 			w.Flush()
 		}
+	},
+}
+
+var getTeamTagCmd = &cobra.Command{
+	Use:   "tag ID|ALIAS TAG_KEY",
+	Short: "Get a team's tag",
+	Long: `Get a team's' tag
+
+opslevel get team tag my-team | jq 'from_entries'
+opslevel get team tag my-team my-tag
+`,
+	Args:       cobra.MinimumNArgs(1),
+	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+	Run: func(cmd *cobra.Command, args []string) {
+		teamKey := args[0]
+		singleTag := len(args) == 2
+		var tagKey string
+		if singleTag {
+			tagKey = args[1]
+		}
+
+		var result *opslevel.Team
+		var err error
+		if common.IsID(teamKey) {
+			result, err = getClientGQL().GetTeam(teamKey)
+			cobra.CheckErr(err)
+		} else {
+			result, err = getClientGQL().GetTeamWithAlias(teamKey)
+			cobra.CheckErr(err)
+		}
+		if result.Id == nil {
+			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
+		}
+		output := []opslevel.Tag{}
+		for _, tag := range result.Tags.Nodes {
+			if singleTag == false || tagKey == tag.Key {
+				output = append(output, tag)
+			}
+		}
+		if len(output) == 0 {
+			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on team '%s'", tagKey, teamKey))
+		}
+		common.PrettyPrint(output)
 	},
 }
 
@@ -190,6 +282,44 @@ var deleteContactCmd = &cobra.Command{
 	},
 }
 
+var deleteTeamTagCmd = &cobra.Command{
+	Use:        "tag ID|ALIAS TAG_KEY|TAG_ID",
+	Short:      "Delete a team's tag",
+	Long:       `Delete a team's tag'`,
+	Args:       cobra.ExactArgs(2),
+	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY", "TAG_ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		teamKey := args[0]
+		tagKey := args[1]
+		var result *opslevel.Team
+		var err error
+		if common.IsID(teamKey) {
+			result, err = getClientGQL().GetTeam(teamKey)
+			cobra.CheckErr(err)
+		} else {
+			result, err = getClientGQL().GetTeamWithAlias(teamKey)
+			cobra.CheckErr(err)
+		}
+		if result.Id == nil {
+			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
+		}
+
+		if common.IsID(tagKey) {
+			err := getClientGQL().DeleteTag(tagKey)
+			cobra.CheckErr(err)
+			fmt.Println("Deleted Tag")
+		} else {
+			for _, tag := range result.Tags.Nodes {
+				if tagKey == tag.Key {
+					getClientGQL().DeleteTag(tag.Id)
+					fmt.Println("Deleted Tag")
+					common.PrettyPrint(tag)
+				}
+			}
+		}
+	},
+}
+
 var importTeamsCmd = &cobra.Command{
 	Use:     "team",
 	Aliases: []string{"teams"},
@@ -233,12 +363,16 @@ func init() {
 	createCmd.AddCommand(createTeamCmd)
 	createCmd.AddCommand(createMemberCmd)
 	createCmd.AddCommand(createContactCmd)
+	createTeamCmd.AddCommand(createTeamTagCmd)
 	getCmd.AddCommand(getTeamCmd)
+	getTeamCmd.AddCommand(getTeamTagCmd)
 	listCmd.AddCommand(listTeamCmd)
 	deleteCmd.AddCommand(deleteTeamCmd)
 	deleteCmd.AddCommand(deleteMemberCmd)
 	deleteCmd.AddCommand(deleteContactCmd)
+	deleteTeamCmd.AddCommand(deleteTeamTagCmd)
 	importCmd.AddCommand(importTeamsCmd)
 
+	createTeamTagCmd.Flags().Bool("assign", false, "Use the `tagAssign` mutation instead of `tagCreate`")
 	createContactCmd.Flags().StringVarP(&contactType, "type", "t", "slack", "The contact type. One of: slack|email|web [default: slack]")
 }
