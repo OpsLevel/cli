@@ -361,15 +361,15 @@ EOF
 
 func init() {
 	createCmd.AddCommand(createTeamCmd)
-	createTeamCmd.AddCommand(createMemberCmd)
-	createTeamCmd.AddCommand(createContactCmd)
+	createCmd.AddCommand(createMemberCmd)
+	createCmd.AddCommand(createContactCmd)
 	createTeamCmd.AddCommand(createTeamTagCmd)
 	getCmd.AddCommand(getTeamCmd)
 	getTeamCmd.AddCommand(getTeamTagCmd)
 	listCmd.AddCommand(listTeamCmd)
 	deleteCmd.AddCommand(deleteTeamCmd)
-	deleteTeamCmd.AddCommand(deleteMemberCmd)
-	deleteTeamCmd.AddCommand(deleteContactCmd)
+	deleteCmd.AddCommand(deleteMemberCmd)
+	deleteCmd.AddCommand(deleteContactCmd)
 	deleteTeamCmd.AddCommand(deleteTeamTagCmd)
 	importCmd.AddCommand(importTeamsCmd)
 
