@@ -460,6 +460,9 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	repoFileCheckConfig := `directory_search = %v
   filepaths = ["%s"]
   %s`
+	repoGrepCheckConfig := `directory_search = %v
+  filepaths = ["%s"]
+  %s`
 	repoSearchCheckConfig := `%s
   %s`
 	servicePropertyCheckConfig := `property = "%s"
@@ -482,6 +485,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	hasRecentDeployCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_has_recent_deploy.tf", directory), false)
 	manualCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_manual.tf", directory), false)
 	repoFileCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_repository_file.tf", directory), false)
+	repoGrepCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_repository_grep.tf", directory), false)
 	repoIntegratedCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_repository_integrated.tf", directory), false)
 	repoSearchCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_repository_search.tf", directory), false)
 	serviceConfigCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_service_configuration.tf", directory), false)
@@ -498,6 +502,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	defer hasRecentDeployCheckFile.Close()
 	defer manualCheckFile.Close()
 	defer repoFileCheckFile.Close()
+	defer repoGrepCheckFile.Close()
 	defer repoIntegratedCheckFile.Close()
 	defer repoSearchCheckFile.Close()
 	defer serviceConfigCheckFile.Close()
@@ -542,6 +547,11 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			activeFile = repoFileCheckFile
 			checkTypeTerraformName = "repository_file"
 			checkExtras = templateConfig(repoFileCheckConfig, casted.DirectorySearch, strings.Join(casted.Filepaths, "\", \""), flattenPredicate("file_contents_predicate", casted.FileContentsPredicate))
+		case opslevel.CheckTypeRepoGrep:
+			casted := check.RepositoryGrepCheckFragment
+			activeFile = repoGrepCheckFile
+			checkTypeTerraformName = "repository_grep"
+			checkExtras = templateConfig(repoGrepCheckConfig, casted.DirectorySearch, strings.Join(casted.Filepaths, "\", \""), flattenPredicate("file_contents_predicate", casted.FileContentsPredicate))
 		case opslevel.CheckTypeHasRepository:
 			activeFile = repoIntegratedCheckFile
 			checkTypeTerraformName = "repository_integrated"
