@@ -248,6 +248,12 @@ func (self *CheckCreateType) AsRepositoryFileCreateInput() *opslevel.CheckReposi
 	return payload
 }
 
+func (self *CheckCreateType) AsRepositoryGrepCreateInput() *opslevel.CheckRepositoryGrepCreateInput {
+	payload := &opslevel.CheckRepositoryGrepCreateInput{}
+	json.Unmarshal(toJson(self.Spec), payload)
+	return payload
+}
+
 func (self *CheckCreateType) AsRepositorySearchCreateInput() *opslevel.CheckRepositorySearchCreateInput {
 	payload := &opslevel.CheckRepositorySearchCreateInput{}
 	json.Unmarshal(toJson(self.Spec), payload)
@@ -351,6 +357,9 @@ func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error
 	case opslevel.CheckTypeRepoFile:
 		output, err = clientGQL.CreateCheckRepositoryFile(*input.AsRepositoryFileCreateInput())
 
+	case opslevel.CheckTypeRepoGrep:
+		output, err = clientGQL.CreateCheckRepositoryGrep(*input.AsRepositoryGrepCreateInput())
+
 	case opslevel.CheckTypeRepoSearch:
 		output, err = clientGQL.CreateCheckRepositorySearch(*input.AsRepositorySearchCreateInput())
 
@@ -428,6 +437,11 @@ func marshalCheck(check opslevel.Check) *CheckCreateType {
 		output.Spec["directorySearch"] = check.RepositoryFileCheckFragment.DirectorySearch
 		output.Spec["filePaths"] = check.RepositoryFileCheckFragment.Filepaths
 		output.Spec["fileContentsPredicate"] = check.RepositoryFileCheckFragment.FileContentsPredicate
+
+	case opslevel.CheckTypeRepoGrep:
+		output.Spec["directorySearch"] = check.RepositoryGrepCheckFragment.DirectorySearch
+		output.Spec["filePaths"] = check.RepositoryGrepCheckFragment.Filepaths
+		output.Spec["fileContentsPredicate"] = check.RepositoryGrepCheckFragment.FileContentsPredicate
 
 	case opslevel.CheckTypeRepoSearch:
 		output.Spec["fileExtensions"] = check.RepositorySearchCheckFragment.FileExtensions
