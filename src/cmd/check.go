@@ -25,7 +25,7 @@ var getCheckCmd = &cobra.Command{
 		if isYamlOutput() {
 			common.YamlPrint(marshalCheck(*check))
 		} else {
-			common.PrettyPrint(check)
+			common.PrettyPrint(marshalCheck(*check))
 		}
 	},
 }
