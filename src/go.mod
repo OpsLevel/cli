@@ -8,7 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gosimple/slug v1.13.1
 	github.com/manifoldco/promptui v0.9.0
-	github.com/open-policy-agent/opa v0.47.3
+	github.com/open-policy-agent/opa v0.47.4
 	github.com/opslevel/opslevel-go/v2022 v2022.12.16
 	github.com/relvacode/iso8601 v1.1.0
 	github.com/rocktavious/autopilot v0.1.5
