@@ -17,13 +17,6 @@ func NewGraphClient(version string) *opslevel.Client {
 		opslevel.SetUserAgentExtra(fmt.Sprintf("cli-%s", version)))
 
 	clientErr := client.Validate()
-	if clientErr != nil {
-		if strings.Contains(clientErr.Error(), "Please provide a valid OpsLevel API token") {
-			cobra.CheckErr(fmt.Errorf("%s via 'export OPSLEVEL_API_TOKEN=XXX' or '--api-token=XXX'", clientErr.Error()))
-		} else {
-			cobra.CheckErr(clientErr)
-		}
-	}
 	cobra.CheckErr(clientErr)
 
 	return client
