@@ -10,11 +10,6 @@ import (
 )
 
 func NewGraphClient(version string) *opslevel.Client {
-	client := opslevel.NewGQLClient(
-		opslevel.SetAPIToken(viper.GetString("api-token")),
-		opslevel.SetURL(viper.GetString("api-url")),
-		opslevel.SetUserAgentExtra(fmt.Sprintf("cli-%s", version)))
-	cobra.CheckErr(client.Validate())
 	timeout := time.Second * time.Duration(viper.GetInt("api-timeout"))
 	client := opslevel.NewGQLClient(opslevel.SetAPIToken(viper.GetString("api-token")),
 		opslevel.SetURL(viper.GetString("api-url")),
