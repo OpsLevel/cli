@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/go-resty/resty/v2"
+	"github.com/opslevel/opslevel-go/v2022"
 	"os"
 	"strings"
 
