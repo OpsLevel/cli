@@ -3,27 +3,77 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"sort"
+	"strings"
 )
 
 var createUserCmd = &cobra.Command{
-	Use:   "user EMAIL NAME",
+	Use:   "user EMAIL NAME [ROLE]",
 	Short: "Create a User",
-	Long:  `Create a User`,
-	Args:  cobra.ExactArgs(2),
+	Long:  "Create a User and optionally define the role (options `User`|`Admin`).",
+	Example: `
+opslevel create user "john@example.com" "John Doe"
+opslevel create user "jane@example.com" "Jane Doe" Admin
+`,
+	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		email := args[0]
 		name := args[1]
+		role := opslevel.UserRoleUser
+		if len(args) > 2 {
+			desiredRole := strings.ToLower(args[2])
+			if Contains(opslevel.AllUserRole(), desiredRole) {
+				role = opslevel.UserRole(desiredRole)
+			}
+		}
 
 		resource, err := getClientGQL().InviteUser(email, opslevel.UserInput{
 			Name: name,
+			Role: role,
 		})
 		cobra.CheckErr(err)
 		fmt.Println(resource.Id)
+	},
+}
+
+var updateUserCmd = &cobra.Command{
+	Use:   "user {ID|EMAIL}",
+	Short: "Update a user",
+	Long:  `Update a group`,
+	Example: `
+cat << EOF | opslevel update user "john@example.com" -f -
+name: John Foobar Doe
+role: Admin
+EOF
+`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		input, err := readUserInput()
+		cobra.CheckErr(err)
+		filter, err := getClientGQL().UpdateUser(key, *input)
+		cobra.CheckErr(err)
+		fmt.Println(filter.Id)
+	},
+}
+
+var getUserCmd = &cobra.Command{
+	Use:        "user {ID|EMAIL}",
+	Short:      "Get details about a filter",
+	Example:    `opslevel get user john@example.com`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		filter, err := getClientGQL().GetUser(args[0])
+		cobra.CheckErr(err)
+		common.PrettyPrint(filter)
 	},
 }
 
@@ -31,7 +81,10 @@ var listUserCmd = &cobra.Command{
 	Use:     "user",
 	Aliases: []string{"users"},
 	Short:   "Lists the users",
-	Long:    `Lists the users`,
+	Example: `
+opslevel list user
+opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entries'
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		list, err := getClientGQL().ListUsers()
 		sort.Slice(list, func(i, j int) bool {
@@ -51,10 +104,10 @@ var listUserCmd = &cobra.Command{
 }
 
 var deleteUserCmd = &cobra.Command{
-	Use:   "user ID",
-	Short: "Delete a User",
-	Long:  `Delete a User`,
-	Args:  cobra.ExactArgs(1),
+	Use:     "user {ID|EMAIL}",
+	Short:   "Delete a User",
+	Example: `opslevel delete user john@example.com`,
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 
@@ -79,10 +132,8 @@ var importUsersCmd = &cobra.Command{
 	Aliases: []string{"users"},
 	Short:   "Imports users from a CSV",
 	Long: `Imports a list of users from a CSV file with the column headers:
-Name,Email,Role,Team
-
-Example:
-
+Name,Email,Role,Team`,
+	Example: `
 cat << EOF | opslevel import user -f -
 Name,Email,Role,Team
 Kyle Rockman,kyle@opslevel.com,Admin,platform
@@ -96,7 +147,7 @@ EOF
 		for reader.Rows() {
 			name := reader.Text("Name")
 			email := reader.Text("Email")
-			role := reader.Text("Role")
+			role := strings.ToLower(reader.Text("Role"))
 			if email == "" {
 				log.Error().Msgf("user '%s' has invalid email '%s'", name, email)
 				continue
@@ -136,7 +187,19 @@ EOF
 
 func init() {
 	createCmd.AddCommand(createUserCmd)
+	updateCmd.AddCommand(updateUserCmd)
+	getCmd.AddCommand(getUserCmd)
 	listCmd.AddCommand(listUserCmd)
 	deleteCmd.AddCommand(deleteUserCmd)
 	importCmd.AddCommand(importUsersCmd)
+}
+
+func readUserInput() (*opslevel.UserInput, error) {
+	readCreateConfigFile()
+	evt := &opslevel.UserInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
 }
