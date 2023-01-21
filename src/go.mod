@@ -8,7 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gosimple/slug v1.13.1
 	github.com/manifoldco/promptui v0.9.0
-	github.com/open-policy-agent/opa v0.47.3
+	github.com/open-policy-agent/opa v0.48.0
 	github.com/opslevel/opslevel-go/v2022 v2022.12.16
 	github.com/relvacode/iso8601 v1.3.0
 	github.com/rocktavious/autopilot v0.1.5
@@ -64,11 +64,11 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/yashtewari/glob-intersection v0.1.0 // indirect
-	golang.org/x/crypto v0.3.0 // indirect
-	golang.org/x/net v0.4.0 // indirect
+	golang.org/x/crypto v0.4.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
