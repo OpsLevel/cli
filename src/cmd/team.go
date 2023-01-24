@@ -64,9 +64,10 @@ var createMemberCmd = &cobra.Command{
 
 var contactType string
 var createContactCmd = &cobra.Command{
-	Use:        "contact {TEAM_ID|TEAM_ALIAS} ADDRESS DISPLAYNAME",
-	Short:      "Add a contact to a team",
-	Example:    `opslevel create contact --type=slack my-team #general General`,
+	Use:   "contact {TEAM_ID|TEAM_ALIAS} ADDRESS DISPLAYNAME",
+	Short: "Add a contact to a team",
+	Example: `opslevel create contact --type=slack my-team #general General
+opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 	Args:       cobra.MinimumNArgs(2),
 	ArgAliases: []string{"TEAM_ID", "TEAM_ALIAS", "ADDRESS", "DISPLAYNAME"},
 	Run: func(cmd *cobra.Command, args []string) {
