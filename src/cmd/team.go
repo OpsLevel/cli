@@ -3,7 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/creasty/defaults"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2022"
@@ -11,24 +13,33 @@ import (
 )
 
 var createTeamCmd = &cobra.Command{
-	Use:        "team NAME",
-	Short:      "Create a team",
-	Long:       `Create a team`,
+	Use:   "team NAME",
+	Short: "Create a team",
+	Example: `opslevel create team my-team
+
+cat << EOF | opslevel create team my-team" -f -
+managerEmail: "manager@example.com""
+group:
+  alias: "my-group"
+responsibilities: "all the things"
+EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
-		team, err := getClientGQL().CreateTeam(opslevel.TeamCreateInput{
-			Name: args[0],
-		})
+		key := args[0]
+		input, err := readTeamCreateInput()
+		input.Name = key
+		cobra.CheckErr(err)
+		team, err := getClientGQL().CreateTeam(*input)
 		cobra.CheckErr(err)
 		fmt.Println(team.Id)
 	},
 }
 
 var createMemberCmd = &cobra.Command{
-	Use:        "member TEAM_ID|TEAM_ALIAS EMAIL",
+	Use:        "member {TEAM_ID|TEAM_ALIAS} EMAIL",
 	Short:      "Add a member to a team",
-	Long:       `Add a member to a team`,
+	Example:    `opslevel create member my-team john@example.com`,
 	Args:       cobra.ExactArgs(2),
 	ArgAliases: []string{"TEAM_ID", "TEAM_ALIAS", "EMAIL"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -53,9 +64,10 @@ var createMemberCmd = &cobra.Command{
 
 var contactType string
 var createContactCmd = &cobra.Command{
-	Use:        "contact TEAM_ID|TEAM_ALIAS ADDRESS DISPLAYNAME",
-	Short:      "Add a contact to a team",
-	Long:       `Add a contact to a team`,
+	Use:   "contact {TEAM_ID|TEAM_ALIAS} ADDRESS DISPLAYNAME",
+	Short: "Add a contact to a team",
+	Example: `opslevel create contact --type=slack my-team #general General
+opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 	Args:       cobra.MinimumNArgs(2),
 	ArgAliases: []string{"TEAM_ID", "TEAM_ALIAS", "ADDRESS", "DISPLAYNAME"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -89,10 +101,9 @@ var createContactCmd = &cobra.Command{
 }
 
 var createTeamTagCmd = &cobra.Command{
-	Use:   "tag ID|ALIAS TAG_KEY TAG_VALUE",
+	Use:   "tag {ID|ALIAS} TAG_KEY TAG_VALUE",
 	Short: "Create a team tag",
-	Long: `Create a team tag
-	
+	Example: `
 opslevel create team tag my-team foo bar
 opslevel create team tag --assign my-team foo bar
 `,
@@ -137,10 +148,34 @@ opslevel create team tag --assign my-team foo bar
 	},
 }
 
+var updateTeamCmd = &cobra.Command{
+	Use:   "team {ID|ALIAS}",
+	Short: "Update a team",
+	Example: `
+cat << EOF | opslevel update team my-team" -f -
+managerEmail: "manager@example.com""
+group:
+  alias: "my-group"
+responsibilities: "all the things"
+EOF
+`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		input, err := readTeamUpdateInput()
+		input.Id = key
+		cobra.CheckErr(err)
+		team, err := getClientGQL().UpdateTeam(*input)
+		cobra.CheckErr(err)
+		fmt.Println(team.Id)
+	},
+}
+
 var getTeamCmd = &cobra.Command{
-	Use:        "team ID|ALIAS",
+	Use:        "team {ID|ALIAS}",
 	Short:      "Get details about a team",
-	Long:       `Get details about a team`,
+	Example:    `opslevel get team my-team | jq '.Members.Nodes | map(.Email)'`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -164,7 +199,10 @@ var listTeamCmd = &cobra.Command{
 	Use:     "team",
 	Aliases: []string{"teams"},
 	Short:   "Lists the teams",
-	Long:    `Lists the teams`,
+	Example: `
+opslevel list team
+opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))' 
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		list, err := getClientGQL().ListTeams()
 		cobra.CheckErr(err)
@@ -181,12 +219,11 @@ var listTeamCmd = &cobra.Command{
 }
 
 var getTeamTagCmd = &cobra.Command{
-	Use:   "tag ID|ALIAS TAG_KEY",
+	Use:   "tag {ID|ALIAS} TAG_KEY",
 	Short: "Get a team's tag",
-	Long: `Get a team's' tag
-
-opslevel get team tag my-team | jq 'from_entries'
+	Example: `
 opslevel get team tag my-team my-tag
+opslevel get team tag my-team | jq 'from_entries'
 `,
 	Args:       cobra.MinimumNArgs(1),
 	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
@@ -224,9 +261,11 @@ opslevel get team tag my-team my-tag
 }
 
 var deleteTeamCmd = &cobra.Command{
-	Use:        "team ID|ALIAS",
-	Short:      "Delete a team",
-	Long:       `Delete a team`,
+	Use:   "team {ID|ALIAS}",
+	Short: "Delete a team",
+	Example: `
+opslevel delete team my-team
+`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -243,9 +282,9 @@ var deleteTeamCmd = &cobra.Command{
 }
 
 var deleteMemberCmd = &cobra.Command{
-	Use:        "member TEAM_ID|TEAM_ALIAS EMAIL",
+	Use:        "member {TEAM_ID|TEAM_ALIAS} EMAIL",
 	Short:      "Removes a member from a team",
-	Long:       `Removes a member from a team`,
+	Example:    `opslevel delete member my-team john@example.com`,
 	Args:       cobra.ExactArgs(2),
 	ArgAliases: []string{"EMAIL"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -271,7 +310,7 @@ var deleteMemberCmd = &cobra.Command{
 var deleteContactCmd = &cobra.Command{
 	Use:        "contact ID",
 	Short:      "Removes a contact from a team",
-	Long:       `Removes a contact from a team`,
+	Example:    `opslevel delete contact XXXXXXXXXXXXXXXX`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -283,9 +322,9 @@ var deleteContactCmd = &cobra.Command{
 }
 
 var deleteTeamTagCmd = &cobra.Command{
-	Use:        "tag ID|ALIAS TAG_KEY|TAG_ID",
+	Use:        "tag {ID|ALIAS} {TAG_KEY|TAG_ID}",
 	Short:      "Delete a team's tag",
-	Long:       `Delete a team's tag'`,
+	Example:    `opslevel delete team tag my-team foo`,
 	Args:       cobra.ExactArgs(2),
 	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY", "TAG_ID"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -325,10 +364,8 @@ var importTeamsCmd = &cobra.Command{
 	Aliases: []string{"teams"},
 	Short:   "Imports teams from a CSV",
 	Long: `Imports a list of teams from a CSV file with the column headers:
-Name,Manager,Responsibilities,Group
-
-Example:
-
+Name,Manager,Responsibilities,Group`,
+	Example: `
 cat << EOF | opslevel import teams -f -
 Name,Manager,Responsibilities,Group
 Platform,kyle@opslevel.com,Makes Tools,engineering
@@ -364,6 +401,7 @@ func init() {
 	createCmd.AddCommand(createMemberCmd)
 	createCmd.AddCommand(createContactCmd)
 	createTeamCmd.AddCommand(createTeamTagCmd)
+	updateCmd.AddCommand(updateTeamCmd)
 	getCmd.AddCommand(getTeamCmd)
 	getTeamCmd.AddCommand(getTeamTagCmd)
 	listCmd.AddCommand(listTeamCmd)
@@ -375,4 +413,24 @@ func init() {
 
 	createTeamTagCmd.Flags().Bool("assign", false, "Use the `tagAssign` mutation instead of `tagCreate`")
 	createContactCmd.Flags().StringVarP(&contactType, "type", "t", "slack", "The contact type. One of: slack|email|web [default: slack]")
+}
+
+func readTeamCreateInput() (*opslevel.TeamCreateInput, error) {
+	readCreateConfigFile()
+	evt := &opslevel.TeamCreateInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
+}
+
+func readTeamUpdateInput() (*opslevel.TeamUpdateInput, error) {
+	readCreateConfigFile()
+	evt := &opslevel.TeamUpdateInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
 }
