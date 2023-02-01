@@ -3,9 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +31,8 @@ var getFilterCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		filter, err := getClientGQL().GetFilter(args[0])
+		key := args[0]
+		filter, err := getClientGQL().GetFilter(opslevel.ID(key))
 		cobra.CheckErr(err)
 		common.PrettyPrint(filter)
 	},
@@ -43,8 +44,9 @@ var listFilterCmd = &cobra.Command{
 	Short:   "Lists filters",
 	Long:    `Lists filters`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListFilters()
+		resp, err := getClientGQL().ListFilters(nil)
 		cobra.CheckErr(err)
+		list := resp.Nodes
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {
@@ -65,7 +67,7 @@ var deleteFilterCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := getClientGQL().DeleteFilter(key)
+		err := getClientGQL().DeleteFilter(opslevel.ID(key))
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' filter\n", key)
 	},

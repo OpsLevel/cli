@@ -3,13 +3,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/gosimple/slug"
-	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/spf13/cobra"
 )
 
@@ -176,9 +176,9 @@ func exportConstants(c *opslevel.Client, config *os.File) {
   }
 }
 `
-	integrations, err := c.ListIntegrations()
+	resp, err := c.ListIntegrations(nil)
 	cobra.CheckErr(err)
-	for _, integration := range integrations {
+	for _, integration := range resp.Nodes {
 		config.WriteString(templateConfig(integrationConfig, getIntegrationTerraformName(integration), integration.Id))
 	}
 }
@@ -212,21 +212,21 @@ func flattenTags(tags []opslevel.Tag) string {
 }
 
 func flattenLifecycle(value opslevel.Lifecycle) string {
-	if value.Id != nil {
+	if value.Id != "" {
 		return fmt.Sprintf("lifecycle_alias = data.opslevel_lifecycle.%s.alias", value.Alias)
 	}
 	return ""
 }
 
 func flattenTier(value opslevel.Tier) string {
-	if value.Id != nil {
+	if value.Id != "" {
 		return fmt.Sprintf("tier_alias = data.opslevel_tier.%s.alias", value.Alias)
 	}
 	return ""
 }
 
 func flattenOwner(value opslevel.TeamId) string {
-	if value.Id != nil {
+	if value.Id != "" {
 		return fmt.Sprintf("owner_alias = opslevel_team.%s.alias", value.Alias)
 	}
 	return ""
@@ -366,9 +366,9 @@ func exportFilters(c *opslevel.Client, config *os.File, shell *os.File) {
   %s
 }
 `
-	filters, err := c.ListFilters()
+	resp, err := c.ListFilters(nil)
 	cobra.CheckErr(err)
-	for _, filter := range filters {
+	for _, filter := range resp.Nodes {
 		predicates := ""
 		filterTerraformName := makeTerraformSlug(filter.Name)
 		for _, predicate := range filter.Predicates {
@@ -382,14 +382,14 @@ func exportFilters(c *opslevel.Client, config *os.File, shell *os.File) {
 }
 
 func flattenCheckOwner(value opslevel.CheckOwner) string {
-	if value.Team.Id != nil {
+	if value.Team.Id != "" {
 		return fmt.Sprintf("owner = opslevel_team.%s.id", value.Team.Alias)
 	}
 	return ""
 }
 
 func flattenCheckFilter(value opslevel.Filter) string {
-	if value.Id != nil {
+	if value.Id != "" {
 		return fmt.Sprintf("filter = opslevel_filter.%s.id", makeTerraformSlug(value.Name))
 	}
 	return ""
@@ -515,9 +515,9 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	defer serviceDependencyCheckFile.Close()
 
 	var activeFile *os.File
-	checks, err := c.ListChecks()
+	resp, err := c.ListChecks(nil)
 	cobra.CheckErr(err)
-	for _, check := range checks {
+	for _, check := range resp.Nodes {
 		checkTerraformName := makeTerraformSlug(check.Name)
 		checkTypeTerraformName := ""
 		checkExtras := ""

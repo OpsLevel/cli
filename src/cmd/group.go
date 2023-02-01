@@ -3,12 +3,11 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
 
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2022"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -52,12 +51,12 @@ var getGroupCommand = &cobra.Command{
 		var group *opslevel.Group
 		var err error
 		if common.IsID(key) {
-			group, err = getClientGQL().GetGroup(key)
+			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(group.Id == nil, key)
+		common.WasFound(group.Id == "", key)
 		common.PrettyPrint(group)
 	},
 }
@@ -74,12 +73,12 @@ var getGroupMembersCommand = &cobra.Command{
 		var group *opslevel.Group
 		var err error
 		if common.IsID(key) {
-			group, err = getClientGQL().GetGroup(key)
+			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(group.Id == nil, key)
+		common.WasFound(group.Id == "", key)
 		members, err := group.Members(getClientGQL())
 		cobra.CheckErr(err)
 		if isJsonOutput() {
@@ -106,12 +105,12 @@ var getGroupDescendantRepositoriesCommand = &cobra.Command{
 		var group *opslevel.Group
 		var err error
 		if common.IsID(key) {
-			group, err = getClientGQL().GetGroup(key)
+			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(group.Id == nil, key)
+		common.WasFound(group.Id == "", key)
 		descendantRepositories, err := group.DescendantRepositories(getClientGQL())
 		cobra.CheckErr(err)
 		if isJsonOutput() {
@@ -138,12 +137,12 @@ var getGroupDescendantServicesCommand = &cobra.Command{
 		var group *opslevel.Group
 		var err error
 		if common.IsID(key) {
-			group, err = getClientGQL().GetGroup(key)
+			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(group.Id == nil, key)
+		common.WasFound(group.Id == "", key)
 		descendantServices, err := group.DescendantServices(getClientGQL())
 		cobra.CheckErr(err)
 		if isJsonOutput() {
@@ -170,12 +169,12 @@ var getGroupDescendantSubgroupsCommand = &cobra.Command{
 		var group *opslevel.Group
 		var err error
 		if common.IsID(key) {
-			group, err = getClientGQL().GetGroup(key)
+			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(group.Id == nil, key)
+		common.WasFound(group.Id == "", key)
 		descendantSubgroups, err := group.DescendantSubgroups(getClientGQL())
 		cobra.CheckErr(err)
 		if isJsonOutput() {
@@ -202,12 +201,12 @@ var getGroupDescendantTeamsCommand = &cobra.Command{
 		var group *opslevel.Group
 		var err error
 		if common.IsID(key) {
-			group, err = getClientGQL().GetGroup(key)
+			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(group.Id == nil, key)
+		common.WasFound(group.Id == "", key)
 		descendantTeams, err := group.DescendantTeams(getClientGQL())
 		cobra.CheckErr(err)
 		if isJsonOutput() {

@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"strings"
 
@@ -11,7 +12,6 @@ import (
 
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -64,7 +64,7 @@ opslevel create service tag --assign my-service foo bar
 				},
 			}
 			if common.IsID(serviceKey) {
-				input.Id = serviceKey
+				input.Id = opslevel.ID(serviceKey)
 			} else {
 				input.Alias = serviceKey
 			}
@@ -76,7 +76,7 @@ opslevel create service tag --assign my-service foo bar
 				Value: tagValue,
 			}
 			if common.IsID(serviceKey) {
-				input.Id = serviceKey
+				input.Id = opslevel.ID(serviceKey)
 			} else {
 				input.Alias = serviceKey
 			}
@@ -99,14 +99,14 @@ var getServiceCmd = &cobra.Command{
 		var result *opslevel.Service
 		var err error
 		if common.IsID(key) {
-			result, err = getClientGQL().GetService(key)
+			result, err = getClientGQL().GetService(opslevel.ID(key))
 			cobra.CheckErr(err)
 		} else {
 			result, err = getClientGQL().GetServiceWithAlias(key)
 			cobra.CheckErr(err)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(result.Id == nil, key)
+		common.WasFound(result.Id == "", key)
 		common.PrettyPrint(result)
 	},
 }
@@ -132,13 +132,13 @@ opslevel get service tag my-service my-tag
 		var result *opslevel.Service
 		var err error
 		if common.IsID(serviceKey) {
-			result, err = getClientGQL().GetService(serviceKey)
+			result, err = getClientGQL().GetService(opslevel.ID(serviceKey))
 			cobra.CheckErr(err)
 		} else {
 			result, err = getClientGQL().GetServiceWithAlias(serviceKey)
 			cobra.CheckErr(err)
 		}
-		if result.Id == nil {
+		if result.Id == "" {
 			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
 		}
 		output := []opslevel.Tag{}
@@ -168,7 +168,7 @@ var listServiceCmd = &cobra.Command{
 			w := csv.NewWriter(os.Stdout)
 			w.Write([]string{"NAME", "ID", "ALIASES"})
 			for _, item := range list {
-				w.Write([]string{item.Name, item.Id.(string), strings.Join(item.Aliases, "/")})
+				w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
 			}
 			w.Flush()
 		} else {
@@ -211,7 +211,7 @@ var deleteServiceCmd = &cobra.Command{
 		var err error
 		if common.IsID(key) {
 			err = getClientGQL().DeleteService(opslevel.ServiceDeleteInput{
-				Id: key,
+				Id: opslevel.ID(key),
 			})
 			cobra.CheckErr(err)
 		} else {
@@ -235,18 +235,18 @@ var deleteServiceTagCmd = &cobra.Command{
 		var result *opslevel.Service
 		var err error
 		if common.IsID(serviceKey) {
-			result, err = getClientGQL().GetService(serviceKey)
+			result, err = getClientGQL().GetService(opslevel.ID(serviceKey))
 			cobra.CheckErr(err)
 		} else {
 			result, err = getClientGQL().GetServiceWithAlias(serviceKey)
 			cobra.CheckErr(err)
 		}
-		if result.Id == nil {
+		if result.Id == "" {
 			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
 		}
 
 		if common.IsID(tagKey) {
-			err := getClientGQL().DeleteTag(tagKey)
+			err := getClientGQL().DeleteTag(opslevel.ID(tagKey))
 			cobra.CheckErr(err)
 			fmt.Println("Deleted Tag")
 		} else {

@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/creasty/defaults"
+	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/spf13/cobra"
 )
 
@@ -49,12 +49,12 @@ var createMemberCmd = &cobra.Command{
 		var team *opslevel.Team
 		var err error
 		if common.IsID(key) {
-			team, err = getClientGQL().GetTeam(key)
+			team, err = getClientGQL().GetTeam(opslevel.ID(key))
 		} else {
 			team, err = getClientGQL().GetTeamWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(team.Id == nil, key)
+		common.WasFound(team.Id == "", key)
 
 		_, addErr := getClientGQL().AddMember(&team.TeamId, email)
 		cobra.CheckErr(addErr)
@@ -78,12 +78,12 @@ opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 		var team *opslevel.Team
 		var err error
 		if common.IsID(key) {
-			team, err = getClientGQL().GetTeam(key)
+			team, err = getClientGQL().GetTeam(opslevel.ID(key))
 		} else {
 			team, err = getClientGQL().GetTeamWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(team.Id == nil, key)
+		common.WasFound(team.Id == "", key)
 		contactInput := opslevel.CreateContactSlack(address, displayName)
 		switch contactType {
 		case string(opslevel.ContactTypeEmail):
@@ -93,7 +93,7 @@ opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 		}
 		contact, err := getClientGQL().AddContact(team.TeamId.Alias, contactInput)
 		cobra.CheckErr(err)
-		if contact.Id == nil {
+		if contact.Id == "" {
 			cobra.CheckErr(fmt.Errorf("unable to create contact '%+v'", contactInput))
 		}
 		fmt.Printf("create contact '%+v' on team '%s'\n", contactInput, team.Alias)
@@ -124,7 +124,7 @@ opslevel create team tag --assign my-team foo bar
 				},
 			}
 			if common.IsID(teamKey) {
-				input.Id = teamKey
+				input.Id = opslevel.ID(teamKey)
 			} else {
 				input.Alias = teamKey
 			}
@@ -136,7 +136,7 @@ opslevel create team tag --assign my-team foo bar
 				Value: tagValue,
 			}
 			if common.IsID(teamKey) {
-				input.Id = teamKey
+				input.Id = opslevel.ID(teamKey)
 			} else {
 				input.Alias = teamKey
 			}
@@ -164,7 +164,7 @@ EOF
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		input, err := readTeamUpdateInput()
-		input.Id = key
+		input.Id = opslevel.ID(key)
 		cobra.CheckErr(err)
 		team, err := getClientGQL().UpdateTeam(*input)
 		cobra.CheckErr(err)
@@ -182,14 +182,14 @@ var getTeamCmd = &cobra.Command{
 		key := args[0]
 		team, err := GetTeam(key)
 		cobra.CheckErr(err)
-		common.WasFound(team.Id == nil, key)
+		common.WasFound(team.Id == "", key)
 		common.PrettyPrint(team)
 	},
 }
 
 func GetTeam(key string) (*opslevel.Team, error) {
 	if common.IsID(key) {
-		return getClientGQL().GetTeam(key)
+		return getClientGQL().GetTeam(opslevel.ID(key))
 	} else {
 		return getClientGQL().GetTeamWithAlias(key)
 	}
@@ -238,13 +238,13 @@ opslevel get team tag my-team | jq 'from_entries'
 		var result *opslevel.Team
 		var err error
 		if common.IsID(teamKey) {
-			result, err = getClientGQL().GetTeam(teamKey)
+			result, err = getClientGQL().GetTeam(opslevel.ID(teamKey))
 			cobra.CheckErr(err)
 		} else {
 			result, err = getClientGQL().GetTeamWithAlias(teamKey)
 			cobra.CheckErr(err)
 		}
-		if result.Id == nil {
+		if result.Id == "" {
 			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
 		}
 		output := []opslevel.Tag{}
@@ -271,7 +271,7 @@ opslevel delete team my-team
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		if common.IsID(key) {
-			err := getClientGQL().DeleteTeam(key)
+			err := getClientGQL().DeleteTeam(opslevel.ID(key))
 			cobra.CheckErr(err)
 		} else {
 			err := getClientGQL().DeleteTeamWithAlias(key)
@@ -294,12 +294,12 @@ var deleteMemberCmd = &cobra.Command{
 		var team *opslevel.Team
 		var err error
 		if common.IsID(key) {
-			team, err = getClientGQL().GetTeam(key)
+			team, err = getClientGQL().GetTeam(opslevel.ID(key))
 		} else {
 			team, err = getClientGQL().GetTeamWithAlias(key)
 		}
 		cobra.CheckErr(err)
-		common.WasFound(team.Id == nil, key)
+		common.WasFound(team.Id == "", key)
 
 		_, removeErr := getClientGQL().RemoveMember(&team.TeamId, email)
 		cobra.CheckErr(removeErr)
@@ -315,7 +315,7 @@ var deleteContactCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := getClientGQL().RemoveContact(key)
+		err := getClientGQL().RemoveContact(opslevel.ID(key))
 		cobra.CheckErr(err)
 		fmt.Printf("contact '%s' removed\n", key)
 	},
@@ -333,18 +333,18 @@ var deleteTeamTagCmd = &cobra.Command{
 		var result *opslevel.Team
 		var err error
 		if common.IsID(teamKey) {
-			result, err = getClientGQL().GetTeam(teamKey)
+			result, err = getClientGQL().GetTeam(opslevel.ID(teamKey))
 			cobra.CheckErr(err)
 		} else {
 			result, err = getClientGQL().GetTeamWithAlias(teamKey)
 			cobra.CheckErr(err)
 		}
-		if result.Id == nil {
+		if result.Id == "" {
 			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
 		}
 
 		if common.IsID(tagKey) {
-			err := getClientGQL().DeleteTag(tagKey)
+			err := getClientGQL().DeleteTag(opslevel.ID(tagKey))
 			cobra.CheckErr(err)
 			fmt.Println("Deleted Tag")
 		} else {

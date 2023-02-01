@@ -3,9 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ var getRepositoryCmd = &cobra.Command{
 		var repository *opslevel.Repository
 		var err error
 		if common.IsID(key) {
-			repository, err = getClientGQL().GetRepository(key)
+			repository, err = getClientGQL().GetRepository(opslevel.ID(key))
 			cobra.CheckErr(err)
 		} else {
 			repository, err = getClientGQL().GetRepositoryWithAlias(key)
