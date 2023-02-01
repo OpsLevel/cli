@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -15,7 +16,8 @@ var getIntegrationCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		integration, err := getClientGQL().GetIntegration(args[0])
+		key := args[0]
+		integration, err := getClientGQL().GetIntegration(opslevel.ID(key))
 		cobra.CheckErr(err)
 		common.PrettyPrint(integration)
 	},
@@ -27,8 +29,9 @@ var listIntegrationCmd = &cobra.Command{
 	Short:   "Lists integrations",
 	Long:    `Lists integrations`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListIntegrations()
+		resp, err := getClientGQL().ListIntegrations(nil)
 		cobra.CheckErr(err)
+		list := resp.Nodes
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {

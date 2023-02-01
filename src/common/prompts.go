@@ -2,10 +2,10 @@ package common
 
 import (
 	"fmt"
+	"github.com/opslevel/opslevel-go/v2023"
 	"sort"
 
 	"github.com/manifoldco/promptui"
-	"github.com/opslevel/opslevel-go/v2022"
 )
 
 func PromptForCategories(client *opslevel.Client) (*opslevel.Category, error) {
@@ -74,11 +74,11 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 }
 
 func PromptForFilter(client *opslevel.Client) (*opslevel.Filter, error) {
-	list, err := client.ListFilters()
+	resp, err := client.ListFilters(nil)
 	if err != nil {
 		return nil, err
 	}
-
+	list := resp.Nodes
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
 		Active:   fmt.Sprintf("%s {{ .Name | cyan }}", promptui.IconSelect),
@@ -87,8 +87,10 @@ func PromptForFilter(client *opslevel.Client) (*opslevel.Filter, error) {
 	}
 
 	noneValue := opslevel.Filter{
-		Name: "None",
-		Id:   nil,
+		FilterId: opslevel.FilterId{
+			Name: "None",
+			Id:   "",
+		},
 	}
 	list = append([]opslevel.Filter{noneValue}, list...)
 
@@ -142,11 +144,11 @@ func PromptForTeam(client *opslevel.Client) (*opslevel.Team, error) {
 }
 
 func PromptForIntegration(client *opslevel.Client) (*opslevel.Integration, error) {
-	list, err := client.ListIntegrations()
+	resp, err := client.ListIntegrations(nil)
 	if err != nil {
 		return nil, err
 	}
-
+	list := resp.Nodes
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
 		Active:   fmt.Sprintf("%s {{ .Name | cyan }}", promptui.IconSelect),

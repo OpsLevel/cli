@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2022"
+	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -86,11 +86,12 @@ opslevel list user
 opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entries'
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListUsers()
+		resp, err := getClientGQL().ListUsers(nil)
+		cobra.CheckErr(err)
+		list := resp.Nodes
 		sort.Slice(list, func(i, j int) bool {
 			return list[i].Email < list[j].Email
 		})
-		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {

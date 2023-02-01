@@ -3,9 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2022"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +31,8 @@ var getCategoryCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		category, err := getClientGQL().GetCategory(args[0])
+		key := args[0]
+		category, err := getClientGQL().GetCategory(opslevel.ID(key))
 		cobra.CheckErr(err)
 		common.PrettyPrint(category)
 	},
@@ -65,7 +66,7 @@ var deleteCategoryCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := getClientGQL().DeleteCategory(key)
+		err := getClientGQL().DeleteCategory(opslevel.ID(key))
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' category\n", key)
 	},
@@ -93,7 +94,8 @@ var getLevelCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		level, err := getClientGQL().GetLevel(args[0])
+		key := args[0]
+		level, err := getClientGQL().GetLevel(opslevel.ID(key))
 		cobra.CheckErr(err)
 		common.PrettyPrint(level)
 	},
@@ -127,7 +129,7 @@ var deleteLevelCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := getClientGQL().DeleteLevel(key)
+		err := getClientGQL().DeleteLevel(opslevel.ID(key))
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' level\n", key)
 	},
