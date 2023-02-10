@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"github.com/creasty/defaults"
@@ -9,6 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 	"sort"
 	"strings"
 )
@@ -94,6 +96,13 @@ opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entr
 		})
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else if isCsvOutput() {
+			w := csv.NewWriter(os.Stdout)
+			w.Write([]string{"ID", "EMAIL", "NAME", "ROLE", "URL"})
+			for _, item := range list {
+				w.Write([]string{string(item.Id), item.Email, item.Name, string(item.Role), item.HTMLUrl})
+			}
+			w.Flush()
 		} else {
 			w := common.NewTabWriter("NAME", "EMAIL", "ID")
 			for _, item := range list {
