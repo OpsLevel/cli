@@ -9,11 +9,11 @@ import (
 )
 
 func PromptForCategories(client *opslevel.Client) (*opslevel.Category, error) {
-	list, err := client.ListCategories()
+	resp, err := client.ListCategories(nil)
 	if err != nil {
 		return nil, err
 	}
-
+	list := resp.Nodes
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
 		Active:   fmt.Sprintf("%s {{ .Name | cyan }}", promptui.IconSelect),
