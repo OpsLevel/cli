@@ -31,8 +31,15 @@ to the request payload.
 In '--paginate' mode, all pages of results will sequentially be requested until
 there are no more pages of results. This requires that the
 original query accepts an '$endCursor: String' variable and that it fetches the
-'pageInfo{ hasNextPage, endCursor }' set of fields from a collection.  It then also
-requires that you specify a JQ expression to use as an aggregation function
+'pageInfo{ hasNextPage, endCursor }' set of fields from a collection.
+
+Note that only the first 'endCursor' value found in the response body will be used
+so ensure you are only paginating on 1 resource.  Nested resources pagination will
+not work and will cause odd results or errors.
+
+Use '--aggregate'' to specify a JQ expression to use as an function
+for the results.  In '--paginate' mode it will use this expression to aggregate
+the results into a JSON list.
 
 Use '-q' to specify the graphql request body.
 Pass "-" to read from standard input.
