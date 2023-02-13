@@ -8,7 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gosimple/slug v1.13.1
 	github.com/manifoldco/promptui v0.9.0
-	github.com/open-policy-agent/opa v0.48.0
+	github.com/open-policy-agent/opa v0.49.0
 	github.com/opslevel/opslevel-go/v2023 v2023.1.21
 	github.com/relvacode/iso8601 v1.3.0
 	github.com/rocktavious/autopilot v0.1.5
@@ -51,7 +51,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pjbgf/sha1cd v0.2.3 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/skeema/knownhosts v1.1.0 // indirect
