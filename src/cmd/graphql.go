@@ -64,7 +64,7 @@ query ($endCursor: String) {
   }
 }'
 
-opslevel graphql -f owner='platform' -f tier="tier_1" --paginate -a=".account.services.nodes[]" -q='
+opslevel graphql -f owner="platform" -f tier="tier_1" --paginate -a=".account.services.nodes[]" -q='
 query ($endCursor: String, $owner: String!, $tier: String!) {
   account {
     services(first: 1, after: $endCursor, ownerAlias: $owner, tierAlias: $tier) {
