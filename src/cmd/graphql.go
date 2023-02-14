@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-var keyValueExp = regexp.MustCompile(`([\w-]+)=(.*)`)
+var keyValueExp = regexp.MustCompile(`([\w-]+)="(.*)"`)
 var usesPaginationExp = regexp.MustCompile(`\$endCursor:\WString`)
 var hasNextPageExp = regexp.MustCompile(`"hasNextPage":([\w]+)`)
 var endCursorExp = regexp.MustCompile(`"endCursor":\"([\w]+)\"`)
