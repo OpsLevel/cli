@@ -167,7 +167,11 @@ func handleErr(msg string, err error) {
 func convert(v string) (interface{}, error) {
 	if v == "-" {
 		reader := bufio.NewReader(os.Stdin)
-		return reader.ReadString('\n')
+		data, err := reader.ReadString('\n')
+		if err != nil {
+			return nil, err
+		}
+		return convert(data)
 	}
 
 	if strings.HasPrefix(v, "@") {
@@ -175,7 +179,7 @@ func convert(v string) (interface{}, error) {
 		if err != nil {
 			return "", err
 		}
-		return string(b), nil
+		return convert(string(b))
 	}
 
 	if n, err := strconv.Atoi(v); err == nil {
