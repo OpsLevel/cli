@@ -330,8 +330,9 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 func exportRubric(c *opslevel.Client, config *os.File, shell *os.File) {
 	shell.WriteString("# Rubric\n")
 
-	categories, err := c.ListCategories()
+	resp, err := c.ListCategories(nil)
 	cobra.CheckErr(err)
+	categories := resp.Nodes
 	categoryConfig := `resource "opslevel_rubric_category" "%s" {
   name = "%s"
 }

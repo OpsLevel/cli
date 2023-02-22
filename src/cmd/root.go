@@ -83,9 +83,9 @@ func getClientRest() *resty.Client {
 	return _clientRest
 }
 
-func getClientGQL() *opslevel.Client {
+func getClientGQL(options ...opslevel.Option) *opslevel.Client {
 	if _clientGQL == nil {
-		_clientGQL = common.NewGraphClient(version)
+		_clientGQL = common.NewGraphClient(version, options...)
 	}
 	return _clientGQL
 }

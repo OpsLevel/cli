@@ -25,8 +25,9 @@ There are multiple output formats that are useful
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := getClientGQL()
-		categories, err := client.ListCategories()
+		categoriesConn, err := client.ListCategories(nil)
 		cobra.CheckErr(err)
+		categories := categoriesConn.Nodes
 		data, err := client.ListServicesMaturity()
 		cobra.CheckErr(err)
 		headers := []string{"Name", "Overall"}

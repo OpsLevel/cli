@@ -44,8 +44,9 @@ var listCategoryCmd = &cobra.Command{
 	Short:   "Lists rubric categories",
 	Long:    `Lists rubric categories`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListCategories()
+		resp, err := getClientGQL().ListCategories(nil)
 		cobra.CheckErr(err)
+		list := resp.Nodes
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {
