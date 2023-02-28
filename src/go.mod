@@ -40,7 +40,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hasura/go-graphql-client v0.8.1 // indirect
+	github.com/hasura/go-graphql-client v0.9.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect

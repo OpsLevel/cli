@@ -109,10 +109,11 @@ func PromptForFilter(client *opslevel.Client) (*opslevel.Filter, error) {
 }
 
 func PromptForTeam(client *opslevel.Client) (*opslevel.Team, error) {
-	list, err := client.ListTeams()
+	resp, err := client.ListTeams(nil)
 	if err != nil {
 		return nil, err
 	}
+	list := resp.Nodes
 
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
