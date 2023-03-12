@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/creasty/defaults v1.6.0
-	github.com/go-git/go-git/v5 v5.5.2
+	github.com/go-git/go-git/v5 v5.6.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gosimple/slug v1.13.1
 	github.com/itchyny/gojq v0.12.11
@@ -52,7 +52,7 @@ require (
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
-	github.com/pjbgf/sha1cd v0.2.3 // indirect
+	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
