@@ -79,7 +79,8 @@ var getGroupMembersCommand = &cobra.Command{
 		}
 		cobra.CheckErr(err)
 		common.WasFound(group.Id == "", key)
-		members, err := group.Members(getClientGQL())
+		resp, err := group.Members(getClientGQL(), nil)
+		members := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.PrettyPrint(members)
@@ -111,7 +112,8 @@ var getGroupDescendantRepositoriesCommand = &cobra.Command{
 		}
 		cobra.CheckErr(err)
 		common.WasFound(group.Id == "", key)
-		descendantRepositories, err := group.DescendantRepositories(getClientGQL())
+		resp, err := group.DescendantRepositories(getClientGQL(), nil)
+		descendantRepositories := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.PrettyPrint(descendantRepositories)
@@ -143,7 +145,8 @@ var getGroupDescendantServicesCommand = &cobra.Command{
 		}
 		cobra.CheckErr(err)
 		common.WasFound(group.Id == "", key)
-		descendantServices, err := group.DescendantServices(getClientGQL())
+		resp, err := group.DescendantServices(getClientGQL(), nil)
+		descendantServices := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.PrettyPrint(descendantServices)
@@ -175,7 +178,8 @@ var getGroupDescendantSubgroupsCommand = &cobra.Command{
 		}
 		cobra.CheckErr(err)
 		common.WasFound(group.Id == "", key)
-		descendantSubgroups, err := group.DescendantSubgroups(getClientGQL())
+		resp, err := group.DescendantSubgroups(getClientGQL(), nil)
+		descendantSubgroups := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.PrettyPrint(descendantSubgroups)
@@ -207,7 +211,8 @@ var getGroupDescendantTeamsCommand = &cobra.Command{
 		}
 		cobra.CheckErr(err)
 		common.WasFound(group.Id == "", key)
-		descendantTeams, err := group.DescendantTeams(getClientGQL())
+		resp, err := group.DescendantTeams(getClientGQL(), nil)
+		descendantTeams := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.PrettyPrint(descendantTeams)
@@ -227,7 +232,8 @@ var listGroupCmd = &cobra.Command{
 	Short:   "Lists the groups",
 	Long:    `Lists the groups`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListGroups()
+		resp, err := getClientGQL().ListGroups(nil)
+		list := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))

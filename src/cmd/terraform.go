@@ -188,7 +188,8 @@ func exportRepos(c *opslevel.Client, config *os.File, shell *os.File) {
   alias = "%s"
 }
 `
-	repos, err := c.ListRepositories()
+	resp, err := c.ListRepositories(nil)
+	repos := resp.Nodes
 	cobra.CheckErr(err)
 	for _, repo := range repos {
 		if repo.DefaultAlias == "" {
@@ -269,7 +270,8 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
   base_directory = "%s"
 }
 `
-	services, err := c.ListServices()
+	resp, err := c.ListServices(nil)
+	services := resp.Nodes
 	cobra.CheckErr(err)
 	for _, service := range services {
 		serviceMainAlias := makeTerraformSlug(service.Aliases[0])
@@ -314,7 +316,8 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
   %s
 }
 `
-	teams, err := c.ListTeams()
+	resp, err := c.ListTeams(nil)
+	teams := resp.Nodes
 	cobra.CheckErr(err)
 	for _, team := range teams {
 		aliases := flattenAliases(team.Aliases)

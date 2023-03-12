@@ -37,7 +37,8 @@ var listRepositoryCmd = &cobra.Command{
 	Short:   "Lists repositories",
 	Long:    `Lists repositories`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListRepositories()
+		resp, err := getClientGQL().ListRepositories(nil)
+		list := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))

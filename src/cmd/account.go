@@ -56,7 +56,7 @@ var toolsCmd = &cobra.Command{
 	Short:   "Lists the valid alias for tools",
 	Long:    `Lists the valid alias for tools`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list := opslevel.AllToolCategory()
+		list := opslevel.AllToolCategory
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {

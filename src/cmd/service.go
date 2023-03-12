@@ -58,18 +58,11 @@ opslevel create service tag --assign my-service foo bar
 		tagAssign, err := cmd.Flags().GetBool("assign")
 		cobra.CheckErr(err)
 		if tagAssign {
-			input := opslevel.TagAssignInput{
-				Tags: []opslevel.TagInput{
-					{Key: tagKey, Value: tagValue},
-				},
+			input := map[string]string{
+				"Key":   tagKey,
+				"Value": tagValue,
 			}
-			if common.IsID(serviceKey) {
-				input.Id = opslevel.ID(serviceKey)
-			} else {
-				input.Alias = serviceKey
-			}
-			input.Type = opslevel.TaggableResourceService
-			result, err = getClientGQL().AssignTags(input)
+			result, err = getClientGQL().AssignTags(serviceKey, input)
 		} else {
 			input := opslevel.TagCreateInput{
 				Key:   tagKey,
@@ -141,7 +134,7 @@ opslevel get service tag my-service my-tag
 		if result.Id == "" {
 			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
 		}
-		output := []opslevel.Tag{}
+		var output []opslevel.Tag
 		for _, tag := range result.Tags.Nodes {
 			if singleTag == false || tagKey == tag.Key {
 				output = append(output, tag)
@@ -160,7 +153,8 @@ var listServiceCmd = &cobra.Command{
 	Short:   "Lists services",
 	Long:    `Lists services`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListServices()
+		resp, err := getClientGQL().ListServices(nil)
+		list := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))

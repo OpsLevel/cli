@@ -118,18 +118,11 @@ opslevel create team tag --assign my-team foo bar
 		tagAssign, err := cmd.Flags().GetBool("assign")
 		cobra.CheckErr(err)
 		if tagAssign {
-			input := opslevel.TagAssignInput{
-				Tags: []opslevel.TagInput{
-					{Key: tagKey, Value: tagValue},
-				},
+			input := map[string]string{
+				"Key":   tagKey,
+				"Value": tagValue,
 			}
-			if common.IsID(teamKey) {
-				input.Id = opslevel.ID(teamKey)
-			} else {
-				input.Alias = teamKey
-			}
-			input.Type = opslevel.TaggableResourceTeam
-			result, err = getClientGQL().AssignTags(input)
+			result, err = getClientGQL().AssignTags(teamKey, input)
 		} else {
 			input := opslevel.TagCreateInput{
 				Key:   tagKey,
@@ -204,7 +197,8 @@ opslevel list team
 opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))' 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListTeams()
+		resp, err := getClientGQL().ListTeams(nil)
+		list := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
@@ -247,7 +241,7 @@ opslevel get team tag my-team | jq 'from_entries'
 		if result.Id == "" {
 			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
 		}
-		output := []opslevel.Tag{}
+		var output []opslevel.Tag
 		for _, tag := range result.Tags.Nodes {
 			if singleTag == false || tagKey == tag.Key {
 				output = append(output, tag)

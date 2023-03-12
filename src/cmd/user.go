@@ -30,7 +30,7 @@ opslevel create user "jane@example.com" "Jane Doe" Admin
 		role := opslevel.UserRoleUser
 		if len(args) > 2 {
 			desiredRole := strings.ToLower(args[2])
-			if Contains(opslevel.AllUserRole(), desiredRole) {
+			if Contains(opslevel.AllUserRole, desiredRole) {
 				role = opslevel.UserRole(desiredRole)
 			}
 		}
@@ -163,7 +163,7 @@ EOF
 				continue
 			}
 			userRole := opslevel.UserRoleUser
-			if Contains(opslevel.AllUserRole(), role) {
+			if Contains(opslevel.AllUserRole, role) {
 				userRole = opslevel.UserRole(role)
 			}
 			input := opslevel.UserInput{

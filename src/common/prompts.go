@@ -51,7 +51,7 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 		{{ "Description:" | faint }}	{{ .Description }}`,
 	}
 
-	filteredList := []opslevel.Level{}
+	var filteredList []opslevel.Level
 	for _, val := range list {
 		if val.Index != 0 {
 			filteredList = append(filteredList, val)
@@ -109,10 +109,11 @@ func PromptForFilter(client *opslevel.Client) (*opslevel.Filter, error) {
 }
 
 func PromptForTeam(client *opslevel.Client) (*opslevel.Team, error) {
-	list, err := client.ListTeams()
+	resp, err := client.ListTeams(nil)
 	if err != nil {
 		return nil, err
 	}
+	list := resp.Nodes
 
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}?",
