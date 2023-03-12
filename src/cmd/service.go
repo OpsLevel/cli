@@ -134,7 +134,7 @@ opslevel get service tag my-service my-tag
 		if result.Id == "" {
 			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
 		}
-		output := []opslevel.Tag{}
+		var output []opslevel.Tag
 		for _, tag := range result.Tags.Nodes {
 			if singleTag == false || tagKey == tag.Key {
 				output = append(output, tag)

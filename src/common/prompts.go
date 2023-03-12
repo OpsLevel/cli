@@ -51,7 +51,7 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 		{{ "Description:" | faint }}	{{ .Description }}`,
 	}
 
-	filteredList := []opslevel.Level{}
+	var filteredList []opslevel.Level
 	for _, val := range list {
 		if val.Index != 0 {
 			filteredList = append(filteredList, val)

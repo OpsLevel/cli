@@ -241,7 +241,7 @@ opslevel get team tag my-team | jq 'from_entries'
 		if result.Id == "" {
 			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
 		}
-		output := []opslevel.Tag{}
+		var output []opslevel.Tag
 		for _, tag := range result.Tags.Nodes {
 			if singleTag == false || tagKey == tag.Key {
 				output = append(output, tag)
