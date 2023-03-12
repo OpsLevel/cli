@@ -10,24 +10,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var lifecycleCmd = &cobra.Command{
-	Use:     "lifecycle",
-	Aliases: []string{"lifecycles"},
-	Short:   "Lists lifecycles",
-	Long:    `Lists lifecycles`,
-	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListLifecycles()
-		cobra.CheckErr(err)
-		if isJsonOutput() {
-			common.JsonPrint(json.MarshalIndent(list, "", "    "))
-		} else {
-			w := common.NewTabWriter("ALIAS", "ID")
-			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t\n", item.Alias, item.Id)
+func NewLifecycleCmd(client *opslevel.Client) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "lifecycle",
+		Aliases: []string{"lifecycles"},
+		Short:   "Lists lifecycles",
+		Long:    `Lists lifecycles`,
+		Run: func(cmd *cobra.Command, args []string) {
+			list, err := client.ListLifecycles()
+			cobra.CheckErr(err)
+			if isJsonOutput() {
+				data, err := json.MarshalIndent(list, "", "  ")
+				cobra.CheckErr(err)
+				cmd.Print(string(data))
+			} else {
+				w := common.NewTabWriter("ALIAS", "ID")
+				for _, item := range list {
+					fmt.Fprintf(w, "%s\t%s\t\n", item.Alias, item.Id)
+				}
+				w.Flush()
 			}
-			w.Flush()
-		}
-	},
+		},
+	}
+	cmd.Flags().StringVarP(&listOutputType, "output", "o", "text", "Output format.  One of: json|csv|text [default: text]")
+	return cmd
 }
 
 var tierCmd = &cobra.Command{
@@ -70,7 +76,8 @@ var toolsCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.AddCommand(lifecycleCmd)
+	//client := getClientGQL()
+	//listCmd.AddCommand(NewLifecycleCmd(client))
 	listCmd.AddCommand(tierCmd)
 	listCmd.AddCommand(toolsCmd)
 }
