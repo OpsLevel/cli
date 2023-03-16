@@ -1,0 +1,3 @@
+kind: Bugfix
+body: Pickup an opslevel-go hotfix that fixes `export terraform` command
+time: 2023-03-16T14:16:56.545834-05:00
