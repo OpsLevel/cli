@@ -3,10 +3,12 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/gosimple/slug"
@@ -97,13 +99,16 @@ provider "opslevel" {
 
 	graphqlClient := getClientGQL()
 
-	exportConstants(graphqlClient, constants)
-	exportRepos(graphqlClient, repos, bash)
-	exportServices(graphqlClient, bash, directory)
+	exportLifecycles(graphqlClient, constants)
+	exportTiers(graphqlClient, constants)
+	exportIntegrations(graphqlClient, constants)
+	exportRepos(graphqlClient, repos)
+	//exportServices(graphqlClient, bash, directory)
 	exportTeams(graphqlClient, teams, bash)
-	exportFilters(graphqlClient, filters, bash)
-	exportRubric(graphqlClient, rubric, bash)
-	exportChecks(graphqlClient, bash, directory)
+	//exportFilters(graphqlClient, filters, bash)
+	exportRubricCategories(graphqlClient, rubric, bash)
+	exportRubricLevels(graphqlClient, rubric, bash)
+	//exportChecks(graphqlClient, bash, directory)
 	fmt.Println("Complete!")
 }
 
@@ -142,61 +147,89 @@ EOT`, fieldName, fieldContents)
 	return fieldContents
 }
 
-func exportConstants(c *opslevel.Client, config *os.File) {
-	lifecycleConfig := `data "opslevel_lifecycle" "%s" {
-  filter {
-    field = "id"
-    value = "%s"
-  }
+func terraformMultilineStringArg(fieldContents string) string {
+	if len(fieldContents) > 0 {
+		if len(strings.Split(fieldContents, "\n")) > 1 {
+			if strings.HasSuffix(fieldContents, "\n") {
+				fieldContents = strings.TrimSuffix(fieldContents, "\n")
+				return fmt.Sprintf(`<<-EOT
+%s
+EOT`, fieldContents)
+			} else {
+				return fmt.Sprintf(`<<-EOT
+%s
+EOT`, fieldContents)
+			}
+		} else {
+			return fmt.Sprintf("%q", fieldContents)
+		}
+	}
+	return fmt.Sprintf("%q", fieldContents)
 }
-`
+
+var _tpl *template.Template
+
+func GetTemplater() *template.Template {
+	if _tpl == nil {
+		_tpl = template.New("").Delims("<%", "%>").Funcs(sprig.TxtFuncMap()).Funcs(map[string]any{"slugify": slug.Make, "multiline": terraformMultilineStringArg})
+	}
+	return _tpl
+}
+
+func ProcessTemplate(config *os.File, resources any, text string) {
+	fn, err := GetTemplater().Parse(text)
+	cobra.CheckErr(err)
+	fn.Execute(config, resources)
+}
+
+func exportLifecycles(c *opslevel.Client, config *os.File) {
 	lifecycles, err := c.ListLifecycles()
 	cobra.CheckErr(err)
-	for _, lifecycle := range lifecycles {
-		config.WriteString(templateConfig(lifecycleConfig, lifecycle.Alias, lifecycle.Id))
-	}
-
-	tierConfig := `data "opslevel_tier" "%s" {
+	ProcessTemplate(config, lifecycles, `<%- range . %>
+data "opslevel_lifecycle" "<% .Alias | slugify %>" {
   filter {
     field = "id"
-    value = "%s"
+    value = "<% .Id %>"
   }
 }
-`
+<%- end %>`)
+}
+
+func exportTiers(c *opslevel.Client, config *os.File) {
 	tiers, err := c.ListTiers()
 	cobra.CheckErr(err)
-	for _, tier := range tiers {
-		config.WriteString(templateConfig(tierConfig, tier.Alias, tier.Id))
-	}
-
-	integrationConfig := `data "opslevel_integration" "%s" {
+	ProcessTemplate(config, tiers, `<%- range . %>
+data "opslevel_tier" "<% .Alias | slugify %>" {
   filter {
     field = "id"
-    value = "%s"
+    value = "<% .Id %>"
   }
 }
-`
-	resp, err := c.ListIntegrations(nil)
-	cobra.CheckErr(err)
-	for _, integration := range resp.Nodes {
-		config.WriteString(templateConfig(integrationConfig, getIntegrationTerraformName(integration), integration.Id))
-	}
+<%- end %>`)
 }
 
-func exportRepos(c *opslevel.Client, config *os.File, shell *os.File) {
-	repoConfig := `data "opslevel_repository" "%s" {
-  alias = "%s"
-}
-`
-	resp, err := c.ListRepositories(nil)
-	repos := resp.Nodes
+func exportIntegrations(c *opslevel.Client, config *os.File) {
+	resp, err := c.ListIntegrations(nil)
 	cobra.CheckErr(err)
-	for _, repo := range repos {
-		if repo.DefaultAlias == "" {
-			continue
-		}
-		config.WriteString(templateConfig(repoConfig, makeTerraformSlug(repo.DefaultAlias), repo.DefaultAlias))
-	}
+	ProcessTemplate(config, resp.Nodes, `<%- range . %>
+data "opslevel_integration" "<% .Type | slugify %>_<% .Name | slugify %>" {
+  filter {
+    field = "id"
+    value = "<% .Id %>"
+  }
+}
+<%- end %>`)
+}
+
+func exportRepos(c *opslevel.Client, config *os.File) {
+	resp, err := c.ListRepositories(nil)
+	cobra.CheckErr(err)
+	ProcessTemplate(config, resp.Nodes, `<%- range . %>
+<% if eq .DefaultAlias "" %><% continue %><% end %>
+data "opslevel_repository" "<% .DefaultAlias | slugify %>" {
+  alias = "<% .DefaultAlias %>"
+}
+<%- end %>`)
 }
 
 func flattenAliases(aliases []string) string {
@@ -307,59 +340,64 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 }
 
 func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
-	shell.WriteString("# Teams\n")
-
-	teamConfig := `resource "opslevel_team" "%s" {
-  name = "%s"
-  manager_email = "%s"
-  %s
-  %s
-}
-`
 	resp, err := c.ListTeams(nil)
-	teams := resp.Nodes
 	cobra.CheckErr(err)
-	for _, team := range teams {
-		aliases := flattenAliases(team.Aliases)
-		if len(aliases) > 0 {
-			aliases = fmt.Sprintf("aliases = [\"%s\"]", aliases)
-		}
-		config.WriteString(templateConfig(teamConfig, team.Alias, team.Name, team.Manager.Email, aliases, buildMultilineStringArg("responsibilities", team.Responsibilities)))
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_team.%s %s\n", team.Alias, team.Id))
-	}
-	shell.WriteString("##########\n\n")
+
+	ProcessTemplate(shell, resp.Nodes, `# Teams
+<%- range . %>
+terraform import opslevel_team.<% .Alias | slugify %> <% .Id %>
+<%- end %>
+##########
+`)
+
+	ProcessTemplate(config, resp.Nodes, `<% range . %>
+data "opslevel_team" "<% .Alias | slugify %>" {
+  name = "<% .Name %>"
+  manager_email = "<% .Manager.Email %>"
+<%- if .Aliases %>
+  aliases = <% .Aliases | toJson %>
+<%- end %>
+  responsibilities = <% .Responsibilities | multiline %>
+}
+<% end %>`)
 }
 
-func exportRubric(c *opslevel.Client, config *os.File, shell *os.File) {
-	shell.WriteString("# Rubric\n")
-
+func exportRubricCategories(c *opslevel.Client, config *os.File, shell *os.File) {
 	resp, err := c.ListCategories(nil)
 	cobra.CheckErr(err)
-	categories := resp.Nodes
-	categoryConfig := `resource "opslevel_rubric_category" "%s" {
-  name = "%s"
-}
-`
-	for _, category := range categories {
-		categoryTerraformName := makeTerraformSlug(category.Name)
-		config.WriteString(templateConfig(categoryConfig, categoryTerraformName, category.Name))
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_rubric_category.%s %s\n", categoryTerraformName, category.Id))
-	}
 
-	levelConfig := `resource "opslevel_rubric_level" "%s" {
-  name = "%s"
-  description = "%s"
-  index = %d
+	ProcessTemplate(shell, resp.Nodes, `# Rubric Categories
+<%- range . %>
+terraform import opslevel_rubric_category.<% .Name | slugify %> <% .Id %>
+<%- end %>
+##########
+`)
+
+	ProcessTemplate(config, resp.Nodes, `<% range . %>
+data "opslevel_rubric_category" "<% .Name | slugify %>" {
+  name = "<% .Name %>"
 }
-`
-	levels, err := c.ListLevels()
+<% end %>`)
+}
+
+func exportRubricLevels(c *opslevel.Client, config *os.File, shell *os.File) {
+	resp, err := c.ListLevels()
 	cobra.CheckErr(err)
-	for _, level := range levels {
-		config.WriteString(templateConfig(levelConfig, level.Alias, level.Name, level.Description, level.Index))
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_rubric_level.%s %s\n", level.Alias, level.Id))
-	}
 
-	shell.WriteString("##########\n\n")
+	ProcessTemplate(shell, resp, `# Rubric Levels
+<%- range . %>
+terraform import opslevel_rubric_level.<% .Alias | slugify %> <% .Id %>
+<%- end %>
+##########
+`)
+
+	ProcessTemplate(config, resp, `<% range . %>
+data "opslevel_rubric_level" "<% .Alias | slugify %>" {
+  name = "<% .Name %>"
+  index = <% .Index %>
+  description = <% .Description | multiline %>
+}
+<% end %>`)
 }
 
 func exportFilters(c *opslevel.Client, config *os.File, shell *os.File) {
