@@ -51,11 +51,11 @@ var getSystemCmd = &cobra.Command{
 }
 
 // The story for this seems to be the need to retrieve all the parent/attached domains for a given system
-var getSystemDomainCmd = &cobra.Command{
-	Use:        "domain ID|ALIAS",
+var getSystemServiceCmd = &cobra.Command{
+	Use:        "system ID|ALIAS",
 	Aliases:    []string{"systems"},
-	Short:      "Get domains attached to a given system",
-	Long:       `Get domains attached to a given system.`,
+	Short:      "Get services attached to a system",
+	Long:       `Get services attached to a system.`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -147,7 +147,7 @@ var listSystemCmd = &cobra.Command{
 func init() {
 	createCmd.AddCommand(createSystemCmd)
 	getCmd.AddCommand(getSystemCmd)
-	getSystemCmd.AddCommand(getSystemDomainCmd)
+	getSystemCmd.AddCommand(getSystemServiceCmd)
 	getSystemCmd.AddCommand(getSystemTagCmd)
 	listCmd.AddCommand(listSystemCmd)
 }
