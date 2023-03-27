@@ -1,0 +1,6 @@
+name: "Test System"
+description: "Hello World System"
+ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
+parent:
+  alias: "platformsystem1"
+note: "this is the first system cli test"
