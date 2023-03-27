@@ -60,10 +60,10 @@ var getSystemDomainCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		system, err := getClientGQL().GetSystem(key) //it gets wonky here
+		system, err := getClientGQL().GetSystem(key)
 		cobra.CheckErr(err)
-		common.WasFound(domain.Id == "", key)
-		resp, err := domain.ChildSystems(getClientGQL(), nil)
+		common.WasFound(system.Id == "", key)
+		resp, err := system.ChildServices(getClientGQL(), nil)
 		systems := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
