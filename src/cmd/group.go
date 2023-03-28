@@ -264,9 +264,9 @@ EOF
 		key := args[0]
 		input, err := readGroupInput()
 		cobra.CheckErr(err)
-		filter, err := getClientGQL().UpdateGroup(key, *input)
+		group, err := getClientGQL().UpdateGroup(key, *input)
 		cobra.CheckErr(err)
-		fmt.Println(filter.Id)
+		fmt.Println(group.Id)
 	},
 }
 

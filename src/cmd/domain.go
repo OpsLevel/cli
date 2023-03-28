@@ -13,6 +13,26 @@ import (
 	"strings"
 )
 
+var assignSystemCmd = &cobra.Command{
+	Use:        "system ID|ALIAS SYSTEM",
+	Short:      "Add a system to a domain",
+	Example:    `opslevel create system my_domain my_system`,
+	Args:       cobra.ExactArgs(2),
+	ArgAliases: []string{"DOMAIN_ID", "DOMAIN_ALIAS", "SYSTEM"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		system := args[1]
+
+		domain, err := getClientGQL().GetDomain(key)
+		cobra.CheckErr(err)
+		common.WasFound(domain.Id == "", key)
+
+		addErr := domain.AssignSystem(getClientGQL(), system)
+		cobra.CheckErr(addErr)
+		fmt.Printf("add system '%s' to domain '%s'\n", system, domain.Name)
+	},
+}
+
 var createDomainCmd = &cobra.Command{
 	Use:   "domain",
 	Short: "Create a domain",
@@ -31,6 +51,20 @@ EOF
 		result, err := getClientGQL().CreateDomain(*input)
 		cobra.CheckErr(err)
 		fmt.Println(result.Id)
+	},
+}
+
+var deleteDomainCmd = &cobra.Command{
+	Use:        "domain ID|ALIAS",
+	Short:      "Delete a domain",
+	Long:       `Delete a domain`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		err := getClientGQL().DeleteDomain(key)
+		cobra.CheckErr(err)
+		fmt.Printf("deleted '%s' domain\n", key)
 	},
 }
 
@@ -143,17 +177,54 @@ var listDomainCmd = &cobra.Command{
 	},
 }
 
+var updateDomainCmd = &cobra.Command{
+	Use:   "domain ID|ALIAS",
+	Short: "Update a domain",
+	Long: `Update a domain
+
+cat << EOF | opslevel update domain my_domain -f -
+name: "My New Domain"
+description: "Hello World New Domain"
+ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83ODk"
+note: "Additional details for my new domain"
+EOF
+`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		input, err := readDomainUpdateInput()
+		cobra.CheckErr(err)
+		domain, err := getClientGQL().UpdateDomain(key, *input)
+		cobra.CheckErr(err)
+		fmt.Println(domain.Id)
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createDomainCmd)
+	createCmd.AddCommand(assignSystemCmd)
+	deleteCmd.AddCommand(deleteDomainCmd)
 	getCmd.AddCommand(getDomainCmd)
 	getDomainCmd.AddCommand(getDomainSystemCmd)
 	getDomainCmd.AddCommand(getDomainTagCmd)
 	listCmd.AddCommand(listDomainCmd)
+	updateCmd.AddCommand(updateDomainCmd)
 }
 
 func readDomainCreateInput() (*opslevel.DomainCreateInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.DomainCreateInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
+}
+
+func readDomainUpdateInput() (*opslevel.DomainUpdateInput, error) {
+	readCreateConfigFile()
+	evt := &opslevel.DomainUpdateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
