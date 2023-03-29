@@ -13,30 +13,11 @@ import (
 	"strings"
 )
 
-var assignSystemCmd = &cobra.Command{
-	Use:        "system ID|ALIAS SYSTEM",
-	Short:      "Add a system to a domain",
-	Example:    `opslevel create system my_domain my_system`,
-	Args:       cobra.ExactArgs(2),
-	ArgAliases: []string{"DOMAIN_ID", "DOMAIN_ALIAS", "SYSTEM"},
-	Run: func(cmd *cobra.Command, args []string) {
-		key := args[0]
-		system := args[1]
-
-		domain, err := getClientGQL().GetDomain(key)
-		cobra.CheckErr(err)
-		common.WasFound(domain.Id == "", key)
-
-		addErr := domain.AssignSystem(getClientGQL(), system)
-		cobra.CheckErr(addErr)
-		fmt.Printf("add system '%s' to domain '%s'\n", system, domain.Name)
-	},
-}
-
 var createDomainCmd = &cobra.Command{
 	Use:   "domain",
 	Short: "Create a domain",
-	Long: `Create a domain
+	Long:  `Create a domain`,
+	Example: `
 
 cat << EOF | opslevel create domain -f -
 name: "My Domain"
@@ -55,9 +36,12 @@ EOF
 }
 
 var deleteDomainCmd = &cobra.Command{
-	Use:        "domain ID|ALIAS",
-	Short:      "Delete a domain",
-	Long:       `Delete a domain`,
+	Use:   "domain ID|ALIAS",
+	Short: "Delete a domain",
+	Long:  `Delete a domain`,
+	Example: `
+opslevel delete domain my_domain
+`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -69,9 +53,12 @@ var deleteDomainCmd = &cobra.Command{
 }
 
 var getDomainCmd = &cobra.Command{
-	Use:        "domain ID|ALIAS",
-	Short:      "Get details about a domain",
-	Long:       `Get details about a domain`,
+	Use:   "domain ID|ALIAS",
+	Short: "Get details about a domain",
+	Long:  `Get details about a domain`,
+	Example: `
+opslevel get domain my_domain
+`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -79,73 +66,11 @@ var getDomainCmd = &cobra.Command{
 		result, err := getClientGQL().GetDomain(key)
 		cobra.CheckErr(err)
 		common.WasFound(result.Id == "", key)
-		common.PrettyPrint(result)
-	},
-}
-
-var getDomainSystemCmd = &cobra.Command{
-	Use:        "system ID|ALIAS",
-	Aliases:    []string{"systems"},
-	Short:      "Get systems for a domain",
-	Long:       `The systems that belong to a domain.`,
-	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"ID", "ALIAS"},
-	Run: func(cmd *cobra.Command, args []string) {
-		key := args[0]
-		domain, err := getClientGQL().GetDomain(key)
-		cobra.CheckErr(err)
-		common.WasFound(domain.Id == "", key)
-		resp, err := domain.ChildSystems(getClientGQL(), nil)
-		systems := resp.Nodes
-		cobra.CheckErr(err)
-		if isJsonOutput() {
-			common.PrettyPrint(systems)
+		if isYamlOutput() {
+			common.YamlPrint(result)
 		} else {
-			w := common.NewTabWriter("Name", "ID")
-			for _, item := range systems {
-				fmt.Fprintf(w, "%s\t%s\t\n", item.Name, item.Id)
-			}
-			w.Flush()
+			common.PrettyPrint(result)
 		}
-	},
-}
-
-var getDomainTagCmd = &cobra.Command{
-	Use:     "tag ID|ALIAS TAG_KEY",
-	Aliases: []string{"tags"},
-	Short:   "Get a domain's tag",
-	Long: `Get a domain's' tag
-
-opslevel get domain tag my_domain | jq 'from_entries'
-opslevel get domain tag my_domain my-tag
-`,
-	Args:       cobra.MinimumNArgs(1),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
-	Run: func(cmd *cobra.Command, args []string) {
-		domainKey := args[0]
-		singleTag := len(args) == 2
-		var tagKey string
-		if singleTag {
-			tagKey = args[1]
-		}
-
-		domain, err := getClientGQL().GetDomain(domainKey)
-		cobra.CheckErr(err)
-		if domain.Id == "" {
-			cobra.CheckErr(fmt.Errorf("domain '%s' not found", domainKey))
-		}
-		var output []opslevel.Tag
-		tags, err := domain.Tags(getClientGQL(), nil)
-		cobra.CheckErr(err)
-		for _, tag := range tags.Nodes {
-			if singleTag == false || tagKey == tag.Key {
-				output = append(output, tag)
-			}
-		}
-		if len(output) == 0 {
-			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on domain '%s'", tagKey, domainKey))
-		}
-		common.PrettyPrint(output)
 	},
 }
 
@@ -154,6 +79,9 @@ var listDomainCmd = &cobra.Command{
 	Aliases: []string{"domains"},
 	Short:   "Lists the domains",
 	Long:    `Lists the domains`,
+	Example: `
+opslevel list domain
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		resp, err := getClientGQL().ListDomains(nil)
 		list := resp.Nodes
@@ -203,11 +131,8 @@ EOF
 
 func init() {
 	createCmd.AddCommand(createDomainCmd)
-	createCmd.AddCommand(assignSystemCmd)
 	deleteCmd.AddCommand(deleteDomainCmd)
 	getCmd.AddCommand(getDomainCmd)
-	getDomainCmd.AddCommand(getDomainSystemCmd)
-	getDomainCmd.AddCommand(getDomainTagCmd)
 	listCmd.AddCommand(listDomainCmd)
 	updateCmd.AddCommand(updateDomainCmd)
 }
