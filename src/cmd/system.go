@@ -14,18 +14,19 @@ import (
 )
 
 var createSystemCmd = &cobra.Command{
-	Use:   "system",
+	Use:   "system ID|ALIAS",
 	Short: "Create a system",
-	Long: `Create a system
-cat << EOF | opslevel create system -f -
-name: "My System"
-description: "Hello World System"
-ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
-parent:
-	alias: "Name of parent domain"
-note: "Additional system details"
-EOF
-`,
+	Long:  `Create a system`,
+	Example: `
+		cat << EOF | opslevel create system -f -
+		name: "My System"
+		description: "Hello World System"
+		ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
+		parent:
+			alias: "Name of parent domain"
+		note: "Additional system details"
+		EOF
+		`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readSystemCreateInput()
 		cobra.CheckErr(err)
@@ -41,83 +42,68 @@ var getSystemCmd = &cobra.Command{
 	Long:       `Get details about a system`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
+	Example: `
+		opslevel get system my-system-alias-or-id
+		`,
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		result, err := getClientGQL().GetSystem(key)
 		cobra.CheckErr(err)
 		common.WasFound(result.Id == "", key)
-		common.PrettyPrint(result)
+		if isYamlOutput() {
+			common.YamlPrint(result)
+		} else {
+			common.PrettyPrint(result)
+		}
 	},
 }
 
-// The story for this seems to be the need to retrieve all the parent/attached domains for a given system
-var getSystemServiceCmd = &cobra.Command{
-	Use:        "system ID|ALIAS",
-	Aliases:    []string{"systems"},
-	Short:      "Get services attached to a system",
-	Long:       `Get services attached to a system.`,
+var deleteSystemCmd = &cobra.Command{
+	Use:   "system ID|ALIAS",
+	Short: "Delete a system",
+	Long:  "Delete a system from OpsLevel",
+	Example: `
+		opslevel delete system my-system-alias-or-id
+		`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		system, err := getClientGQL().GetSystem(key)
+		err := getClientGQL().DeleteSystem(key)
 		cobra.CheckErr(err)
-		common.WasFound(system.Id == "", key)
-		resp, err := system.ChildServices(getClientGQL(), nil)
-		systems := resp.Nodes
-		cobra.CheckErr(err)
-		if isJsonOutput() {
-			common.PrettyPrint(systems)
-		} else {
-			w := common.NewTabWriter("Name", "ID")
-			for _, item := range systems {
-				fmt.Fprintf(w, "%s\t%s\t\n", item.Name, item.Id)
-			}
-			w.Flush()
-		}
+		fmt.Printf("deleted '%s' system\n", key)
 	},
 }
 
-var getSystemTagCmd = &cobra.Command{
-	Use:     "tag ID|ALIAS TAG_KEY",
-	Aliases: []string{"tags"},
-	Short:   "Get a system's tags",
-	Long: `Get a system's' tags
-opslevel get system tag my_system | jq 'from_entries'
-opslevel get system tag my_system my-tag
-`,
-	Args:       cobra.MinimumNArgs(1),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+// TODO: bug in API prevents use of alias in this function.  Adding full functionality for now.
+var updateSystemCmd = &cobra.Command{
+	Use:   "system ID|ALIAS",
+	Short: "Update an OpsLevel system",
+	Long:  "Update an OpsLevel system",
+	Example: `
+		cat << EOF | opslevel update system my-system-alias-or-id -f -
+		name: "My Updated System"
+		description: "Hello Updated System"
+		ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
+		parent:
+			alias: "my_domain"
+		note: "Additional system details for my updated system"
+		EOF
+		`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
-		systemKey := args[0]
-		singleTag := len(args) == 2
-		var tagKey string
-		if singleTag {
-			tagKey = args[1]
-		}
-
-		system, err := getClientGQL().GetSystem(systemKey)
+		key := args[0]
+		input, err := readSystemUpdateInput()
 		cobra.CheckErr(err)
-		if system.Id == "" {
-			cobra.CheckErr(fmt.Errorf("system '%s' not found", systemKey))
-		}
-		var output []opslevel.Tag
-		tags, err := system.Tags(getClientGQL(), nil)
+		system, err := getClientGQL().UpdateSystem(key, *input)
 		cobra.CheckErr(err)
-		for _, tag := range tags.Nodes {
-			if singleTag == false || tagKey == tag.Key {
-				output = append(output, tag)
-			}
-		}
-		if len(output) == 0 {
-			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on system '%s'", tagKey, systemKey))
-		}
-		common.PrettyPrint(output)
+		fmt.Println(system.Id)
 	},
 }
 
 var listSystemCmd = &cobra.Command{
-	Use:     "system",
+	Use:     "system ID|ALIAS",
 	Aliases: []string{"systems"},
 	Short:   "Lists the systems",
 	Long:    `Lists the systems`,
@@ -147,14 +133,24 @@ var listSystemCmd = &cobra.Command{
 func init() {
 	createCmd.AddCommand(createSystemCmd)
 	getCmd.AddCommand(getSystemCmd)
-	getSystemCmd.AddCommand(getSystemServiceCmd)
-	getSystemCmd.AddCommand(getSystemTagCmd)
+	deleteCmd.AddCommand(deleteSystemCmd)
+	updateCmd.AddCommand(updateSystemCmd)
 	listCmd.AddCommand(listSystemCmd)
 }
 
 func readSystemCreateInput() (*opslevel.SystemCreateInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.SystemCreateInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
+}
+
+func readSystemUpdateInput() (*opslevel.SystemUpdateInput, error) {
+	readCreateConfigFile()
+	evt := &opslevel.SystemUpdateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
