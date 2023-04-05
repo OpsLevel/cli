@@ -14,7 +14,6 @@ func NewGraphClient(version string, options ...opslevel.Option) *opslevel.Client
 	options = append(options, opslevel.SetURL(viper.GetString("api-url")))
 	options = append(options, opslevel.SetTimeout(timeout))
 	options = append(options, opslevel.SetUserAgentExtra(fmt.Sprintf("cli-%s", version)))
-	options = append(options, opslevel.SetAPIVisibility("internal"))
 	client := opslevel.NewGQLClient(options...)
 
 	clientErr := client.Validate()
