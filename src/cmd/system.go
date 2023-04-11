@@ -21,9 +21,9 @@ var createSystemCmd = &cobra.Command{
 		cat << EOF | opslevel create system -f -
 		name: "My System"
 		description: "Hello World System"
-		ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
+		owner: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
 		parent:
-			alias: "Name of parent domain"
+			alias: "alias of domain"
 		note: "Additional system details"
 		EOF
 		`,

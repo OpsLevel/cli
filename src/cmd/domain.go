@@ -22,7 +22,7 @@ var createDomainCmd = &cobra.Command{
 cat << EOF | opslevel create domain -f -
 name: "My Domain"
 description: "Hello World Domain"
-ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
+owner: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
 note: "Additional details"
 EOF
 `,
