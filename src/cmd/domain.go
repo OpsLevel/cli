@@ -27,7 +27,7 @@ note: "Additional details"
 EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readDomainCreateInput()
+		input, err := readDomainInput()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateDomain(*input)
 		cobra.CheckErr(err)
@@ -113,7 +113,7 @@ var updateDomainCmd = &cobra.Command{
 cat << EOF | opslevel update domain my_domain -f -
 name: "My New Domain"
 description: "Hello World New Domain"
-ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83ODk"
+owner: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83ODk"
 note: "Additional details for my new domain"
 EOF
 `,
@@ -121,7 +121,7 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readDomainUpdateInput()
+		input, err := readDomainInput()
 		cobra.CheckErr(err)
 		domain, err := getClientGQL().UpdateDomain(key, *input)
 		cobra.CheckErr(err)
@@ -137,19 +137,9 @@ func init() {
 	updateCmd.AddCommand(updateDomainCmd)
 }
 
-func readDomainCreateInput() (*opslevel.DomainCreateInput, error) {
+func readDomainInput() (*opslevel.DomainInput, error) {
 	readCreateConfigFile()
-	evt := &opslevel.DomainCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
-}
-
-func readDomainUpdateInput() (*opslevel.DomainUpdateInput, error) {
-	readCreateConfigFile()
-	evt := &opslevel.DomainUpdateInput{}
+	evt := &opslevel.DomainInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err

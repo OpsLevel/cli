@@ -28,7 +28,7 @@ var createSystemCmd = &cobra.Command{
 		EOF
 		`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readSystemCreateInput()
+		input, err := readSystemInput()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateSystem(*input)
 		cobra.CheckErr(err)
@@ -84,7 +84,7 @@ var updateSystemCmd = &cobra.Command{
 		cat << EOF | opslevel update system my-system-alias-or-id -f -
 		name: "My Updated System"
 		description: "Hello Updated System"
-		ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
+		owner: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
 		parent:
 			alias: "my_domain"
 		note: "Additional system details for my updated system"
@@ -94,7 +94,7 @@ var updateSystemCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readSystemUpdateInput()
+		input, err := readSystemInput()
 		cobra.CheckErr(err)
 		system, err := getClientGQL().UpdateSystem(key, *input)
 		cobra.CheckErr(err)
@@ -138,19 +138,9 @@ func init() {
 	listCmd.AddCommand(listSystemCmd)
 }
 
-func readSystemCreateInput() (*opslevel.SystemCreateInput, error) {
+func readSystemInput() (*opslevel.SystemInput, error) {
 	readCreateConfigFile()
-	evt := &opslevel.SystemCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
-}
-
-func readSystemUpdateInput() (*opslevel.SystemUpdateInput, error) {
-	readCreateConfigFile()
-	evt := &opslevel.SystemUpdateInput{}
+	evt := &opslevel.SystemInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
