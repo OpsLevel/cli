@@ -10,11 +10,11 @@ require (
 	github.com/itchyny/gojq v0.12.11
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.48.0
-	github.com/opslevel/opslevel-go/v2023 v2023.3.14
+	github.com/opslevel/opslevel-go/v2023 v2023.4.11
 	github.com/relvacode/iso8601 v1.3.0
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.29.0
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -40,9 +40,9 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hasura/go-graphql-client v0.9.1 // indirect
+	github.com/hasura/go-graphql-client v0.9.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
@@ -80,4 +80,4 @@ require (
 )
 
 //Only used for local development!
-replace github.com/opslevel/opslevel-go/v2023 => ./submodules/opslevel-go
+//replace github.com/opslevel/opslevel-go/v2023 => ./submodules/opslevel-go

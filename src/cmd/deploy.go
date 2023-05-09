@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/opslevel/opslevel-go/v2023"
+	"os"
 	"time"
 
 	"github.com/creasty/defaults"
@@ -50,6 +51,11 @@ var deployCreateCmd = &cobra.Command{
 	Short: "Create deployment events",
 	Long:  "Create deployment events",
 	Run: func(cmd *cobra.Command, args []string) {
+		if integrationUrl == "" {
+			log.Error().Msg("Please provide '--integration-url' to send the deployment information to")
+			os.Exit(1)
+		}
+
 		var err error
 		evt, err := readCreateConfigAsDeployEvent()
 		cobra.CheckErr(err)
@@ -60,13 +66,18 @@ var deployCreateCmd = &cobra.Command{
 			body, err := json.Marshal(evt)
 			cobra.CheckErr(err)
 			response := &opslevel.RestResponse{}
-			_, err = getClientRest().R().
+			resp, err := getClientRest().R().
 				SetHeader("Content-Type", "application/json").
 				SetBody(body).
 				SetResult(response).
 				Post(integrationUrl)
 			cobra.CheckErr(err)
-			log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
+			if resp.IsSuccess() {
+				log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
+			} else {
+				log.Error().Msg(resp.String())
+				os.Exit(1)
+			}
 		}
 	},
 }
