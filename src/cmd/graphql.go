@@ -14,7 +14,7 @@ import (
     "strings"
 )
 
-var keyValueExp = regexp.MustCompile(`([\w-]+)="(.*)"`)
+var keyValueExp = regexp.MustCompile(`([\w-]+)=(.*)`)
 var usesPaginationExp = regexp.MustCompile(`\$endCursor:\WString`)
 var hasNextPageExp = regexp.MustCompile(`"hasNextPage":([\w]+)`)
 var endCursorExp = regexp.MustCompile(`"endCursor":\"([\w]+)\"`)
@@ -64,7 +64,7 @@ query ($endCursor: String) {
   }
 }'
 
-opslevel graphql -f owner="platform" -f tier="tier_1" --paginate -a=".account.services.nodes[]" -q='
+opslevel graphql -f "owner=platform" -f "tier=tier_1" --paginate -a=".account.services.nodes[]" -q='
 query ($endCursor: String, $owner: String!, $tier: String!) {
   account {
     services(first: 1, after: $endCursor, ownerAlias: $owner, tierAlias: $tier) {
@@ -79,6 +79,15 @@ query ($endCursor: String, $owner: String!, $tier: String!) {
     }
   }
 }'
+
+opslevel graphql -f "id=XXXXXX" -H "GraphQL-Visibility=internal" -a=".account.configFile.yaml" -q='
+query ($id: ID!){
+  account {
+    configFile(id: $id) {
+      yaml
+    }
+  }
+}' | jq -r '.[0]' > opslevel.yml
 `,
     Run: func(cmd *cobra.Command, args []string) {
         flags := cmd.Flags()
