@@ -25,7 +25,7 @@ jobs:
           cd src/
           go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
       - name: Upload Coverage
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           files: ./src/coverage.txt
           fail_ci_if_error: false
