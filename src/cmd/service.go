@@ -89,18 +89,22 @@ var getServiceCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		var result *opslevel.Service
+		client := getClientGQL()
+		var service *opslevel.Service
 		var err error
 		if common.IsID(key) {
-			result, err = getClientGQL().GetService(opslevel.ID(key))
+			service, err = getClientGQL().GetService(opslevel.ID(key))
 			cobra.CheckErr(err)
 		} else {
-			result, err = getClientGQL().GetServiceWithAlias(key)
+			service, err = getClientGQL().GetServiceWithAlias(key)
 			cobra.CheckErr(err)
 		}
+		_, err = service.GetDependents(client, nil)
 		cobra.CheckErr(err)
-		common.WasFound(result.Id == "", key)
-		common.PrettyPrint(result)
+		_, err = service.GetDependencies(client, nil)
+		cobra.CheckErr(err)
+		common.WasFound(service.Id == "", key)
+		common.PrettyPrint(service)
 	},
 }
 

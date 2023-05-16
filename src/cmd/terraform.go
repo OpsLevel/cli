@@ -115,7 +115,7 @@ func makeTerraformSlug(value string) string {
 	//return strings.ReplaceAll(strings.ReplaceAll(slug.Make(value), "-", "_"), ":", "_")
 }
 
-func getIntegrationTerraformName(integration opslevel.Integration) string {
+func getIntegrationTerraformName(integration opslevel.IntegrationId) string {
 	return makeTerraformSlug(fmt.Sprintf("%s_%s", integration.Type, integration.Name))
 }
 
@@ -179,7 +179,7 @@ func exportConstants(c *opslevel.Client, config *os.File) {
 	resp, err := c.ListIntegrations(nil)
 	cobra.CheckErr(err)
 	for _, integration := range resp.Nodes {
-		config.WriteString(templateConfig(integrationConfig, getIntegrationTerraformName(integration), integration.Id))
+		config.WriteString(templateConfig(integrationConfig, getIntegrationTerraformName(integration.IntegrationId), integration.Id))
 	}
 }
 

@@ -1,0 +1,4 @@
+kind: Feature
+body: Add dependents and dependencies to the return data of the command `opslevel
+  get service`
+time: 2023-04-25T20:16:50.852203-05:00
