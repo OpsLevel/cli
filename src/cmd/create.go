@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -28,6 +29,28 @@ func hasStdin() bool {
 		return false
 	}
 	return stat.Size() > 0
+}
+
+func readCreateFile() ([]byte, error) {
+	if hasStdin() {
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	} else {
+		file, err := os.Open(createDataFile)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+
+		data, err := io.ReadAll(file)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	}
 }
 
 func readCreateConfigFile() {

@@ -13,8 +13,13 @@ require (
 	github.com/opslevel/opslevel-go/v2023 v2023.4.11
 	github.com/relvacode/iso8601 v1.3.0
 	github.com/rocktavious/autopilot v0.1.5
+<<<<<<< HEAD
 	github.com/rs/zerolog v1.29.0
 	github.com/spf13/cobra v1.7.0
+=======
+	github.com/rs/zerolog v1.29.1
+	github.com/spf13/cobra v1.6.1
+>>>>>>> 39ea59b (service depends)
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -40,7 +45,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hasura/go-graphql-client v0.9.2 // indirect
+	github.com/hasura/go-graphql-client v0.9.3 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect
@@ -66,11 +71,19 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/yashtewari/glob-intersection v0.1.0 // indirect
+<<<<<<< HEAD
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.6.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
+=======
+	golang.org/x/crypto v0.4.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/oauth2 v0.8.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
+>>>>>>> 39ea59b (service depends)
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
@@ -80,4 +93,4 @@ require (
 )
 
 //Only used for local development!
-//replace github.com/opslevel/opslevel-go/v2023 => ./submodules/opslevel-go
+replace github.com/opslevel/opslevel-go/v2023 => ./submodules/opslevel-go
