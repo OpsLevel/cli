@@ -21,7 +21,7 @@ var createUserCmd = &cobra.Command{
 	Long:  "Create a User and optionally define the role (options `User`|`Admin`).",
 	Example: `
 opslevel create user "john@example.com" "John Doe"
-opslevel create user "jane@example.com" "Jane Doe" Admin
+opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
 `,
 	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -35,9 +35,12 @@ opslevel create user "jane@example.com" "Jane Doe" Admin
 			}
 		}
 
+		skipEmail, err := cmd.Flags().GetBool("skip-welcome-email")
+
 		resource, err := getClientGQL().InviteUser(email, opslevel.UserInput{
-			Name: name,
-			Role: role,
+			Name:             name,
+			Role:             role,
+			SkipWelcomeEmail: skipEmail,
 		})
 		cobra.CheckErr(err)
 		fmt.Println(resource.Id)
@@ -196,6 +199,8 @@ EOF
 }
 
 func init() {
+	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set the welcome e-mail will be skipped from being sent")
+
 	createCmd.AddCommand(createUserCmd)
 	updateCmd.AddCommand(updateUserCmd)
 	getCmd.AddCommand(getUserCmd)
