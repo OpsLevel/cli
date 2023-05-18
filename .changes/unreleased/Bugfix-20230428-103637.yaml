@@ -1,4 +1,0 @@
-kind: Bugfix
-body: Fix bug where command `create deploy` does not properly error out and incorrectly
-  reports successful deploy event registered
-time: 2023-04-28T10:36:37.979606-05:00
