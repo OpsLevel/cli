@@ -69,7 +69,7 @@ jobs:
 
     - run: |
         echo "Pull Submodules and Build in /src"
-        git submodule update --init --recursive && cd src && go build -v ./...
+        cd src && git submodule update --init --recursive && go build -v ./...
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
