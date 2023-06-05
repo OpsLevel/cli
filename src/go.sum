@@ -298,8 +298,6 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLA
 github.com/open-policy-agent/opa v0.52.0 h1:Rv3F+VCDqsufaiYy/3S9/Iuk0yfcREK4iZmWbNsKZjA=
 github.com/open-policy-agent/opa v0.52.0/go.mod h1:2n99s7WY/BXZUWUOq10JdTgK+G6XM4FYGoe7kQ5Vg0s=
 github.com/opentracing/opentracing-go v1.2.0/go.mod h1:GxEUsuufX4nBwe+T+Wl9TAgYrxe9dPLANfrWvHYVTgc=
-github.com/opslevel/opslevel-go/v2023 v2023.5.18 h1:GxIGS9SzLBBoXvb0g+wfuLFwCeqp7OrwPlCE3w7EeUU=
-github.com/opslevel/opslevel-go/v2023 v2023.5.18/go.mod h1:1mjAL32RGpPrnAG0cmvG7yq48cyKxc3WVltZNM9cEdc=
 github.com/pelletier/go-toml/v2 v2.0.6 h1:nrzqCb7j9cDFj2coyLNLaZuJTLjWjlaz6nvTvIwycIU=
 github.com/pelletier/go-toml/v2 v2.0.6/go.mod h1:eumQOmlWiOPt5WriQQqoM5y18pDHwha2N+QD+EUNTek=
 github.com/pjbgf/sha1cd v0.3.0 h1:4D5XXmUUBUl/xQ6IjCkEAbqXskkq/4O7LmGn0AqMDs4=
