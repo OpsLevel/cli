@@ -1,20 +1,26 @@
 package common
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
 	"text/tabwriter"
+
+	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
 )
 
 func PrettyPrint(object interface{}) {
-	bytes, err := json.MarshalIndent(object, "", "  ")
+	var b bytes.Buffer
+	jsonEncoder := json.NewEncoder(&b)
+	jsonEncoder.SetEscapeHTML(false)
+	jsonEncoder.SetIndent("", " ")
+	err := jsonEncoder.Encode(&object)
 	cobra.CheckErr(err)
-	fmt.Println(string(bytes))
+	fmt.Println(string(b.Bytes()))
 }
 
 func NewTabWriter(headers ...string) *tabwriter.Writer {
