@@ -17,7 +17,7 @@ func PrettyPrint(object interface{}) {
 	var b bytes.Buffer
 	jsonEncoder := json.NewEncoder(&b)
 	jsonEncoder.SetEscapeHTML(false)
-	jsonEncoder.SetIndent("", " ")
+	jsonEncoder.SetIndent("", "  ")
 	err := jsonEncoder.Encode(&object)
 	cobra.CheckErr(err)
 	fmt.Println(string(b.Bytes()))
