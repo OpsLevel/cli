@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/creasty/defaults"
