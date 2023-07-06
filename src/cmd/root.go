@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"github.com/go-resty/resty/v2"
-	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -14,8 +15,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var _clientRest *resty.Client
-var _clientGQL *opslevel.Client
+var (
+	_clientRest *resty.Client
+	_clientGQL  *opslevel.Client
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "opslevel",
@@ -23,9 +26,9 @@ var rootCmd = &cobra.Command{
 	Long:  `Opslevel Commandline Tool`,
 }
 
-func Execute(v string, commit string) {
+func Execute(v string, currentCommit string) {
 	version = v
-	commit = commit
+	commit = currentCommit
 	cobra.CheckErr(rootCmd.Execute())
 }
 
@@ -38,12 +41,29 @@ func init() {
 	rootCmd.PersistentFlags().Lookup("no-headers").NoOptDefVal = "true"
 	rootCmd.PersistentFlags().Int("api-timeout", 10, "The number of seconds to timeout of the request. Overrides environment variable 'OPSLEVEL_API_TIMEOUT'")
 
-	viper.BindPFlags(rootCmd.PersistentFlags())
-	viper.BindEnv("log-format", "OPSLEVEL_LOG_FORMAT", "OL_LOG_FORMAT", "OL_LOGFORMAT")
-	viper.BindEnv("log-level", "OPSLEVEL_LOG_LEVEL", "OL_LOG_LEVEL", "OL_LOGLEVEL")
-	viper.BindEnv("api-url", "OPSLEVEL_API_URL", "OL_API_URL", "OPSLEVEL_APP_URL", "OL_APP_URL")
-	viper.BindEnv("api-token", "OPSLEVEL_API_TOKEN", "OL_API_TOKEN", "OL_APITOKEN")
-	viper.BindEnv("api-timeout", "OPSLEVEL_API_TIMEOUT")
+	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
+		cobra.CheckErr(err)
+	}
+	err := viper.BindEnv("log-format", "OPSLEVEL_LOG_FORMAT", "OL_LOG_FORMAT", "OL_LOGFORMAT")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("log-level", "OPSLEVEL_LOG_LEVEL", "OL_LOG_LEVEL", "OL_LOGLEVEL")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("api-url", "OPSLEVEL_API_URL", "OL_API_URL", "OPSLEVEL_APP_URL", "OL_APP_URL")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("api-token", "OPSLEVEL_API_TOKEN", "OL_API_TOKEN", "OL_APITOKEN")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("api-timeout", "OPSLEVEL_API_TIMEOUT")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
 	cobra.OnInitialize(initConfig)
 }
 

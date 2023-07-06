@@ -3,11 +3,12 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/gosimple/slug"
 	"github.com/spf13/cobra"
@@ -27,9 +28,9 @@ func init() {
 }
 
 func newFile(filename string, makeExecutable bool) *os.File {
-	path := fmt.Sprintf("%s", filename)
+	path := filename
 
-	var _, err = os.Stat(path)
+	_, err := os.Stat(path)
 	if os.IsExist(err) {
 		removeErr := os.Remove(path)
 		if removeErr != nil {
@@ -50,7 +51,7 @@ func newFile(filename string, makeExecutable bool) *os.File {
 
 func templateConfig(tmpl string, a ...interface{}) string {
 	// TODO: it would be nice to remove blank lines to condense the terraform config - this is a hacky way that doesn't work
-	//return strings.ReplaceAll(fmt.Sprintf(tmpl, a...), "  \n", "")
+	// return strings.ReplaceAll(fmt.Sprintf(tmpl, a...), "  \n", "")
 	return fmt.Sprintf(tmpl, a...)
 }
 
@@ -82,7 +83,7 @@ func runExportTerraform(cmd *cobra.Command, args []string) {
 	defer rubric.Close()
 	defer filters.Close()
 
-	main.WriteString(`terraform {
+	_, err := main.WriteString(`terraform {
   required_providers {
     opslevel = {
       source  = "opslevel/opslevel"
@@ -93,7 +94,13 @@ func runExportTerraform(cmd *cobra.Command, args []string) {
 provider "opslevel" {
 }
 `)
-	bash.WriteString("#!/bin/sh\n\n")
+	if err != nil {
+		panic(err)
+	}
+	_, err = bash.WriteString("#!/bin/sh\n\n")
+	if err != nil {
+		panic(err)
+	}
 
 	graphqlClient := getClientGQL()
 
@@ -112,7 +119,7 @@ provider "opslevel" {
 // we would likely need to tie the resource's ID to the generated string for future lookups for connected resources
 func makeTerraformSlug(value string) string {
 	return strings.ReplaceAll(slug.Make(value), "-", "_")
-	//return strings.ReplaceAll(strings.ReplaceAll(slug.Make(value), "-", "_"), ":", "_")
+	// return strings.ReplaceAll(strings.ReplaceAll(slug.Make(value), "-", "_"), ":", "_")
 }
 
 func getIntegrationTerraformName(integration opslevel.IntegrationId) string {
@@ -153,7 +160,10 @@ func exportConstants(c *opslevel.Client, config *os.File) {
 	lifecycles, err := c.ListLifecycles()
 	cobra.CheckErr(err)
 	for _, lifecycle := range lifecycles {
-		config.WriteString(templateConfig(lifecycleConfig, lifecycle.Alias, lifecycle.Id))
+		_, err := config.WriteString(templateConfig(lifecycleConfig, lifecycle.Alias, lifecycle.Id))
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	tierConfig := `data "opslevel_tier" "%s" {
@@ -166,7 +176,10 @@ func exportConstants(c *opslevel.Client, config *os.File) {
 	tiers, err := c.ListTiers()
 	cobra.CheckErr(err)
 	for _, tier := range tiers {
-		config.WriteString(templateConfig(tierConfig, tier.Alias, tier.Id))
+		_, err := config.WriteString(templateConfig(tierConfig, tier.Alias, tier.Id))
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	integrationConfig := `data "opslevel_integration" "%s" {
@@ -179,7 +192,10 @@ func exportConstants(c *opslevel.Client, config *os.File) {
 	resp, err := c.ListIntegrations(nil)
 	cobra.CheckErr(err)
 	for _, integration := range resp.Nodes {
-		config.WriteString(templateConfig(integrationConfig, getIntegrationTerraformName(integration.IntegrationId), integration.Id))
+		_, err := config.WriteString(templateConfig(integrationConfig, getIntegrationTerraformName(integration.IntegrationId), integration.Id))
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -195,7 +211,10 @@ func exportRepos(c *opslevel.Client, config *os.File, shell *os.File) {
 		if repo.DefaultAlias == "" {
 			continue
 		}
-		config.WriteString(templateConfig(repoConfig, makeTerraformSlug(repo.DefaultAlias), repo.DefaultAlias))
+		_, err := config.WriteString(templateConfig(repoConfig, makeTerraformSlug(repo.DefaultAlias), repo.DefaultAlias))
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -284,30 +303,55 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 		if len(tags) > 0 {
 			tags = fmt.Sprintf("tags = [\"%s\"]", tags)
 		}
-		file.WriteString(templateConfig(serviceConfig, serviceMainAlias, service.Name, service.Description, service.Product, service.Framework, service.Language, flattenLifecycle(service.Lifecycle), flattenTier(service.Tier), flattenOwner(service.Owner), aliases, tags))
-		shell.WriteString(fmt.Sprintf("# Service: %s\n", serviceMainAlias))
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_service.%s %s\n", serviceMainAlias, service.Id))
+		_, err := file.WriteString(templateConfig(serviceConfig, serviceMainAlias, service.Name, service.Description, service.Product, service.Framework, service.Language, flattenLifecycle(service.Lifecycle), flattenTier(service.Tier), flattenOwner(service.Owner), aliases, tags))
+		if err != nil {
+			panic(err)
+		}
+		_, err = shell.WriteString(fmt.Sprintf("# Service: %s\n", serviceMainAlias))
+		if err != nil {
+			panic(err)
+		}
+		_, err = shell.WriteString(fmt.Sprintf("terraform import opslevel_service.%s %s\n", serviceMainAlias, service.Id))
+		if err != nil {
+			panic(err)
+		}
 		for _, tool := range service.Tools.Nodes {
 			toolTerraformName := makeTerraformSlug(fmt.Sprintf("%s_%s", serviceMainAlias, getToolTerraformName(tool)))
-			file.WriteString(templateConfig(serviceToolConfig, toolTerraformName, serviceMainAlias, tool.DisplayName, tool.Category, tool.Url, tool.Environment))
-			shell.WriteString(fmt.Sprintf("terraform import opslevel_service_tool.%s %s:%s\n", toolTerraformName, service.Id, tool.Id))
+			_, err = file.WriteString(templateConfig(serviceToolConfig, toolTerraformName, serviceMainAlias, tool.DisplayName, tool.Category, tool.Url, tool.Environment))
+			if err != nil {
+				panic(err)
+			}
+			_, err = shell.WriteString(fmt.Sprintf("terraform import opslevel_service_tool.%s %s:%s\n", toolTerraformName, service.Id, tool.Id))
+			if err != nil {
+				panic(err)
+			}
 		}
 		for _, edge := range service.Repositories.Edges {
 			for _, serviceRepo := range edge.ServiceRepositories {
 				repo := serviceRepo.Repository
 				repoName := makeTerraformSlug(repo.DefaultAlias)
 				serviceRepoTerraformName := fmt.Sprintf("%s_%s", serviceMainAlias, repoName)
-				file.WriteString(templateConfig(serviceRepoConfig, serviceRepoTerraformName, serviceMainAlias, repoName, serviceRepo.DisplayName, serviceRepo.BaseDirectory))
-				shell.WriteString(fmt.Sprintf("terraform import opslevel_service_repository.%s %s:%s\n", serviceRepoTerraformName, service.Id, serviceRepo.Id))
+				_, err = file.WriteString(templateConfig(serviceRepoConfig, serviceRepoTerraformName, serviceMainAlias, repoName, serviceRepo.DisplayName, serviceRepo.BaseDirectory))
+				if err != nil {
+					panic(err)
+				}
+				_, err = shell.WriteString(fmt.Sprintf("terraform import opslevel_service_repository.%s %s:%s\n", serviceRepoTerraformName, service.Id, serviceRepo.Id))
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
 		file.Close()
-		shell.WriteString("##########\n\n")
+		if _, err = shell.WriteString("##########\n\n"); err != nil {
+			panic(err)
+		}
 	}
 }
 
 func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
-	shell.WriteString("# Teams\n")
+	if _, err := shell.WriteString("# Teams\n"); err != nil {
+		panic(err)
+	}
 
 	teamConfig := `resource "opslevel_team" "%s" {
   name = "%s"
@@ -324,14 +368,24 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 		if len(aliases) > 0 {
 			aliases = fmt.Sprintf("aliases = [\"%s\"]", aliases)
 		}
-		config.WriteString(templateConfig(teamConfig, team.Alias, team.Name, team.Manager.Email, aliases, buildMultilineStringArg("responsibilities", team.Responsibilities)))
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_team.%s %s\n", team.Alias, team.Id))
+		_, err = config.WriteString(templateConfig(teamConfig, team.Alias, team.Name, team.Manager.Email, aliases, buildMultilineStringArg("responsibilities", team.Responsibilities)))
+		if err != nil {
+			panic(err)
+		}
+		_, err = shell.WriteString(fmt.Sprintf("terraform import opslevel_team.%s %s\n", team.Alias, team.Id))
+		if err != nil {
+			panic(err)
+		}
 	}
-	shell.WriteString("##########\n\n")
+	if _, err = shell.WriteString("##########\n\n"); err != nil {
+		panic(err)
+	}
 }
 
 func exportRubric(c *opslevel.Client, config *os.File, shell *os.File) {
-	shell.WriteString("# Rubric\n")
+	if _, err := shell.WriteString("# Rubric\n"); err != nil {
+		panic(err)
+	}
 
 	resp, err := c.ListCategories(nil)
 	cobra.CheckErr(err)
@@ -342,8 +396,14 @@ func exportRubric(c *opslevel.Client, config *os.File, shell *os.File) {
 `
 	for _, category := range categories {
 		categoryTerraformName := makeTerraformSlug(category.Name)
-		config.WriteString(templateConfig(categoryConfig, categoryTerraformName, category.Name))
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_rubric_category.%s %s\n", categoryTerraformName, category.Id))
+		_, err = config.WriteString(templateConfig(categoryConfig, categoryTerraformName, category.Name))
+		if err != nil {
+			panic(err)
+		}
+		_, err = shell.WriteString(fmt.Sprintf("terraform import opslevel_rubric_category.%s %s\n", categoryTerraformName, category.Id))
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	levelConfig := `resource "opslevel_rubric_level" "%s" {
@@ -355,15 +415,25 @@ func exportRubric(c *opslevel.Client, config *os.File, shell *os.File) {
 	levels, err := c.ListLevels()
 	cobra.CheckErr(err)
 	for _, level := range levels {
-		config.WriteString(templateConfig(levelConfig, level.Alias, level.Name, level.Description, level.Index))
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_rubric_level.%s %s\n", level.Alias, level.Id))
+		_, err = config.WriteString(templateConfig(levelConfig, level.Alias, level.Name, level.Description, level.Index))
+		if err != nil {
+			panic(err)
+		}
+		_, err = shell.WriteString(fmt.Sprintf("terraform import opslevel_rubric_level.%s %s\n", level.Alias, level.Id))
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	shell.WriteString("##########\n\n")
+	if _, err = shell.WriteString("##########\n\n"); err != nil {
+		panic(err)
+	}
 }
 
 func exportFilters(c *opslevel.Client, config *os.File, shell *os.File) {
-	shell.WriteString("# Filters\n")
+	if _, err := shell.WriteString("# Filters\n"); err != nil {
+		panic(err)
+	}
 	filterConfig := `resource "opslevel_filter" "%s" {
   name = "%s"
   connective = "%s"
@@ -378,11 +448,19 @@ func exportFilters(c *opslevel.Client, config *os.File, shell *os.File) {
 		for _, predicate := range filter.Predicates {
 			predicates += flattenFilterPredicate(&predicate)
 		}
-		config.WriteString(templateConfig(filterConfig, filterTerraformName, filter.Name, string(filter.Connective), predicates))
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_filter.%s %s\n", filterTerraformName, filter.Id))
+		_, err = config.WriteString(templateConfig(filterConfig, filterTerraformName, filter.Name, string(filter.Connective), predicates))
+		if err != nil {
+			panic(err)
+		}
+		_, err = shell.WriteString(fmt.Sprintf("terraform import opslevel_filter.%s %s\n", filterTerraformName, filter.Id))
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	shell.WriteString("##########\n\n")
+	if _, err = shell.WriteString("##########\n\n"); err != nil {
+		panic(err)
+	}
 }
 
 func flattenCheckOwner(value opslevel.CheckOwner) string {
@@ -442,7 +520,9 @@ func flattenUpdateFrequency(value *opslevel.ManualCheckFrequency) string {
 }
 
 func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
-	shell.WriteString("# Checks\n")
+	if _, err := shell.WriteString("# Checks\n"); err != nil {
+		panic(err)
+	}
 	// TODO: If we use golang templating here we can easily remove all the extra newlines
 	baseCheckConfig := `resource "opslevel_check_%s" "%s" {
   name = %q
@@ -608,9 +688,16 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			continue
 		}
 		checkConfig := templateConfig(baseCheckConfig, checkTypeTerraformName, checkTerraformName, check.Name, check.Enabled, makeTerraformSlug(check.Category.Name), check.Level.Alias, flattenCheckOwner(check.Owner), flattenCheckFilter(check.Filter), checkExtras, buildMultilineStringArg("notes", check.Notes))
-		activeFile.WriteString(checkConfig)
-		shell.WriteString(fmt.Sprintf("terraform import opslevel_check_%s.%s %s\n", checkTypeTerraformName, checkTerraformName, check.Id))
+		if _, err = activeFile.WriteString(checkConfig); err != nil {
+			cobra.CheckErr(err)
+		}
+		_, err = shell.WriteString(fmt.Sprintf("terraform import opslevel_check_%s.%s %s\n", checkTypeTerraformName, checkTerraformName, check.Id))
+		if err != nil {
+			cobra.CheckErr(err)
+		}
 	}
 
-	shell.WriteString("##########\n")
+	if _, err = shell.WriteString("##########\n"); err != nil {
+		panic(err)
+	}
 }

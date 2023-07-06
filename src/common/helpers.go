@@ -43,7 +43,7 @@ func YamlPrint(object interface{}) {
 	yamlEncoder.SetIndent(4) // this is what you're looking for
 	err := yamlEncoder.Encode(&object)
 	cobra.CheckErr(err)
-	fmt.Printf("---\n%s\n", string(b.Bytes()))
+	fmt.Printf("---\n%s\n", b.String())
 }
 
 func MinInt(values ...int) int {

@@ -19,14 +19,18 @@ func init() {
 	rootCmd.AddCommand(updateCmd)
 
 	updateCmd.PersistentFlags().StringVarP(&updateDataFile, "file", "f", "-", "File to read update from. If '.' then reads from './data.yaml'. Defaults to reading from stdin.")
-	viper.BindPFlags(createCmd.Flags())
+	if err := viper.BindPFlags(createCmd.Flags()); err != nil {
+		cobra.CheckErr(err)
+	}
 }
 
 func readUpdateConfigFile() {
 	if updateDataFile != "" {
 		if updateDataFile == "-" {
 			viper.SetConfigType("yaml")
-			viper.ReadConfig(os.Stdin)
+			if err := viper.ReadConfig(os.Stdin); err != nil {
+				cobra.CheckErr(err)
+			}
 			return
 		} else if updateDataFile == "." {
 			viper.SetConfigFile("./data.yaml")
@@ -42,5 +46,7 @@ func readUpdateConfigFile() {
 		viper.AddConfigPath(".")
 		viper.AddConfigPath(home)
 	}
-	viper.ReadInConfig()
+	if err := viper.ReadInConfig(); err != nil {
+		cobra.CheckErr(err)
+	}
 }

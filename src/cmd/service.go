@@ -4,9 +4,10 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"strings"
+
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/rs/zerolog/log"
 
@@ -43,7 +44,7 @@ var createServiceTagCmd = &cobra.Command{
 	Use:   "tag ID|ALIAS TAG_KEY TAG_VALUE",
 	Short: "Create a service tag",
 	Long: `Create a service tag
-	
+
 opslevel create service tag my-service foo bar
 opslevel create service tag --assign my-service foo bar
 `,
@@ -140,7 +141,7 @@ opslevel get service tag my-service my-tag
 		}
 		var output []opslevel.Tag
 		for _, tag := range result.Tags.Nodes {
-			if singleTag == false || tagKey == tag.Key {
+			if !singleTag || tagKey == tag.Key {
 				output = append(output, tag)
 			}
 		}
@@ -164,9 +165,14 @@ var listServiceCmd = &cobra.Command{
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else if isCsvOutput() {
 			w := csv.NewWriter(os.Stdout)
-			w.Write([]string{"NAME", "ID", "ALIASES"})
+			if err := w.Write([]string{"NAME", "ID", "ALIASES"}); err != nil {
+				cobra.CheckErr(err)
+			}
 			for _, item := range list {
-				w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
+				err := w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
+				if err != nil {
+					cobra.CheckErr(err)
+				}
 			}
 			w.Flush()
 		} else {
@@ -250,7 +256,9 @@ var deleteServiceTagCmd = &cobra.Command{
 		} else {
 			for _, tag := range result.Tags.Nodes {
 				if tagKey == tag.Key {
-					getClientGQL().DeleteTag(tag.Id)
+					if err := getClientGQL().DeleteTag(tag.Id); err != nil {
+						cobra.CheckErr(err)
+					}
 					fmt.Println("Deleted Tag")
 					common.PrettyPrint(tag)
 				}
@@ -339,7 +347,9 @@ func init() {
 func readServiceCreateInput() (*opslevel.ServiceCreateInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.ServiceCreateInput{}
-	viper.Unmarshal(&evt)
+	if err := viper.Unmarshal(&evt); err != nil {
+		return nil, err
+	}
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}
@@ -349,7 +359,9 @@ func readServiceCreateInput() (*opslevel.ServiceCreateInput, error) {
 func readServiceUpdateInput() (*opslevel.ServiceUpdateInput, error) {
 	readUpdateConfigFile()
 	evt := &opslevel.ServiceUpdateInput{}
-	viper.Unmarshal(&evt)
+	if err := viper.Unmarshal(&evt); err != nil {
+		return nil, err
+	}
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}

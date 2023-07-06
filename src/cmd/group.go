@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
 
@@ -278,13 +279,8 @@ var deleteGroupCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		if common.IsID(key) {
-			err := getClientGQL().DeleteGroup(key)
-			cobra.CheckErr(err)
-		} else {
-			err := getClientGQL().DeleteGroupWithAlias(key)
-			cobra.CheckErr(err)
-		}
+		err := getClientGQL().DeleteGroup(key)
+		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' group\n", key)
 	},
 }
@@ -345,7 +341,9 @@ func init() {
 func readGroupInput() (*opslevel.GroupInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.GroupInput{}
-	viper.Unmarshal(&evt)
+	if err := viper.Unmarshal(&evt); err != nil {
+		return nil, err
+	}
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}

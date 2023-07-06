@@ -4,13 +4,14 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"strings"
 )
 
 var createDomainCmd = &cobra.Command{
@@ -90,9 +91,14 @@ opslevel list domain
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else if isCsvOutput() {
 			w := csv.NewWriter(os.Stdout)
-			w.Write([]string{"NAME", "ID", "ALIASES"})
+			if err := w.Write([]string{"NAME", "ID", "ALIASES"}); err != nil {
+				panic(err)
+			}
 			for _, item := range list {
-				w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
+				err := w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
+				if err != nil {
+					panic(err)
+				}
 			}
 			w.Flush()
 		} else {
@@ -140,7 +146,9 @@ func init() {
 func readDomainInput() (*opslevel.DomainInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.DomainInput{}
-	viper.Unmarshal(&evt)
+	if err := viper.Unmarshal(&evt); err != nil {
+		return nil, err
+	}
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}

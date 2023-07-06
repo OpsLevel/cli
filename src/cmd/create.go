@@ -20,7 +20,9 @@ func init() {
 	rootCmd.AddCommand(createCmd)
 
 	createCmd.PersistentFlags().StringVarP(&createDataFile, "file", "f", "-", "File to read data from. If '.' then reads from './data.yaml'. Defaults to reading from stdin.")
-	viper.BindPFlags(createCmd.Flags())
+	if err := viper.BindPFlags(createCmd.Flags()); err != nil {
+		cobra.CheckErr(err)
+	}
 }
 
 func hasStdin() bool {
@@ -58,7 +60,9 @@ func readCreateConfigFile() {
 		if createDataFile == "-" {
 			viper.SetConfigType("yaml")
 			if hasStdin() {
-				viper.ReadConfig(os.Stdin)
+				if err := viper.ReadConfig(os.Stdin); err != nil {
+					cobra.CheckErr(err)
+				}
 			}
 			return
 		} else if createDataFile == "." {
@@ -75,5 +79,7 @@ func readCreateConfigFile() {
 		viper.AddConfigPath(".")
 		viper.AddConfigPath(home)
 	}
-	viper.ReadInConfig()
+	if err := viper.ReadInConfig(); err != nil {
+		cobra.CheckErr(err)
+	}
 }

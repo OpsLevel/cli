@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
@@ -62,43 +63,45 @@ var createMemberCmd = &cobra.Command{
 	},
 }
 
-var contactType string
-var createContactCmd = &cobra.Command{
-	Use:   "contact {TEAM_ID|TEAM_ALIAS} ADDRESS DISPLAYNAME",
-	Short: "Add a contact to a team",
-	Example: `opslevel create contact --type=slack my-team #general General
+var (
+	contactType      string
+	createContactCmd = &cobra.Command{
+		Use:   "contact {TEAM_ID|TEAM_ALIAS} ADDRESS DISPLAYNAME",
+		Short: "Add a contact to a team",
+		Example: `opslevel create contact --type=slack my-team #general General
 opslevel create contact --type=email my-team team@example.com "Mailing List"`,
-	Args:       cobra.MinimumNArgs(2),
-	ArgAliases: []string{"TEAM_ID", "TEAM_ALIAS", "ADDRESS", "DISPLAYNAME"},
-	Run: func(cmd *cobra.Command, args []string) {
-		key := args[0]
-		address := args[1]
-		displayName := common.GetArg(args, 2, "")
+		Args:       cobra.MinimumNArgs(2),
+		ArgAliases: []string{"TEAM_ID", "TEAM_ALIAS", "ADDRESS", "DISPLAYNAME"},
+		Run: func(cmd *cobra.Command, args []string) {
+			key := args[0]
+			address := args[1]
+			displayName := common.GetArg(args, 2, "")
 
-		var team *opslevel.Team
-		var err error
-		if common.IsID(key) {
-			team, err = getClientGQL().GetTeam(opslevel.ID(key))
-		} else {
-			team, err = getClientGQL().GetTeamWithAlias(key)
-		}
-		cobra.CheckErr(err)
-		common.WasFound(team.Id == "", key)
-		contactInput := opslevel.CreateContactSlack(address, displayName)
-		switch contactType {
-		case string(opslevel.ContactTypeEmail):
-			contactInput = opslevel.CreateContactEmail(address, displayName)
-		case string(opslevel.ContactTypeWeb):
-			contactInput = opslevel.CreateContactWeb(address, displayName)
-		}
-		contact, err := getClientGQL().AddContact(team.TeamId.Alias, contactInput)
-		cobra.CheckErr(err)
-		if contact.Id == "" {
-			cobra.CheckErr(fmt.Errorf("unable to create contact '%+v'", contactInput))
-		}
-		fmt.Printf("create contact '%+v' on team '%s'\n", contactInput, team.Alias)
-	},
-}
+			var team *opslevel.Team
+			var err error
+			if common.IsID(key) {
+				team, err = getClientGQL().GetTeam(opslevel.ID(key))
+			} else {
+				team, err = getClientGQL().GetTeamWithAlias(key)
+			}
+			cobra.CheckErr(err)
+			common.WasFound(team.Id == "", key)
+			contactInput := opslevel.CreateContactSlack(address, displayName)
+			switch contactType {
+			case string(opslevel.ContactTypeEmail):
+				contactInput = opslevel.CreateContactEmail(address, displayName)
+			case string(opslevel.ContactTypeWeb):
+				contactInput = opslevel.CreateContactWeb(address, displayName)
+			}
+			contact, err := getClientGQL().AddContact(team.TeamId.Alias, contactInput)
+			cobra.CheckErr(err)
+			if contact.Id == "" {
+				cobra.CheckErr(fmt.Errorf("unable to create contact '%+v'", contactInput))
+			}
+			fmt.Printf("create contact '%+v' on team '%s'\n", contactInput, team.Alias)
+		},
+	}
+)
 
 var createTeamTagCmd = &cobra.Command{
 	Use:   "tag {ID|ALIAS} TAG_KEY TAG_VALUE",
@@ -194,7 +197,7 @@ var listTeamCmd = &cobra.Command{
 	Short:   "Lists the teams",
 	Example: `
 opslevel list team
-opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))' 
+opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))'
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		resp, err := getClientGQL().ListTeams(nil)
@@ -243,7 +246,7 @@ opslevel get team tag my-team | jq 'from_entries'
 		}
 		var output []opslevel.Tag
 		for _, tag := range result.Tags.Nodes {
-			if singleTag == false || tagKey == tag.Key {
+			if !singleTag || tagKey == tag.Key {
 				output = append(output, tag)
 			}
 		}
@@ -344,7 +347,9 @@ var deleteTeamTagCmd = &cobra.Command{
 		} else {
 			for _, tag := range result.Tags.Nodes {
 				if tagKey == tag.Key {
-					getClientGQL().DeleteTag(tag.Id)
+					if err := getClientGQL().DeleteTag(tag.Id); err != nil {
+						cobra.CheckErr(err)
+					}
 					fmt.Println("Deleted Tag")
 					common.PrettyPrint(tag)
 				}
@@ -412,7 +417,9 @@ func init() {
 func readTeamCreateInput() (*opslevel.TeamCreateInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.TeamCreateInput{}
-	viper.Unmarshal(&evt)
+	if err := viper.Unmarshal(&evt); err != nil {
+		return nil, err
+	}
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}
@@ -422,7 +429,9 @@ func readTeamCreateInput() (*opslevel.TeamCreateInput, error) {
 func readTeamUpdateInput() (*opslevel.TeamUpdateInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.TeamUpdateInput{}
-	viper.Unmarshal(&evt)
+	if err := viper.Unmarshal(&evt); err != nil {
+		return nil, err
+	}
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}

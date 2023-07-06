@@ -17,7 +17,9 @@ func init() {
 	rootCmd.AddCommand(getCmd)
 
 	getCmd.PersistentFlags().StringVarP(&getOutputType, "output", "o", "text", "Output format.  One of: yaml|text [default: text]")
-	viper.BindPFlags(getCmd.Flags())
+	if err := viper.BindPFlags(getCmd.Flags()); err != nil {
+		cobra.CheckErr(err)
+	}
 }
 
 func isYamlOutput() bool {

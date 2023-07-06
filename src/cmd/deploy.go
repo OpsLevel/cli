@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"encoding/json"
-	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"time"
+
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/creasty/defaults"
 	git "github.com/go-git/go-git/v5"
@@ -101,23 +102,57 @@ func init() {
 
 	deployCreateCmd.Flags().String("commit-sha", "", "git commit sha associated with the event (OPSLEVEL_DEPLOYER_NAME)")
 	deployCreateCmd.Flags().String("commit-message", "", "git commit message associated with the event (OPSLEVEL_DEPLOYER_EMAIL)")
-	viper.BindPFlags(deployCreateCmd.Flags())
-	viper.BindEnv("integration-url", "OPSLEVEL_INTEGRATION_URL", "OL_INTEGRATION_URL")
-	viper.BindEnv("dry-run", "OPSLEVEL_DRY_RUN", "OL_DRY_RUN")
-	viper.BindEnv("git-path", "OPSLEVEL_GIT_PATH", "OL_GIT_PATH")
-	viper.BindEnv("deploy-number", "OPSLEVEL_DEPLOY_NUMBER", "OL_DEPLOY_NUMBER")
-	viper.BindEnv("deploy-url", "OPSLEVEL_DEPLOY_URL", "OL_DEPLOY_URL")
-	viper.BindEnv("dedup-id", "OPSLEVEL_DEDUP_ID", "OL_DEDUP_ID")
-	viper.BindEnv("deployer-name", "OPSLEVEL_DEPLOYER_NAME", "OL_DEPLOYER_NAME")
-	viper.BindEnv("deployer-email", "OPSLEVEL_DEPLOYER_EMAIL", "OL_DEPLOYER_EMAIL")
-	viper.BindEnv("commit-sha", "OPSLEVEL_COMMIT_SHA", "OL_COMMIT_SHA")
-	viper.BindEnv("commit-message", "OPSLEVEL_COMMIT_MESSAGE", "OL_COMMIT_MESSAGE")
+	if err := viper.BindPFlags(deployCreateCmd.Flags()); err != nil {
+		cobra.CheckErr(err)
+	}
+	err := viper.BindEnv("integration-url", "OPSLEVEL_INTEGRATION_URL", "OL_INTEGRATION_URL")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("dry-run", "OPSLEVEL_DRY_RUN", "OL_DRY_RUN")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("git-path", "OPSLEVEL_GIT_PATH", "OL_GIT_PATH")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("deploy-number", "OPSLEVEL_DEPLOY_NUMBER", "OL_DEPLOY_NUMBER")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("deploy-url", "OPSLEVEL_DEPLOY_URL", "OL_DEPLOY_URL")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("dedup-id", "OPSLEVEL_DEDUP_ID", "OL_DEDUP_ID")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("deployer-name", "OPSLEVEL_DEPLOYER_NAME", "OL_DEPLOYER_NAME")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("deployer-email", "OPSLEVEL_DEPLOYER_EMAIL", "OL_DEPLOYER_EMAIL")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("commit-sha", "OPSLEVEL_COMMIT_SHA", "OL_COMMIT_SHA")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	err = viper.BindEnv("commit-message", "OPSLEVEL_COMMIT_MESSAGE", "OL_COMMIT_MESSAGE")
+	if err != nil {
+		cobra.CheckErr(err)
+	}
 }
 
 func readCreateConfigAsDeployEvent() (*DeployEvent, error) {
 	readCreateConfigFile()
 	evt := &DeployEvent{}
-	viper.Unmarshal(&evt)
+	if err := viper.Unmarshal(&evt); err != nil {
+		return nil, err
+	}
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}

@@ -4,12 +4,13 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2023"
-	"github.com/spf13/cobra"
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/opslevel/cli/common"
+	"github.com/opslevel/opslevel-go/v2023"
+	"github.com/spf13/cobra"
 )
 
 var listServiceMaturityCmd = &cobra.Command{
@@ -42,9 +43,13 @@ There are multiple output formats that are useful
 			common.JsonPrint(json.MarshalIndent(data, "", "    "))
 		} else if isCsvOutput() {
 			w := csv.NewWriter(os.Stdout)
-			w.Write(headers)
+			if err := w.Write(headers); err != nil {
+				panic(err)
+			}
 			for _, item := range data {
-				w.Write(GetValues(&item, headers...))
+				if err := w.Write(GetValues(&item, headers...)); err != nil {
+					panic(err)
+				}
 			}
 			w.Flush()
 		} else {

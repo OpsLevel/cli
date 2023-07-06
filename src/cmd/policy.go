@@ -5,6 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
@@ -13,12 +19,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io/ioutil"
-	"math"
-	"net/url"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 type regoInput struct {
@@ -124,13 +124,13 @@ Examples:
 		cobra.CheckErr(err)
 		inputJSON := &map[string]interface{}{}
 		if inputFilePath != "" {
-			inputRead, err := ioutil.ReadFile(inputFilePath)
+			inputRead, err := os.ReadFile(inputFilePath)
 			cobra.CheckErr(err)
 			cobra.CheckErr(json.Unmarshal(inputRead, inputJSON))
 		}
 		outputFilePath, err := flags.GetString("output")
 		cobra.CheckErr(err)
-		policy, err := ioutil.ReadFile(filePath)
+		policy, err := os.ReadFile(filePath)
 		cobra.CheckErr(err)
 		input := regoInput{}
 		err = filepath.Walk(".",
@@ -184,7 +184,7 @@ Examples:
 		)
 		rs, err := rego.Eval(context.Background())
 		cobra.CheckErr(err)
-		b, err := json.Marshal(rs[0].Expressions[0].Value) //TODO: need more advanced handling of multiple things in json and reading from stdin
+		b, err := json.Marshal(rs[0].Expressions[0].Value) // TODO: need more advanced handling of multiple things in json and reading from stdin
 		cobra.CheckErr(err)
 
 		if outputFilePath == "-" {
@@ -192,7 +192,9 @@ Examples:
 		} else {
 			main := newFile(outputFilePath, false)
 			defer main.Close()
-			main.WriteString(string(b))
+			if _, err := main.WriteString(string(b)); err != nil {
+				log.Error().Err(err).Msg("")
+			}
 		}
 	},
 }
@@ -203,6 +205,9 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 			log.Warn().Msgf("%s", err)
 		} else {
 			file, err := os.Open(string(str))
+			if err != nil {
+				log.Error().Err(err).Msg("")
+			}
 			defer file.Close()
 			if err != nil {
 				log.Error().Err(err).Msg("")
@@ -221,7 +226,6 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 }
 
 func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, error) {
-
 	var org, repo string
 	if err := ast.As(a.Value, &org); err != nil {
 		log.Error().Err(err).Msg("")
@@ -260,7 +264,7 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		return nil, err
 	}
 
-	if response.IsError() == true {
+	if response.IsError() {
 		err := fmt.Errorf("error requesting Github repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
 		log.Error().Err(err).Msgf("")
 		return nil, err
@@ -276,7 +280,7 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		return nil, err
 	}
 
-	if languagesResponse.IsError() == true {
+	if languagesResponse.IsError() {
 		err := fmt.Errorf("error requesting Github repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
 		log.Error().Err(err).Msgf("")
 		return nil, err
@@ -294,7 +298,6 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 }
 
 func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
-
 	var path string
 	if err := ast.As(a.Value, &path); err != nil {
 		log.Error().Err(err).Msg("")
@@ -322,7 +325,7 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 		return nil, err
 	}
 
-	if response.IsError() == true {
+	if response.IsError() {
 		err := fmt.Errorf("error requesting Gitlab repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
 		log.Error().Err(err).Msgf("")
 		return nil, err
@@ -337,7 +340,7 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 		return nil, err
 	}
 
-	if languagesResponse.IsError() == true {
+	if languagesResponse.IsError() {
 		err := fmt.Errorf("error requesting Gitlab repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
 		log.Error().Err(err).Msgf("")
 		return nil, err
@@ -354,7 +357,6 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 }
 
 func RegoFuncGetMaturity(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
-
 	var alias string
 	if err := ast.As(a.Value, &alias); err != nil {
 		log.Error().Err(err).Msg("")
@@ -418,7 +420,13 @@ func init() {
 	policyCmd.PersistentFlags().String("github-token", "", "The Github API token to use when calling opslevel.repo.github function within a Rego policy. Overrides environment variable 'GITHUB_API_TOKEN'")
 	policyCmd.PersistentFlags().String("gitlab-token", "", "The Gitlab API token to use when calling opslevel.repo.gitlab function within a Rego policy. Overrides environment variable 'GITLAB_API_TOKEN'")
 
-	viper.BindPFlags(policyCmd.PersistentFlags())
-	viper.BindEnv("github-token", "GITHUB_API_TOKEN")
-	viper.BindEnv("gitlab-token", "GITLAB_API_TOKEN")
+	if err := viper.BindPFlags(policyCmd.PersistentFlags()); err != nil {
+		cobra.CheckErr(err)
+	}
+	if err := viper.BindEnv("github-token", "GITHUB_API_TOKEN"); err != nil {
+		cobra.CheckErr(err)
+	}
+	if err := viper.BindEnv("gitlab-token", "GITLAB_API_TOKEN"); err != nil {
+		cobra.CheckErr(err)
+	}
 }

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/opslevel/opslevel-go/v2023"
@@ -62,7 +61,7 @@ Examples:
 	opslevel create check -f my_cec.yaml
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		usePrompts := hasStdin() == false
+		usePrompts := !hasStdin()
 		input, err := readCheckCreateInput()
 		cobra.CheckErr(err)
 		check, err := createCheck(*input, usePrompts)
@@ -198,91 +197,121 @@ func toJson(data map[string]interface{}) []byte {
 
 func (self *CheckCreateType) AsServiceOwnershipCreateInput() *opslevel.CheckServiceOwnershipCreateInput {
 	payload := &opslevel.CheckServiceOwnershipCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsHasRecentDeployCreateInput() *opslevel.CheckHasRecentDeployCreateInput {
 	payload := &opslevel.CheckHasRecentDeployCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsServicePropertyCreateInput() *opslevel.CheckServicePropertyCreateInput {
 	payload := &opslevel.CheckServicePropertyCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsServiceConfigurationCreateInput() *opslevel.CheckServiceConfigurationCreateInput {
 	payload := &opslevel.CheckServiceConfigurationCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsHasDocumentationCreateInput() *opslevel.CheckHasDocumentationCreateInput {
 	payload := &opslevel.CheckHasDocumentationCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsRepositoryIntegratedCreateInput() *opslevel.CheckRepositoryIntegratedCreateInput {
 	payload := &opslevel.CheckRepositoryIntegratedCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsToolUsageCreateInput() *opslevel.CheckToolUsageCreateInput {
 	payload := &opslevel.CheckToolUsageCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsTagDefinedCreateInput() *opslevel.CheckTagDefinedCreateInput {
 	payload := &opslevel.CheckTagDefinedCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsRepositoryFileCreateInput() *opslevel.CheckRepositoryFileCreateInput {
 	payload := &opslevel.CheckRepositoryFileCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsRepositoryGrepCreateInput() *opslevel.CheckRepositoryGrepCreateInput {
 	payload := &opslevel.CheckRepositoryGrepCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsRepositorySearchCreateInput() *opslevel.CheckRepositorySearchCreateInput {
 	payload := &opslevel.CheckRepositorySearchCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsManualCreateInput() *opslevel.CheckManualCreateInput {
 	payload := &opslevel.CheckManualCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsAlertSourceUsageCreateInput() *opslevel.CheckAlertSourceUsageCreateInput {
 	payload := &opslevel.CheckAlertSourceUsageCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsGitBranchProtectionCreateInput() *opslevel.CheckGitBranchProtectionCreateInput {
 	payload := &opslevel.CheckGitBranchProtectionCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
 func (self *CheckCreateType) AsServiceDependencyCreateInput() *opslevel.CheckServiceDependencyCreateInput {
 	payload := &opslevel.CheckServiceDependencyCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
@@ -311,7 +340,9 @@ func (self *CheckCreateType) resolveIntegrationAliases(client *opslevel.Client, 
 func (self *CheckCreateType) AsCustomEventCreateInput() *opslevel.CheckCustomEventCreateInput {
 	self.Spec["resultMessage"] = self.Spec["message"]
 	payload := &opslevel.CheckCustomEventCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
+	if err := json.Unmarshal(toJson(self.Spec), payload); err != nil {
+		panic(err)
+	}
 	return payload
 }
 
@@ -486,13 +517,17 @@ func readCheckCreateInput() (*CheckCreateType, error) {
 	readCreateConfigFile()
 	// Validate Version
 	v := &ConfigVersion{}
-	viper.Unmarshal(&v)
+	if err := viper.Unmarshal(&v); err != nil {
+		panic(err)
+	}
 	if v.Version != CheckConfigCurrentVersion {
-		return nil, errors.New(fmt.Sprintf("Supported config version is '%s' but found '%s' | Please update config file", CheckConfigCurrentVersion, v.Version))
+		return nil, fmt.Errorf("Supported config version is '%s' but found '%s' | Please update config file", CheckConfigCurrentVersion, v.Version)
 	}
 	// Unmarshall
 	evt := &CheckCreateType{}
-	viper.Unmarshal(&evt)
+	if err := viper.Unmarshal(&evt); err != nil {
+		panic(err)
+	}
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}

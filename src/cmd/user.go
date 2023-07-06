@@ -4,15 +4,16 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"os"
+	"sort"
+	"strings"
+
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"sort"
-	"strings"
 )
 
 var createUserCmd = &cobra.Command{
@@ -36,6 +37,9 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
 		}
 
 		skipEmail, err := cmd.Flags().GetBool("skip-welcome-email")
+		if err != nil {
+			cobra.CheckErr(err)
+		}
 
 		resource, err := getClientGQL().InviteUser(email, opslevel.UserInput{
 			Name:             name,
@@ -101,9 +105,14 @@ opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entr
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else if isCsvOutput() {
 			w := csv.NewWriter(os.Stdout)
-			w.Write([]string{"ID", "EMAIL", "NAME", "ROLE", "URL"})
+			if err := w.Write([]string{"ID", "EMAIL", "NAME", "ROLE", "URL"}); err != nil {
+				cobra.CheckErr(err)
+			}
 			for _, item := range list {
-				w.Write([]string{string(item.Id), item.Email, item.Name, string(item.Role), item.HTMLUrl})
+				err := w.Write([]string{string(item.Id), item.Email, item.Name, string(item.Role), item.HTMLUrl})
+				if err != nil {
+					cobra.CheckErr(err)
+				}
 			}
 			w.Flush()
 		} else {
@@ -212,7 +221,9 @@ func init() {
 func readUserInput() (*opslevel.UserInput, error) {
 	readCreateConfigFile()
 	evt := &opslevel.UserInput{}
-	viper.Unmarshal(&evt)
+	if err := viper.Unmarshal(&evt); err != nil {
+		return nil, err
+	}
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}

@@ -17,7 +17,9 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	listCmd.PersistentFlags().StringVarP(&listOutputType, "output", "o", "text", "Output format.  One of: json|csv|text [default: text]")
-	viper.BindPFlags(listCmd.Flags())
+	if err := viper.BindPFlags(listCmd.Flags()); err != nil {
+		cobra.CheckErr(err)
+	}
 }
 
 func isJsonOutput() bool {
