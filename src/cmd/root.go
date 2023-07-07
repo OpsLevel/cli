@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"github.com/go-resty/resty/v2"
-	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -14,8 +15,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var _clientRest *resty.Client
-var _clientGQL *opslevel.Client
+var (
+	_clientRest *resty.Client
+	_clientGQL  *opslevel.Client
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "opslevel",
@@ -23,9 +26,9 @@ var rootCmd = &cobra.Command{
 	Long:  `Opslevel Commandline Tool`,
 }
 
-func Execute(v string, commit string) {
+func Execute(v string, currentCommit string) {
 	version = v
-	commit = commit
+	commit = currentCommit
 	cobra.CheckErr(rootCmd.Execute())
 }
 

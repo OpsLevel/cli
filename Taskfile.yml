@@ -1,0 +1,28 @@
+# https://taskfile.dev/
+
+version: '3'
+
+tasks:
+  lint:
+    desc: Formatting and linting
+    dir: src
+    cmds:
+      - gofmt -d .
+      - go vet ./...
+      # TODO: uncomment after lint fixes addressed
+      # - golangci-lint run
+
+  lintfix:
+    desc: Fix formatting and linting
+    dir: src
+    cmds:
+      - gofmt -w .
+      # TODO: uncomment after lint fixes addressed
+      # - golangci-lint run --fix
+
+  test:
+    desc: Run tests
+    dir: src
+    cmds:
+      - go test -v ./... {{ .CLI_ARGS }}
+    silent: true
