@@ -1,7 +1,7 @@
 package common_test
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -18,7 +18,7 @@ func captureOutput() string {
 	common.PrettyPrint("< > & alan was here & < >")
 
 	w.Close()
-	out, _ := ioutil.ReadAll(r)
+	out, _ := io.ReadAll(r)
 	os.Stdout = stdOut
 
 	return string(out)

@@ -20,7 +20,7 @@ func PrettyPrint(object interface{}) {
 	jsonEncoder.SetIndent("", "  ")
 	err := jsonEncoder.Encode(&object)
 	cobra.CheckErr(err)
-	fmt.Println(string(b.Bytes()))
+	fmt.Println(b.String())
 }
 
 func NewTabWriter(headers ...string) *tabwriter.Writer {
@@ -37,7 +37,7 @@ func NewTabWriter(headers ...string) *tabwriter.Writer {
 	}
 	headerFormat.WriteString("\n")
 	w := tabwriter.NewWriter(os.Stdout, longestHeader, longestHeader, 2, ' ', 0)
-	if viper.GetBool("no-headers") == false {
+	if !viper.GetBool("no-headers") {
 		fmt.Fprintf(w, headerFormat.String(), headersCasted...)
 	}
 	return w

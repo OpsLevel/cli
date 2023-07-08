@@ -5,6 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"math"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
@@ -13,12 +20,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io/ioutil"
-	"math"
-	"net/url"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 type regoInput struct {
@@ -184,7 +185,7 @@ Examples:
 		)
 		rs, err := rego.Eval(context.Background())
 		cobra.CheckErr(err)
-		b, err := json.Marshal(rs[0].Expressions[0].Value) //TODO: need more advanced handling of multiple things in json and reading from stdin
+		b, err := json.Marshal(rs[0].Expressions[0].Value) // TODO: need more advanced handling of multiple things in json and reading from stdin
 		cobra.CheckErr(err)
 
 		if outputFilePath == "-" {
@@ -221,7 +222,6 @@ func RegoFuncReadFile(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
 }
 
 func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, error) {
-
 	var org, repo string
 	if err := ast.As(a.Value, &org); err != nil {
 		log.Error().Err(err).Msg("")
@@ -260,7 +260,7 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		return nil, err
 	}
 
-	if response.IsError() == true {
+	if response.IsError() {
 		err := fmt.Errorf("error requesting Github repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
 		log.Error().Err(err).Msgf("")
 		return nil, err
@@ -276,7 +276,7 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 		return nil, err
 	}
 
-	if languagesResponse.IsError() == true {
+	if languagesResponse.IsError() {
 		err := fmt.Errorf("error requesting Github repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
 		log.Error().Err(err).Msgf("")
 		return nil, err
@@ -294,7 +294,6 @@ func RegoFuncGetGithubRepo(ctx rego.BuiltinContext, a, b *ast.Term) (*ast.Term, 
 }
 
 func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
-
 	var path string
 	if err := ast.As(a.Value, &path); err != nil {
 		log.Error().Err(err).Msg("")
@@ -322,7 +321,7 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 		return nil, err
 	}
 
-	if response.IsError() == true {
+	if response.IsError() {
 		err := fmt.Errorf("error requesting Gitlab repo metadata. CODE: %d: REASON: %s", response.StatusCode(), response)
 		log.Error().Err(err).Msgf("")
 		return nil, err
@@ -337,7 +336,7 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 		return nil, err
 	}
 
-	if languagesResponse.IsError() == true {
+	if languagesResponse.IsError() {
 		err := fmt.Errorf("error requesting Gitlab repo languages. CODE: %d: REASON: %s", response.StatusCode(), response)
 		log.Error().Err(err).Msgf("")
 		return nil, err
@@ -354,7 +353,6 @@ func RegoFuncGetGitlabRepo(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, err
 }
 
 func RegoFuncGetMaturity(ctx rego.BuiltinContext, a *ast.Term) (*ast.Term, error) {
-
 	var alias string
 	if err := ast.As(a.Value, &alias); err != nil {
 		log.Error().Err(err).Msg("")

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/opslevel/opslevel-go/v2023"
@@ -62,7 +61,7 @@ Examples:
 	opslevel create check -f my_cec.yaml
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		usePrompts := hasStdin() == false
+		usePrompts := !hasStdin()
 		input, err := readCheckCreateInput()
 		cobra.CheckErr(err)
 		check, err := createCheck(*input, usePrompts)
@@ -488,7 +487,7 @@ func readCheckCreateInput() (*CheckCreateType, error) {
 	v := &ConfigVersion{}
 	viper.Unmarshal(&v)
 	if v.Version != CheckConfigCurrentVersion {
-		return nil, errors.New(fmt.Sprintf("Supported config version is '%s' but found '%s' | Please update config file", CheckConfigCurrentVersion, v.Version))
+		return nil, fmt.Errorf("Supported config version is '%s' but found '%s' | Please update config file", CheckConfigCurrentVersion, v.Version)
 	}
 	// Unmarshall
 	evt := &CheckCreateType{}
