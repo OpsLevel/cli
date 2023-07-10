@@ -3,11 +3,12 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/gosimple/slug"
 	"github.com/spf13/cobra"
@@ -27,21 +28,19 @@ func init() {
 }
 
 func newFile(filename string, makeExecutable bool) *os.File {
-	path := fmt.Sprintf("%s", filename)
-
-	var _, err = os.Stat(path)
+	_, err := os.Stat(filename)
 	if os.IsExist(err) {
-		removeErr := os.Remove(path)
+		removeErr := os.Remove(filename)
 		if removeErr != nil {
 			panic(removeErr)
 		}
 	}
-	file, err := os.Create(path)
+	file, err := os.Create(filename)
 	if err != nil {
 		panic(err)
 	}
 	if makeExecutable {
-		if err := os.Chmod(path, 0755); err != nil {
+		if err := os.Chmod(filename, 0755); err != nil {
 			panic(err)
 		}
 	}
@@ -50,7 +49,7 @@ func newFile(filename string, makeExecutable bool) *os.File {
 
 func templateConfig(tmpl string, a ...interface{}) string {
 	// TODO: it would be nice to remove blank lines to condense the terraform config - this is a hacky way that doesn't work
-	//return strings.ReplaceAll(fmt.Sprintf(tmpl, a...), "  \n", "")
+	// return strings.ReplaceAll(fmt.Sprintf(tmpl, a...), "  \n", "")
 	return fmt.Sprintf(tmpl, a...)
 }
 
@@ -112,7 +111,7 @@ provider "opslevel" {
 // we would likely need to tie the resource's ID to the generated string for future lookups for connected resources
 func makeTerraformSlug(value string) string {
 	return strings.ReplaceAll(slug.Make(value), "-", "_")
-	//return strings.ReplaceAll(strings.ReplaceAll(slug.Make(value), "-", "_"), ":", "_")
+	// return strings.ReplaceAll(strings.ReplaceAll(slug.Make(value), "-", "_"), ":", "_")
 }
 
 func getIntegrationTerraformName(integration opslevel.IntegrationId) string {

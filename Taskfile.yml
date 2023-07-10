@@ -9,16 +9,14 @@ tasks:
     cmds:
       - gofmt -d .
       - go vet ./...
-      # TODO: uncomment after lint fixes addressed
-      # - golangci-lint run
+      - golangci-lint run
 
   lintfix:
     desc: Fix formatting and linting
     dir: src
     cmds:
       - gofmt -w .
-      # TODO: uncomment after lint fixes addressed
-      # - golangci-lint run --fix
+      - golangci-lint run --fix
 
   test:
     desc: Run tests

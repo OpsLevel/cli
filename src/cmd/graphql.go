@@ -4,20 +4,22 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/itchyny/gojq"
-	"github.com/opslevel/opslevel-go/v2023"
-	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/itchyny/gojq"
+	"github.com/opslevel/opslevel-go/v2023"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
 )
 
-var keyValueExp = regexp.MustCompile(`([\w-]+)=(.*)`)
-var usesPaginationExp = regexp.MustCompile(`\$endCursor:\WString`)
-var hasNextPageExp = regexp.MustCompile(`"hasNextPage":([\w]+)`)
-var endCursorExp = regexp.MustCompile(`"endCursor":\"([\w]+)\"`)
+var (
+	keyValueExp    = regexp.MustCompile(`([\w-]+)=(.*)`)
+	hasNextPageExp = regexp.MustCompile(`"hasNextPage":([\w]+)`)
+	endCursorExp   = regexp.MustCompile(`"endCursor":\"([\w]+)\"`)
+)
 
 // graphqlCmd represents the graphql command
 var graphqlCmd = &cobra.Command{
@@ -135,9 +137,7 @@ query ($id: ID!){
 		for hasNextPage {
 			data, err := client.ExecRaw(query, variables, opslevel.WithName(operationName))
 			handleErr("error making graphql api call", err)
-			for _, item := range handleAggregate(data, aggregation) {
-				output = append(output, item)
-			}
+			output = append(output, handleAggregate(data, aggregation)...)
 
 			if paginate {
 				hasNextPage, err = strconv.ParseBool(string(hasNextPageExp.FindSubmatch(data)[1]))

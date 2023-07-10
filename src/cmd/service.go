@@ -4,9 +4,10 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"strings"
+
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/rs/zerolog/log"
 
@@ -43,7 +44,7 @@ var createServiceTagCmd = &cobra.Command{
 	Use:   "tag ID|ALIAS TAG_KEY TAG_VALUE",
 	Short: "Create a service tag",
 	Long: `Create a service tag
-	
+
 opslevel create service tag my-service foo bar
 opslevel create service tag --assign my-service foo bar
 `,
@@ -140,7 +141,7 @@ opslevel get service tag my-service my-tag
 		}
 		var output []opslevel.Tag
 		for _, tag := range result.Tags.Nodes {
-			if singleTag == false || tagKey == tag.Key {
+			if !singleTag || tagKey == tag.Key {
 				output = append(output, tag)
 			}
 		}
