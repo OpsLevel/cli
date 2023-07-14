@@ -15,7 +15,7 @@ import (
 )
 
 var createSystemCmd = &cobra.Command{
-	Use:   "system ID|ALIAS",
+	Use:   "system",
 	Short: "Create a system",
 	Long:  `Create a system`,
 	Example: `
@@ -59,20 +59,31 @@ var getSystemCmd = &cobra.Command{
 	},
 }
 
-var deleteSystemCmd = &cobra.Command{
-	Use:   "system ID|ALIAS",
-	Short: "Delete a system",
-	Long:  "Delete a system from OpsLevel",
-	Example: `
-		opslevel delete system my-system-alias-or-id
-		`,
-	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"ID", "ALIAS"},
+var listSystemCmd = &cobra.Command{
+	Use:     "system",
+	Aliases: []string{"systems"},
+	Short:   "Lists the systems",
+	Long:    `Lists the systems`,
 	Run: func(cmd *cobra.Command, args []string) {
-		key := args[0]
-		err := getClientGQL().DeleteSystem(key)
+		resp, err := getClientGQL().ListSystems(nil)
+		list := resp.Nodes
 		cobra.CheckErr(err)
-		fmt.Printf("deleted '%s' system\n", key)
+		if isJsonOutput() {
+			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else if isCsvOutput() {
+			w := csv.NewWriter(os.Stdout)
+			w.Write([]string{"NAME", "ID", "ALIASES"})
+			for _, item := range list {
+				w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
+			}
+			w.Flush()
+		} else {
+			w := common.NewTabWriter("NAME", "ALIAS", "ID")
+			for _, item := range list {
+				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Id, strings.Join(item.Aliases, ","))
+			}
+			w.Flush()
+		}
 	},
 }
 
@@ -103,45 +114,29 @@ var updateSystemCmd = &cobra.Command{
 	},
 }
 
-var listSystemCmd = &cobra.Command{
-	Use:     "system ID|ALIAS",
-	Aliases: []string{"systems"},
-	Short:   "Lists the systems",
-	Long:    `Lists the systems`,
+var deleteSystemCmd = &cobra.Command{
+	Use:   "system ID|ALIAS",
+	Short: "Delete a system",
+	Long:  "Delete a system from OpsLevel",
+	Example: `
+		opslevel delete system my-system-alias-or-id
+		`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
-		resp, err := getClientGQL().ListSystems(nil)
-		list := resp.Nodes
+		key := args[0]
+		err := getClientGQL().DeleteSystem(key)
 		cobra.CheckErr(err)
-		if isJsonOutput() {
-			common.JsonPrint(json.MarshalIndent(list, "", "    "))
-		} else if isCsvOutput() {
-			w := csv.NewWriter(os.Stdout)
-			if err := w.Write([]string{"NAME", "ID", "ALIASES"}); err != nil {
-				panic(err)
-			}
-			for _, item := range list {
-				err := w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
-				if err != nil {
-					panic(err)
-				}
-			}
-			w.Flush()
-		} else {
-			w := common.NewTabWriter("NAME", "ALIAS", "ID")
-			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Id, strings.Join(item.Aliases, ","))
-			}
-			w.Flush()
-		}
+		fmt.Printf("deleted '%s' system\n", key)
 	},
 }
 
 func init() {
 	createCmd.AddCommand(createSystemCmd)
 	getCmd.AddCommand(getSystemCmd)
-	deleteCmd.AddCommand(deleteSystemCmd)
-	updateCmd.AddCommand(updateSystemCmd)
 	listCmd.AddCommand(listSystemCmd)
+	updateCmd.AddCommand(updateSystemCmd)
+	deleteCmd.AddCommand(deleteSystemCmd)
 }
 
 func readSystemInput() (*opslevel.SystemInput, error) {

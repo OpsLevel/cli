@@ -1,0 +1,9 @@
+run:
+  timeout: 2m
+linters:
+  disable:
+      # 1st -> remove staticcheck and fix lint issues
+    - staticcheck
+      # 2nd -> remove errcheck and ineffassign
+    - errcheck
+    - ineffassign

@@ -28,21 +28,19 @@ func init() {
 }
 
 func newFile(filename string, makeExecutable bool) *os.File {
-	path := filename
-
-	_, err := os.Stat(path)
+	_, err := os.Stat(filename)
 	if os.IsExist(err) {
-		removeErr := os.Remove(path)
+		removeErr := os.Remove(filename)
 		if removeErr != nil {
 			panic(removeErr)
 		}
 	}
-	file, err := os.Create(path)
+	file, err := os.Create(filename)
 	if err != nil {
 		panic(err)
 	}
 	if makeExecutable {
-		if err := os.Chmod(path, 0755); err != nil {
+		if err := os.Chmod(filename, 0755); err != nil {
 			panic(err)
 		}
 	}

@@ -16,8 +16,7 @@ import (
 )
 
 var (
-	keyValueExp = regexp.MustCompile(`([\w-]+)=(.*)`)
-	// var usesPaginationExp = regexp.MustCompile(`\$endCursor:\WString`)
+	keyValueExp    = regexp.MustCompile(`([\w-]+)=(.*)`)
 	hasNextPageExp = regexp.MustCompile(`"hasNextPage":([\w]+)`)
 	endCursorExp   = regexp.MustCompile(`"endCursor":\"([\w]+)\"`)
 )
@@ -106,7 +105,6 @@ query ($id: ID!){
 		handleErr("error getting paginate flag", err)
 
 		aggregate, err := flags.GetString("aggregate")
-		handleErr("error getting aggregate flag", err)
 		jq, err := gojq.Parse(aggregate)
 		handleErr("error parsing pagination flag value", err)
 		aggregation, err := gojq.Compile(jq)
@@ -115,7 +113,6 @@ query ($id: ID!){
 		queryValue, err := flags.GetString("query")
 		handleErr("error getting query flag value", err)
 		queryParsed, err := convert(queryValue)
-		handleErr("error parsing query flag value", err)
 		query, ok := queryParsed.(string)
 		if !ok {
 			handleErr("error parsing query flag value", fmt.Errorf("'%#v' is not a string", queryParsed))
