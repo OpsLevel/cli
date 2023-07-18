@@ -142,7 +142,10 @@ query ($id: ID!){
 			if paginate {
 				hasNextPage, err = strconv.ParseBool(string(hasNextPageExp.FindSubmatch(data)[1]))
 				handleErr("error parsing bool for has next page", err)
-				variables["endCursor"] = string(endCursorExp.FindSubmatch(data)[1])
+				// don't try to parse endCursor unless we know there's another page
+				if hasNextPage {
+					variables["endCursor"] = string(endCursorExp.FindSubmatch(data)[1])
+				}
 			} else {
 				hasNextPage = false
 			}
