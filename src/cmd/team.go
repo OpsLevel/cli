@@ -86,12 +86,12 @@ opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 			}
 			cobra.CheckErr(err)
 			common.WasFound(team.Id == "", key)
-			contactInput := opslevel.CreateContactSlack(address, displayName)
+			contactInput := opslevel.CreateContactSlack(address, &displayName)
 			switch contactType {
 			case string(opslevel.ContactTypeEmail):
-				contactInput = opslevel.CreateContactEmail(address, displayName)
+				contactInput = opslevel.CreateContactEmail(address, &displayName)
 			case string(opslevel.ContactTypeWeb):
-				contactInput = opslevel.CreateContactWeb(address, displayName)
+				contactInput = opslevel.CreateContactWeb(address, &displayName)
 			}
 			contact, err := getClientGQL().AddContact(team.TeamId.Alias, contactInput)
 			cobra.CheckErr(err)
