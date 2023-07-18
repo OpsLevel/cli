@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"net/url"
 	"os"
@@ -125,13 +124,13 @@ Examples:
 		cobra.CheckErr(err)
 		inputJSON := &map[string]interface{}{}
 		if inputFilePath != "" {
-			inputRead, err := ioutil.ReadFile(inputFilePath)
+			inputRead, err := os.ReadFile(inputFilePath)
 			cobra.CheckErr(err)
 			cobra.CheckErr(json.Unmarshal(inputRead, inputJSON))
 		}
 		outputFilePath, err := flags.GetString("output")
 		cobra.CheckErr(err)
-		policy, err := ioutil.ReadFile(filePath)
+		policy, err := os.ReadFile(filePath)
 		cobra.CheckErr(err)
 		input := regoInput{}
 		err = filepath.Walk(".",

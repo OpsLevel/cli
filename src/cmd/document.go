@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/opslevel/opslevel-go/v2023"
-	"io/ioutil"
+	"os"
 	"strings"
+
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -29,7 +30,7 @@ opslevel create document my-service -r services -t openapi -i xxxxx -f swagger.j
 		integrationID, err := flags.GetString("integration-id")
 		cobra.CheckErr(err)
 		integrationURL := fmt.Sprintf("integrations/document/%s/%s/%s/%s", integrationID, resourceType, serviceAlias, documentType)
-		fileContents, err := ioutil.ReadFile(createDataFile)
+		fileContents, err := os.ReadFile(createDataFile)
 		cobra.CheckErr(err)
 		var result opslevel.RestResponse
 		response, err := getClientRest().R().

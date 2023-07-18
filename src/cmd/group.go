@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
 
@@ -282,7 +283,7 @@ var deleteGroupCmd = &cobra.Command{
 			err := getClientGQL().DeleteGroup(key)
 			cobra.CheckErr(err)
 		} else {
-			err := getClientGQL().DeleteGroupWithAlias(key)
+			err := getClientGQL().DeleteGroup(key)
 			cobra.CheckErr(err)
 		}
 		fmt.Printf("deleted '%s' group\n", key)
