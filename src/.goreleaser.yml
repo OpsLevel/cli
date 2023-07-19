@@ -31,21 +31,6 @@ dockers:
     - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
     - "--label=org.opencontainers.image.version={{ .Tag }}"
     - "--build-arg=VERSION={{ .Tag }}"
-nfpms:
-  - formats:
-      - deb
-      - rpm
-    dependencies:
-      - jq
-    vendor: "opslevel"
-    homepage: "https://opslevel.com"
-    maintainer: "OpsLevel <info@opslevel.com>"
-    description: "Opslevel Command Line Utility"
-    license: "Apache-2.0"
-    file_name_template: "{{.ProjectName}}-{{.Os}}-{{.Arch}}"
-    replacements:
-      amd64: 64bit
-      386: 32bit
 archives:
   - name_template: '{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}'
     format_overrides:
