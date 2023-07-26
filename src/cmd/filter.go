@@ -15,8 +15,8 @@ import (
 var createFilterCmd = &cobra.Command{
 	Use:   "filter",
 	Short: "Create a filter",
-	Long: `Create a filter
-
+	Long:  `Create a filter`,
+	Example: `
 cat << EOF | opslevel create filter -f -
 name: "Tier 1 Rails apps using RDS"
 connective: "and"
@@ -79,8 +79,8 @@ var listFilterCmd = &cobra.Command{
 var updateFilterCmd = &cobra.Command{
 	Use:   "filter",
 	Short: "Update a filter",
-	Long: `Update a filter
-
+	Long:  `Update a filter`,
+	Example: `
 cat << EOF | opslevel update filter -f -
 id: "Z2lkOi8vb3BzbGV2ZWwvRmlsdGVyLzIzNTk"
 name: "Apps using RDS or DynamoDB"
