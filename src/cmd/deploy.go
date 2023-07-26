@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"encoding/json"
-	"github.com/opslevel/opslevel-go/v2023"
 	"os"
 	"time"
+
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/creasty/defaults"
 	git "github.com/go-git/go-git/v5"
@@ -115,7 +116,7 @@ func init() {
 }
 
 func readCreateConfigAsDeployEvent() (*DeployEvent, error) {
-	readCreateConfigFile()
+	readInputConfig()
 	evt := &DeployEvent{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {

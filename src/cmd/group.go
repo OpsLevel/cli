@@ -344,7 +344,7 @@ func init() {
 }
 
 func readGroupInput() (*opslevel.GroupInput, error) {
-	readCreateConfigFile()
+	readInputConfig()
 	evt := &opslevel.GroupInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {

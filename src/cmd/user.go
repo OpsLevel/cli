@@ -4,15 +4,16 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"os"
+	"sort"
+	"strings"
+
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"sort"
-	"strings"
 )
 
 var createUserCmd = &cobra.Command{
@@ -211,7 +212,7 @@ func init() {
 }
 
 func readUserInput() (*opslevel.UserInput, error) {
-	readCreateConfigFile()
+	readInputConfig()
 	evt := &opslevel.UserInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {

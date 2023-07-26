@@ -413,7 +413,7 @@ func init() {
 }
 
 func readTeamCreateInput() (*opslevel.TeamCreateInput, error) {
-	readCreateConfigFile()
+	readInputConfig()
 	evt := &opslevel.TeamCreateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
@@ -423,7 +423,7 @@ func readTeamCreateInput() (*opslevel.TeamCreateInput, error) {
 }
 
 func readTeamUpdateInput() (*opslevel.TeamUpdateInput, error) {
-	readCreateConfigFile()
+	readInputConfig()
 	evt := &opslevel.TeamUpdateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {

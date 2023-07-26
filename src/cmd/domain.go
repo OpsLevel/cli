@@ -4,13 +4,14 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"strings"
 )
 
 var createDomainCmd = &cobra.Command{
@@ -138,7 +139,7 @@ func init() {
 }
 
 func readDomainInput() (*opslevel.DomainInput, error) {
-	readCreateConfigFile()
+	readInputConfig()
 	evt := &opslevel.DomainInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
