@@ -1,0 +1,3 @@
+kind: Feature
+body: Add support for creating and updating [Filters](https://docs.opslevel.com/docs/checks-and-filters#filters) using YAML files
+time: 2023-07-26T20:38:09.918324-04:00
