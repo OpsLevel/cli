@@ -18,22 +18,19 @@ var createFilterCmd = &cobra.Command{
 	Long:  `Create a filter`,
 	Example: `
 cat << EOF | opslevel create filter -f -
-name: "Tier 1 Rails apps using RDS"
+name: "Tier 1 apps using RDS"
 connective: "and"
 predicates:
   - key: "tier_index"
     type: "equals"
     value: "1"
-  - key: "filter_id"
-    type: "matches"
-    value: "Z2lkOi8vb3BzbGV2ZWwvRmlsdGVyLzEyNjQ"
   - key: "tags"
     keyData: "db"
     type: "equals"
     value: "rds"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readFilterCreateInput()
+		input, err := readFilterInput()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateFilter(*input)
 		cobra.CheckErr(err)
@@ -77,28 +74,38 @@ var listFilterCmd = &cobra.Command{
 }
 
 var updateFilterCmd = &cobra.Command{
-	Use:   "filter",
+	Use:   "filter ID",
 	Short: "Update a filter",
 	Long:  `Update a filter`,
 	Example: `
-cat << EOF | opslevel update filter -f -
-id: "Z2lkOi8vb3BzbGV2ZWwvRmlsdGVyLzIzNTk"
-name: "Apps using RDS or DynamoDB"
-connective: "or"
+cat << EOF | opslevel update filter Z2lkOi8vb3BzbGV2ZWwvRmlsdGVyLzIzNTk -f -
+name: "Tier 2 apps using RDS"
+connective: "and"
 predicates:
-  - key: "tags"
-    keyData: "db"
+  - key: "tier_index"
     type: "equals"
-    value: "rds"
+    value: "2"
   - key: "tags"
     keyData: "db"
     type: "equals"
     value: "dynamo"
 EOF`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readFilterUpdateInput()
+		input, err := readFilterInput()
 		cobra.CheckErr(err)
-		filter, err := getClientGQL().UpdateFilter(*input)
+
+		// hack: in the future all ObjectUpdateInput and ObjectCreateInput
+		// will be merged into ObjectInput. for now, create an update input
+		// by adding in the first argument.
+		updateInput := &opslevel.FilterUpdateInput{
+			Id:         *opslevel.NewID(args[0]),
+			Name:       input.Name,
+			Predicates: input.Predicates,
+			Connective: input.Connective,
+		}
+		filter, err := getClientGQL().UpdateFilter(*updateInput)
 		cobra.CheckErr(err)
 		common.JsonPrint(json.MarshalIndent(filter, "", "    "))
 	},
@@ -126,19 +133,9 @@ func init() {
 	deleteCmd.AddCommand(deleteFilterCmd)
 }
 
-func readFilterCreateInput() (*opslevel.FilterCreateInput, error) {
-	readCreateConfigFile()
+func readFilterInput() (*opslevel.FilterCreateInput, error) {
+	readInputConfig()
 	evt := &opslevel.FilterCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
-}
-
-func readFilterUpdateInput() (*opslevel.FilterUpdateInput, error) {
-	readUpdateConfigFile()
-	evt := &opslevel.FilterUpdateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
