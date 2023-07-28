@@ -10,7 +10,7 @@ require (
 	github.com/itchyny/gojq v0.12.13
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.54.0
-	github.com/opslevel/opslevel-go/v2023 v2023.7.17
+	github.com/opslevel/opslevel-go/v2023 v2023.7.28
 	github.com/relvacode/iso8601 v1.3.0
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.29.1
@@ -95,4 +95,4 @@ require (
 )
 
 //Only used for local development!
-replace github.com/opslevel/opslevel-go/v2023 => ./submodules/opslevel-go
+//replace github.com/opslevel/opslevel-go/v2023 => ./submodules/opslevel-go
