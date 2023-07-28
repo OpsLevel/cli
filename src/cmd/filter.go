@@ -3,24 +3,38 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var createFilterCmd = &cobra.Command{
-	Use:        "filter NAME",
-	Short:      "Create a filter",
-	Long:       `Create a filter`,
-	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"NAME"},
+	Use:   "filter",
+	Short: "Create a filter",
+	Long:  `Create a filter`,
+	Example: `
+cat << EOF | opslevel create filter -f -
+name: "Tier 1 apps using RDS"
+connective: "and"
+predicates:
+  - key: "tier_index"
+    type: "equals"
+    value: "1"
+  - key: "tags"
+    keyData: "db"
+    type: "equals"
+    value: "rds"
+EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		filter, err := getClientGQL().CreateFilter(opslevel.FilterCreateInput{
-			Name: args[0],
-		})
+		input, err := readFilterInput()
 		cobra.CheckErr(err)
-		fmt.Println(filter.Id)
+		result, err := getClientGQL().CreateFilter(*input)
+		cobra.CheckErr(err)
+		fmt.Println(result.Id)
 	},
 }
 
@@ -59,6 +73,44 @@ var listFilterCmd = &cobra.Command{
 	},
 }
 
+var updateFilterCmd = &cobra.Command{
+	Use:   "filter ID",
+	Short: "Update a filter",
+	Long:  `Update a filter`,
+	Example: `
+cat << EOF | opslevel update filter Z2lkOi8vb3BzbGV2ZWwvRmlsdGVyLzIzNTk -f -
+name: "Tier 2 apps using RDS"
+connective: "and"
+predicates:
+  - key: "tier_index"
+    type: "equals"
+    value: "2"
+  - key: "tags"
+    keyData: "db"
+    type: "equals"
+    value: "dynamo"
+EOF`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		input, err := readFilterInput()
+		cobra.CheckErr(err)
+
+		// hack: in the future all ObjectUpdateInput and ObjectCreateInput
+		// will be merged into ObjectInput. for now, create an update input
+		// by adding in the first argument.
+		updateInput := &opslevel.FilterUpdateInput{
+			Id:         *opslevel.NewID(args[0]),
+			Name:       input.Name,
+			Predicates: input.Predicates,
+			Connective: input.Connective,
+		}
+		filter, err := getClientGQL().UpdateFilter(*updateInput)
+		cobra.CheckErr(err)
+		common.JsonPrint(json.MarshalIndent(filter, "", "    "))
+	},
+}
+
 var deleteFilterCmd = &cobra.Command{
 	Use:        "filter ID",
 	Short:      "Delete a filter",
@@ -75,7 +127,18 @@ var deleteFilterCmd = &cobra.Command{
 
 func init() {
 	createCmd.AddCommand(createFilterCmd)
+	updateCmd.AddCommand(updateFilterCmd)
 	getCmd.AddCommand(getFilterCmd)
 	listCmd.AddCommand(listFilterCmd)
 	deleteCmd.AddCommand(deleteFilterCmd)
+}
+
+func readFilterInput() (*opslevel.FilterCreateInput, error) {
+	readInputConfig()
+	evt := &opslevel.FilterCreateInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
 }
