@@ -30,7 +30,7 @@ opslevel create document my-service -r services -t openapi -i xxxxx -f swagger.j
 		integrationID, err := flags.GetString("integration-id")
 		cobra.CheckErr(err)
 		integrationURL := fmt.Sprintf("integrations/document/%s/%s/%s/%s", integrationID, resourceType, serviceAlias, documentType)
-		fileContents, err := os.ReadFile(createDataFile)
+		fileContents, err := os.ReadFile(dataFile)
 		cobra.CheckErr(err)
 		var result opslevel.RestResponse
 		response, err := getClientRest().R().

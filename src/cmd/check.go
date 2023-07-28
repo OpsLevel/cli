@@ -482,7 +482,7 @@ type ConfigVersion struct {
 }
 
 func readCheckCreateInput() (*CheckCreateType, error) {
-	readCreateConfigFile()
+	readInputConfig()
 	// Validate Version
 	v := &ConfigVersion{}
 	viper.Unmarshal(&v)

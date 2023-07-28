@@ -338,7 +338,7 @@ func init() {
 }
 
 func readServiceCreateInput() (*opslevel.ServiceCreateInput, error) {
-	readCreateConfigFile()
+	readInputConfig()
 	evt := &opslevel.ServiceCreateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
@@ -348,7 +348,7 @@ func readServiceCreateInput() (*opslevel.ServiceCreateInput, error) {
 }
 
 func readServiceUpdateInput() (*opslevel.ServiceUpdateInput, error) {
-	readUpdateConfigFile()
+	readInputConfig()
 	evt := &opslevel.ServiceUpdateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {

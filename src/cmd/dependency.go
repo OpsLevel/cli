@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -57,7 +58,7 @@ func init() {
 }
 
 func readCreateServiceDependencyInput() (*opslevel.ServiceDependencyCreateInput, error) {
-	data, err := readCreateFile()
+	data, err := readInputFile()
 	if err != nil {
 		return nil, err
 	}
