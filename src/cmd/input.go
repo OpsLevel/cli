@@ -44,10 +44,7 @@ func readInputConfig() {
 	if dataFile != "" {
 		if dataFile == "-" {
 			viper.SetConfigType("yaml")
-			if hasStdin() {
-				viper.ReadConfig(os.Stdin)
-			}
-			return
+			viper.ReadConfig(os.Stdin)
 		} else if dataFile == "." {
 			viper.SetConfigFile("./data.yaml")
 		} else {
