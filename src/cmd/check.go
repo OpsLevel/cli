@@ -13,6 +13,61 @@ import (
 	"github.com/spf13/viper"
 )
 
+var checkCreateCmd = &cobra.Command{
+	Use:   "check",
+	Short: "Create a rubric check",
+	Long: `Create a rubric check
+
+Examples:
+
+	opslevel create check -f my_cec.yaml
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		usePrompts := !hasStdin()
+		input, err := readCheckCreateInput()
+		cobra.CheckErr(err)
+		clientGQL := getClientGQL()
+		opslevel.Cache.CacheCategories(clientGQL)
+		opslevel.Cache.CacheLevels(clientGQL)
+		opslevel.Cache.CacheTeams(clientGQL)
+		opslevel.Cache.CacheFilters(clientGQL)
+		check, err := createCheck(*input, usePrompts)
+		cobra.CheckErr(err)
+		fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
+	},
+}
+
+var importCheckCmd = &cobra.Command{
+	Use:   "check CSV_FILEPATH",
+	Short: "Import a CSV of check definitions",
+	Long: `Import a CSV of check definitions
+	
+Examples:
+
+    opslevel import check data.csv
+	
+`,
+	Aliases:    []string{"checks"},
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"CSV_FILEPATH"},
+	Run: func(cmd *cobra.Command, args []string) {
+		filepath := args[0]
+		reader, err := common.ReadCSVFile(filepath)
+		cobra.CheckErr(err)
+		clientGQL := getClientGQL()
+		opslevel.Cache.CacheCategories(clientGQL)
+		opslevel.Cache.CacheLevels(clientGQL)
+		opslevel.Cache.CacheTeams(clientGQL)
+		opslevel.Cache.CacheFilters(clientGQL)
+		for reader.Rows() {
+			spec := marshalCSVRow(reader)
+			check, err := createCheck(spec, false)
+			cobra.CheckErr(err)
+			fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
+		}
+	},
+}
+
 var getCheckCmd = &cobra.Command{
 	Use:        "check ID",
 	Short:      "Get details about a rubic check",
@@ -47,52 +102,6 @@ var listCheckCmd = &cobra.Command{
 				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Type, item.Id)
 			}
 			w.Flush()
-		}
-	},
-}
-
-var checkCreateCmd = &cobra.Command{
-	Use:   "check",
-	Short: "Create a rubric check",
-	Long: `Create a rubric check
-
-Examples:
-
-	opslevel create check -f my_cec.yaml
-`,
-	Run: func(cmd *cobra.Command, args []string) {
-		usePrompts := !hasStdin()
-		input, err := readCheckCreateInput()
-		cobra.CheckErr(err)
-		check, err := createCheck(*input, usePrompts)
-		cobra.CheckErr(err)
-		fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
-	},
-}
-
-var importCheckCmd = &cobra.Command{
-	Use:   "check CSV_FILEPATH",
-	Short: "Import a CSV of check definitions",
-	Long: `Import a CSV of check definitions
-	
-Examples:
-
-    opslevel import check data.csv
-	
-`,
-	Aliases:    []string{"checks"},
-	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"CSV_FILEPATH"},
-	Run: func(cmd *cobra.Command, args []string) {
-		filepath := args[0]
-		reader, err := common.ReadCSVFile(filepath)
-		cobra.CheckErr(err)
-		cacheCheckAliases()
-		for reader.Rows() {
-			spec := marshalCSVRow(reader)
-			check, err := createCheck(spec, false)
-			cobra.CheckErr(err)
-			fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
 		}
 	},
 }
@@ -346,10 +355,6 @@ func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error
 	var output *opslevel.Check
 	var err error
 	clientGQL := getClientGQL()
-	opslevel.Cache.CacheCategories(clientGQL)
-	opslevel.Cache.CacheLevels(clientGQL)
-	opslevel.Cache.CacheTeams(clientGQL)
-	opslevel.Cache.CacheFilters(clientGQL)
 	err = input.resolveCategoryAliases(clientGQL, usePrompts)
 	cobra.CheckErr(err)
 	err = input.resolveLevelAliases(clientGQL, usePrompts)
