@@ -70,6 +70,33 @@ Examples:
 	},
 }
 
+var importCheckCmd = &cobra.Command{
+	Use:   "check CSV_FILEPATH",
+	Short: "Import a CSV of check definitions",
+	Long: `Import a CSV of check definitions
+	
+Examples:
+
+    opslevel import check data.csv
+	
+`,
+	Aliases:    []string{"checks"},
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"CSV_FILEPATH"},
+	Run: func(cmd *cobra.Command, args []string) {
+		filepath := args[0]
+		reader, err := common.ReadCSVFile(filepath)
+		cobra.CheckErr(err)
+		cacheCheckAliases()
+		for reader.Rows() {
+			spec := marshalCSVRow(reader)
+			check, err := createCheck(spec, false)
+			cobra.CheckErr(err)
+			fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
+		}
+	},
+}
+
 var deleteCheckCmd = &cobra.Command{
 	Use:        "check ID",
 	Short:      "Delete a rubric check",
@@ -86,6 +113,7 @@ var deleteCheckCmd = &cobra.Command{
 
 func init() {
 	createCmd.AddCommand(checkCreateCmd)
+	importCmd.AddCommand(importCheckCmd)
 	getCmd.AddCommand(getCheckCmd)
 	listCmd.AddCommand(listCheckCmd)
 	deleteCmd.AddCommand(deleteCheckCmd)
@@ -387,6 +415,62 @@ func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error
 		return nil, fmt.Errorf("unknown error - no check data returned")
 	}
 	return output, err
+}
+
+func marshalCSVRow(reader *common.CSVReader) CheckCreateType {
+	checkCreate := CheckCreateType{
+		Spec: map[string]interface{}{
+			"name":     reader.Text("Name"),
+			"enabled":  true,
+			"category": reader.Text("Category"),
+			"level":    reader.Text("Level"),
+			"filter":   reader.Text("Filter"),
+			"owner":    reader.Text("Owner"),
+			"notes":    reader.Text("Notes"),
+		},
+	}
+	switch reader.Text("Type") {
+	case "Service Owner":
+		checkCreate.Kind = opslevel.CheckTypeHasOwner
+	case "Service Property":
+		checkCreate.Kind = opslevel.CheckTypeServiceProperty
+		// serviceProperty
+		// propertyValuePredicate
+	case "Service Integrated":
+		checkCreate.Kind = opslevel.CheckTypeHasServiceConfig
+	case "Repository Integrated":
+		checkCreate.Kind = opslevel.CheckTypeHasRepository
+	case "Tool Usage":
+		checkCreate.Kind = opslevel.CheckTypeToolUsage
+		// toolCategory
+		// toolNamePredicate
+		// environmentPredicate
+	case "Tag Defined":
+		checkCreate.Kind = opslevel.CheckTypeTagDefined
+		// tagKey
+		// tagPredicate
+	case "Repository File":
+		checkCreate.Kind = opslevel.CheckTypeRepoFile
+		// directorySearch
+		// filePaths
+		// fileContentsPredicate
+	case "Repository Search":
+		checkCreate.Kind = opslevel.CheckTypeRepoSearch
+		// fileExtensions
+		// fileContentsPredicate
+	case "Manual":
+		checkCreate.Kind = opslevel.CheckTypeManual
+		// updateFrequency
+		checkCreate.Spec["updateRequiresComment"] = reader.Bool("Require update comment")
+	case "Custom Event":
+		checkCreate.Kind = opslevel.CheckTypeGeneric
+		// integration
+		// serviceSelector
+		// successCondition
+		// message
+	}
+
+	return checkCreate
 }
 
 func marshalCheck(check opslevel.Check) *CheckCreateType {
