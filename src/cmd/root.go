@@ -18,6 +18,7 @@ import (
 var (
 	_clientRest *resty.Client
 	_clientGQL  *opslevel.Client
+	_dryRun     bool
 )
 
 var rootCmd = &cobra.Command{
@@ -40,6 +41,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("no-headers", false, "If --output=text and this flag is set the headers will be skip from being output")
 	rootCmd.PersistentFlags().Lookup("no-headers").NoOptDefVal = "true"
 	rootCmd.PersistentFlags().Int("api-timeout", 10, "The number of seconds to timeout of the request. Overrides environment variable 'OPSLEVEL_API_TIMEOUT'")
+	rootCmd.PersistentFlags().BoolVar(&_dryRun, "dry-run", false, "Dry run mode")
 
 	viper.BindPFlags(rootCmd.PersistentFlags())
 	viper.BindEnv("log-format", "OPSLEVEL_LOG_FORMAT", "OL_LOG_FORMAT", "OL_LOGFORMAT")

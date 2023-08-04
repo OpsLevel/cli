@@ -3,6 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 
 	"github.com/opslevel/opslevel-go/v2023"
 
@@ -14,14 +17,10 @@ import (
 )
 
 var checkCreateCmd = &cobra.Command{
-	Use:   "check",
-	Short: "Create a rubric check",
-	Long: `Create a rubric check
-
-Examples:
-
-	opslevel create check -f my_cec.yaml
-`,
+	Use:     "check",
+	Short:   "Create a rubric check",
+	Long:    `Create a rubric check`,
+	Example: `opslevel create check -f my_cec.yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		usePrompts := !hasStdin()
 		input, err := readCheckCreateInput()
@@ -31,22 +30,17 @@ Examples:
 		opslevel.Cache.CacheLevels(clientGQL)
 		opslevel.Cache.CacheTeams(clientGQL)
 		opslevel.Cache.CacheFilters(clientGQL)
-		check, err := createCheck(*input, usePrompts)
+		check, err := createCheck(*input, usePrompts, _dryRun)
 		cobra.CheckErr(err)
 		fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
 	},
 }
 
 var importCheckCmd = &cobra.Command{
-	Use:   "check CSV_FILEPATH",
-	Short: "Import a CSV of check definitions",
-	Long: `Import a CSV of check definitions
-	
-Examples:
-
-    opslevel import check data.csv
-	
-`,
+	Use:        "check CSV_FILEPATH",
+	Short:      "Import a CSV of check definitions",
+	Long:       `Import a CSV of check definitions`,
+	Example:    `opslevel import check data.csv`,
 	Aliases:    []string{"checks"},
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"CSV_FILEPATH"},
@@ -60,10 +54,32 @@ Examples:
 		opslevel.Cache.CacheTeams(clientGQL)
 		opslevel.Cache.CacheFilters(clientGQL)
 		for reader.Rows() {
-			spec := marshalCSVRow(reader)
-			check, err := createCheck(spec, false)
+			spec := marshalFromCSV(reader)
+			check, err := createCheck(spec, false, _dryRun)
 			cobra.CheckErr(err)
 			fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
+		}
+	},
+}
+
+var exportCheckCmd = &cobra.Command{
+	Use:        "check CSV_FILEPATH",
+	Short:      "Export a CSV of check definitions",
+	Long:       `Export a CSV of check definitions`,
+	Example:    `opslevel export check data.csv`,
+	Aliases:    []string{"checks"},
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"CSV_FILEPATH"},
+	Run: func(cmd *cobra.Command, args []string) {
+		filepath := args[0]
+		output := newFile(filepath, false)
+		defer output.Close()
+		output.WriteString(strings.Join(getCheckCSVHeaders(), "\t") + "\n")
+		client := getClientGQL()
+		resp, err := client.ListChecks(nil)
+		cobra.CheckErr(err)
+		for _, check := range resp.Nodes {
+			marshalToCSV(output, check)
 		}
 	},
 }
@@ -123,6 +139,7 @@ var deleteCheckCmd = &cobra.Command{
 func init() {
 	createCmd.AddCommand(checkCreateCmd)
 	importCmd.AddCommand(importCheckCmd)
+	exportCmd.AddCommand(exportCheckCmd)
 	getCmd.AddCommand(getCheckCmd)
 	listCmd.AddCommand(listCheckCmd)
 	deleteCmd.AddCommand(deleteCheckCmd)
@@ -351,7 +368,7 @@ func (self *CheckCreateType) AsCustomEventCreateInput() *opslevel.CheckCustomEve
 	return payload
 }
 
-func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error) {
+func createCheck(input CheckCreateType, usePrompts bool, dryRun bool) (*opslevel.Check, error) {
 	var output *opslevel.Check
 	var err error
 	clientGQL := getClientGQL()
@@ -365,55 +382,119 @@ func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error
 	cobra.CheckErr(err)
 	switch input.Kind {
 	case opslevel.CheckTypeHasOwner:
-		output, err = clientGQL.CreateCheckServiceOwnership(*input.AsServiceOwnershipCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckServiceOwnership(*input.AsServiceOwnershipCreateInput())
+		} else {
+			log.Info().Type("check", input.AsServiceOwnershipCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeHasRecentDeploy:
-		output, err = clientGQL.CreateCheckHasRecentDeploy(*input.AsHasRecentDeployCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckHasRecentDeploy(*input.AsHasRecentDeployCreateInput())
+		} else {
+			log.Info().Type("check", input.AsHasRecentDeployCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeServiceProperty:
-		output, err = clientGQL.CreateCheckServiceProperty(*input.AsServicePropertyCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckServiceProperty(*input.AsServicePropertyCreateInput())
+		} else {
+			log.Info().Type("check", input.AsServicePropertyCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeHasServiceConfig:
-		output, err = clientGQL.CreateCheckServiceConfiguration(*input.AsServiceConfigurationCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckServiceConfiguration(*input.AsServiceConfigurationCreateInput())
+		} else {
+			log.Info().Type("check", input.AsServiceConfigurationCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeHasDocumentation:
-		output, err = clientGQL.CreateCheckHasDocumentation(*input.AsHasDocumentationCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckHasDocumentation(*input.AsHasDocumentationCreateInput())
+		} else {
+			log.Info().Type("check", input.AsHasDocumentationCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeHasRepository:
-		output, err = clientGQL.CreateCheckRepositoryIntegrated(*input.AsRepositoryIntegratedCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckRepositoryIntegrated(*input.AsRepositoryIntegratedCreateInput())
+		} else {
+			log.Info().Type("check", input.AsRepositoryIntegratedCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeToolUsage:
-		output, err = clientGQL.CreateCheckToolUsage(*input.AsToolUsageCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckToolUsage(*input.AsToolUsageCreateInput())
+		} else {
+			log.Info().Type("check", input.AsToolUsageCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeTagDefined:
-		output, err = clientGQL.CreateCheckTagDefined(*input.AsTagDefinedCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckTagDefined(*input.AsTagDefinedCreateInput())
+		} else {
+			log.Info().Type("check", input.AsTagDefinedCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeRepoFile:
-		output, err = clientGQL.CreateCheckRepositoryFile(*input.AsRepositoryFileCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckRepositoryFile(*input.AsRepositoryFileCreateInput())
+		} else {
+			log.Info().Type("check", input.AsRepositoryFileCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeRepoGrep:
-		output, err = clientGQL.CreateCheckRepositoryGrep(*input.AsRepositoryGrepCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckRepositoryGrep(*input.AsRepositoryGrepCreateInput())
+		} else {
+			log.Info().Type("check", input.AsRepositoryGrepCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeRepoSearch:
-		output, err = clientGQL.CreateCheckRepositorySearch(*input.AsRepositorySearchCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckRepositorySearch(*input.AsRepositorySearchCreateInput())
+		} else {
+			log.Info().Type("check", input.AsRepositorySearchCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeManual:
-		output, err = clientGQL.CreateCheckManual(*input.AsManualCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckManual(*input.AsManualCreateInput())
+		} else {
+			log.Info().Type("check", input.AsManualCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeGeneric:
 		opslevel.Cache.CacheIntegrations(clientGQL)
 		err = input.resolveIntegrationAliases(clientGQL, usePrompts)
 		cobra.CheckErr(err)
-		output, err = clientGQL.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
+		} else {
+			log.Info().Type("check", input.AsCustomEventCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeAlertSourceUsage:
-		output, err = clientGQL.CreateCheckAlertSourceUsage(*input.AsAlertSourceUsageCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckAlertSourceUsage(*input.AsAlertSourceUsageCreateInput())
+		} else {
+			log.Info().Type("check", input.AsAlertSourceUsageCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeGitBranchProtection:
-		output, err = clientGQL.CreateCheckGitBranchProtection(*input.AsGitBranchProtectionCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckGitBranchProtection(*input.AsGitBranchProtectionCreateInput())
+		} else {
+			log.Info().Type("check", input.AsGitBranchProtectionCreateInput()).Msg("")
+		}
 
 	case opslevel.CheckTypeServiceDependency:
-		output, err = clientGQL.CreateCheckServiceDependency(*input.AsServiceDependencyCreateInput())
+		if dryRun {
+			output, err = clientGQL.CreateCheckServiceDependency(*input.AsServiceDependencyCreateInput())
+		} else {
+			log.Info().Type("check", input.AsServiceDependencyCreateInput()).Msg("")
+		}
 	}
 	cobra.CheckErr(err)
 	if output == nil {
@@ -422,7 +503,19 @@ func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error
 	return output, err
 }
 
-func marshalCSVRow(reader *common.CSVReader) CheckCreateType {
+func marshalPredicateInput(predicate string) opslevel.PredicateInput {
+	output := opslevel.PredicateInput{}
+	cobra.CheckErr(json.Unmarshal([]byte(predicate), &output))
+	return output
+}
+
+func marshalManualCheckFrequencyInput(predicate string) opslevel.ManualCheckFrequencyInput {
+	output := opslevel.ManualCheckFrequencyInput{}
+	cobra.CheckErr(json.Unmarshal([]byte(predicate), &output))
+	return output
+}
+
+func marshalFromCSV(reader *common.CSVReader) CheckCreateType {
 	checkCreate := CheckCreateType{
 		Spec: map[string]interface{}{
 			"name":     reader.Text("Name"),
@@ -435,47 +528,196 @@ func marshalCSVRow(reader *common.CSVReader) CheckCreateType {
 		},
 	}
 	switch reader.Text("Type") {
-	case "Service Owner":
-		checkCreate.Kind = opslevel.CheckTypeHasOwner
-	case "Service Property":
-		checkCreate.Kind = opslevel.CheckTypeServiceProperty
-		// serviceProperty
-		// propertyValuePredicate
-	case "Service Integrated":
-		checkCreate.Kind = opslevel.CheckTypeHasServiceConfig
-	case "Repository Integrated":
-		checkCreate.Kind = opslevel.CheckTypeHasRepository
-	case "Tool Usage":
-		checkCreate.Kind = opslevel.CheckTypeToolUsage
-		// toolCategory
-		// toolNamePredicate
-		// environmentPredicate
-	case "Tag Defined":
-		checkCreate.Kind = opslevel.CheckTypeTagDefined
-		// tagKey
-		// tagPredicate
-	case "Repository File":
-		checkCreate.Kind = opslevel.CheckTypeRepoFile
-		// directorySearch
-		// filePaths
-		// fileContentsPredicate
-	case "Repository Search":
-		checkCreate.Kind = opslevel.CheckTypeRepoSearch
-		// fileExtensions
-		// fileContentsPredicate
-	case "Manual":
-		checkCreate.Kind = opslevel.CheckTypeManual
-		// updateFrequency
-		checkCreate.Spec["updateRequiresComment"] = reader.Bool("Require update comment")
+	case "Alert Source Usage":
+		checkCreate.Kind = opslevel.CheckTypeAlertSourceUsage
+		checkCreate.Spec["alertSourceNamePredicate"] = marshalPredicateInput(reader.Text("Alert Source Name Predicate"))
+		checkCreate.Spec["alertSourceType"] = reader.Text("Alert Source Type")
 	case "Custom Event":
 		checkCreate.Kind = opslevel.CheckTypeGeneric
-		// integration
-		// serviceSelector
-		// successCondition
-		// message
+		checkCreate.Spec["integration"] = reader.Text("Integration")
+		checkCreate.Spec["serviceSelector"] = reader.Text("Service Selector")
+		checkCreate.Spec["successCondition"] = reader.Text("Success Condition")
+		checkCreate.Spec["message"] = reader.Text("Message")
+	case "Git Branch Protection":
+		checkCreate.Kind = opslevel.CheckTypeGitBranchProtection
+	case "Has Documentation":
+		checkCreate.Kind = opslevel.CheckTypeHasDocumentation
+		checkCreate.Spec["documentType"] = reader.Text("Document Type")
+		checkCreate.Spec["documentSubtype"] = reader.Text("Document Subtype")
+	case "Has Owner":
+		checkCreate.Kind = opslevel.CheckTypeHasOwner
+		checkCreate.Spec["requireContactMethod"] = reader.Bool("Require Contact Method")
+		checkCreate.Spec["contactMethod"] = reader.Text("Contact Method")
+		checkCreate.Spec["tagKey"] = reader.Text("Tag Key")
+		checkCreate.Spec["tagPredicate"] = marshalPredicateInput(reader.Text("Tag Predicate"))
+	case "Has Recent Deploy":
+		checkCreate.Kind = opslevel.CheckTypeHasRecentDeploy
+		checkCreate.Spec["days"] = reader.Int("Days")
+	case "Has Repository":
+		checkCreate.Kind = opslevel.CheckTypeHasRepository
+	case "Has Service Config":
+		checkCreate.Kind = opslevel.CheckTypeHasServiceConfig
+	case "Manual":
+		checkCreate.Kind = opslevel.CheckTypeManual
+		checkCreate.Spec["updateFrequency"] = marshalManualCheckFrequencyInput(reader.Text("Update Frequency"))
+		checkCreate.Spec["updateRequiresComment"] = reader.Bool("Require Update Comment")
+	case "Repository File":
+		checkCreate.Kind = opslevel.CheckTypeRepoFile
+		checkCreate.Spec["directorySearch"] = reader.Bool("Directory Search")
+		checkCreate.Spec["filePaths"] = strings.Split(reader.Text("File Paths"), ";")
+		checkCreate.Spec["fileContentsPredicate"] = marshalPredicateInput(reader.Text("File Contents Predicate"))
+		checkCreate.Spec["useAbsoluteRootPath"] = reader.Bool("Use Absolute Root Path")
+	case "Repository Grep":
+		checkCreate.Kind = opslevel.CheckTypeRepoGrep
+		checkCreate.Spec["directorySearch"] = reader.Bool("Directory Search")
+		checkCreate.Spec["filePaths"] = strings.Split(reader.Text("File Paths"), ";")
+		checkCreate.Spec["fileContentsPredicate"] = marshalPredicateInput(reader.Text("File Contents Predicate"))
+	case "Repository Search":
+		checkCreate.Kind = opslevel.CheckTypeRepoSearch
+		checkCreate.Spec["fileExtensions"] = strings.Split(reader.Text("File Extensions"), ";")
+		checkCreate.Spec["fileContentsPredicate"] = marshalPredicateInput(reader.Text("File Contents Predicate"))
+	case "Service Dependency":
+		checkCreate.Kind = opslevel.CheckTypeServiceDependency
+	case "Service Property":
+		checkCreate.Kind = opslevel.CheckTypeServiceProperty
+		checkCreate.Spec["serviceProperty"] = reader.Text("Service Property")
+		checkCreate.Spec["propertyValuePredicate"] = marshalPredicateInput(reader.Text("Service Property Predicate"))
+	case "Tag Defined":
+		checkCreate.Kind = opslevel.CheckTypeTagDefined
+		checkCreate.Spec["tagKey"] = reader.Text("Tag Key")
+		checkCreate.Spec["tagPredicate"] = marshalPredicateInput(reader.Text("Tag Predicate"))
+	case "Tool Usage":
+		checkCreate.Kind = opslevel.CheckTypeToolUsage
+		checkCreate.Spec["toolCategory"] = reader.Text("Tool Category")
+		checkCreate.Spec["toolNamePredicate"] = marshalPredicateInput(reader.Text("Tool Name Predicate"))
+		checkCreate.Spec["toolUrlPredicate"] = marshalPredicateInput(reader.Text("Tool URL Predicate"))
+		checkCreate.Spec["environmentPredicate"] = marshalPredicateInput(reader.Text("Tool Environment Predicate"))
 	}
 
 	return checkCreate
+}
+
+func marshalString(input string) string {
+	data, err := json.Marshal(input)
+	cobra.CheckErr(err)
+	return string(data)
+}
+
+func marshalPredicate(predicate *opslevel.Predicate) string {
+	if predicate == nil {
+		return ""
+	}
+	data, err := json.Marshal(predicate)
+	cobra.CheckErr(err)
+	return string(data)
+}
+
+func getCheckCSVHeaders() []string {
+	return []string{
+		"Name",
+		"Enabled",
+		"Category",
+		"Level",
+		"Filter",
+		"Owner",
+		"Notes",
+		"Alert Source Name Predicate",
+		"Alert Source Type",
+		"Integration",
+		"Service Selector",
+		"Success Condition",
+		"Message",
+		"Document Type",
+		"Document Subtype",
+		"Require Contact Method",
+		"Contact Method",
+		"Tag Key",
+		"Tag Predicate",
+		"Days",
+		"Update Frequency",
+		"Require Update Comment",
+		"Directory Search",
+		"File Extensions",
+		"File Paths",
+		"File Contents Predicate",
+		"Use Absolute Root Path",
+		"Service Property",
+		"Service Property Predicate",
+		"Tool Category",
+		"Tool Name Predicate",
+		"Tool URL Predicate",
+		"Tool Environment Predicate",
+	}
+}
+
+func marshalToCSV(output *os.File, check opslevel.Check) {
+	headers := getCheckCSVHeaders()
+	row := map[string]string{}
+	for _, key := range headers {
+		row[key] = ""
+	}
+	row["Name"] = marshalString(check.Name)
+	row["Enabled"] = strconv.FormatBool(check.Enabled)
+	row["Category"] = check.Category.Alias()
+	row["Level"] = check.Level.Alias
+	row["Filter"] = check.Filter.Alias()
+	row["Owner"] = check.Owner.Team.Alias
+	row["Notes"] = marshalString(check.Notes)
+
+	switch check.Type {
+	case opslevel.CheckTypeAlertSourceUsage:
+		row["Alert Source Name Predicate"] = marshalPredicate(&check.AlertSourceNamePredicate)
+		row["Alert Source Type"] = string(check.AlertSourceType)
+	case opslevel.CheckTypeGeneric:
+		row["Integration"] = check.Integration.Alias()
+		row["Service Selector"] = marshalString(check.ServiceSelector)
+		row["Success Condition"] = marshalString(check.SuccessCondition)
+		row["Message"] = marshalString(check.ResultMessage)
+	case opslevel.CheckTypeHasDocumentation:
+		row["Document Type"] = string(check.DocumentType)
+		row["Document Subtype"] = string(check.DocumentSubtype)
+	case opslevel.CheckTypeHasOwner:
+		row["Require Contact Method"] = strconv.FormatBool(*check.RequireContactMethod)
+		row["Contact Method"] = string(*check.ContactMethod)
+		row["Tag Key"] = check.TagKey
+		row["Tag Predicate"] = marshalPredicate(check.TagPredicate)
+	case opslevel.CheckTypeHasRecentDeploy:
+		row["Days"] = strconv.FormatInt(int64(check.Days), 10)
+	case opslevel.CheckTypeManual:
+		data, err := json.Marshal(check.UpdateFrequency)
+		cobra.CheckErr(err)
+		row["Update Frequency"] = string(data)
+		row["Require Update Comment"] = strconv.FormatBool(check.UpdateRequiresComment)
+	case opslevel.CheckTypeRepoFile:
+		row["Directory Search"] = strconv.FormatBool(check.RepositoryFileCheckFragment.DirectorySearch)
+		row["File Paths"] = strings.Join(check.RepositoryFileCheckFragment.Filepaths, ";")
+		row["File Contents Predicate"] = marshalPredicate(check.RepositoryFileCheckFragment.FileContentsPredicate)
+		row["Use Absolute Root Path"] = strconv.FormatBool(check.UseAbsoluteRoot)
+	case opslevel.CheckTypeRepoGrep:
+		row["Directory Search"] = strconv.FormatBool(check.RepositoryGrepCheckFragment.DirectorySearch)
+		row["File Paths"] = strings.Join(check.RepositoryGrepCheckFragment.Filepaths, ";")
+		row["File Contents Predicate"] = marshalPredicate(check.RepositoryGrepCheckFragment.FileContentsPredicate)
+	case opslevel.CheckTypeRepoSearch:
+		row["File Extensions"] = strings.Join(check.RepositorySearchCheckFragment.FileExtensions, ";")
+		row["File Contents Predicate"] = marshalPredicate(&check.RepositorySearchCheckFragment.FileContentsPredicate)
+	case opslevel.CheckTypeServiceProperty:
+		row["Service Property"] = string(check.ServicePropertyCheckFragment.Property)
+		row["Service Property Predicate"] = marshalPredicate(check.ServicePropertyCheckFragment.Predicate)
+	case opslevel.CheckTypeTagDefined:
+		row["Tag Key"] = check.TagKey
+		row["Tag Predicate"] = marshalPredicate(check.TagPredicate)
+	case opslevel.CheckTypeToolUsage:
+		row["Tool Category"] = string(check.ToolCategory)
+		row["Tool Name Predicate"] = marshalPredicate(check.ToolNamePredicate)
+		row["Tool URL Predicate"] = marshalPredicate(check.ToolUrlPredicate)
+		row["Tool Environment Predicate"] = marshalPredicate(check.ToolUsageCheckFragment.EnvironmentPredicate)
+	}
+
+	var values []string
+	for _, key := range headers {
+		values = append(values, row[key])
+	}
+	output.WriteString(strings.Join(values, "\t") + "\n")
 }
 
 func marshalCheck(check opslevel.Check) *CheckCreateType {
@@ -527,6 +769,7 @@ func marshalCheck(check opslevel.Check) *CheckCreateType {
 		output.Spec["directorySearch"] = check.RepositoryFileCheckFragment.DirectorySearch
 		output.Spec["filePaths"] = check.RepositoryFileCheckFragment.Filepaths
 		output.Spec["fileContentsPredicate"] = check.RepositoryFileCheckFragment.FileContentsPredicate
+		output.Spec["useAbsoluteRoot"] = check.RepositoryFileCheckFragment.UseAbsoluteRoot
 
 	case opslevel.CheckTypeRepoGrep:
 		output.Spec["directorySearch"] = check.RepositoryGrepCheckFragment.DirectorySearch

@@ -34,6 +34,14 @@ func (s *CSVReader) Bool(header string) bool {
 	return value
 }
 
+func (s *CSVReader) Int(header string) int64 {
+	value, err := strconv.ParseInt(s.Text(header), 10, 64)
+	if err != nil {
+		return 0
+	}
+	return value
+}
+
 func (s *CSVReader) Close() error {
 	return s.fileReader.Close()
 }
