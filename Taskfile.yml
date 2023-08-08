@@ -29,8 +29,14 @@ tasks:
       - go test -v ./... {{ .CLI_ARGS }}
     silent: true
 
+  testcov:
+    desc: Run tests with code coverage output
+    dir: "{{.SRC_DIR}}"
+    cmds:
+      - go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
+
   workspace:
-    desc: Setup workspace for local opslevel-go development
+    desc: Setup workspace for cli & opslevel-go development
     dir: "{{.SRC_DIR}}"
     cmds:
       - git submodule update --init

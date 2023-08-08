@@ -93,6 +93,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 )
-
-//Only used for local development!
-//replace github.com/opslevel/opslevel-go/v2023 => ./submodules/opslevel-go
