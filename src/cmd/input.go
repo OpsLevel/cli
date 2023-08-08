@@ -10,6 +10,7 @@ import (
 
 var dataFile string
 
+// TODO: remove this function, it is not reliable
 func hasStdin() bool {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
@@ -18,6 +19,7 @@ func hasStdin() bool {
 	return stat.Size() > 0
 }
 
+// TODO: remove this function
 func readInputFile() ([]byte, error) {
 	if hasStdin() {
 		data, err := io.ReadAll(os.Stdin)
