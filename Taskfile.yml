@@ -2,10 +2,13 @@
 
 version: '3'
 
+env:
+  SRC_DIR: "{{.TASKFILE_DIR}}/src"
+
 tasks:
   lint:
     desc: Formatting and linting
-    dir: src
+    dir: "{{.SRC_DIR}}"
     cmds:
       - gofmt -d .
       - go vet ./...
@@ -13,7 +16,7 @@ tasks:
 
   lintfix:
     desc: Fix formatting and linting
-    dir: src
+    dir: "{{.SRC_DIR}}"
     cmds:
       - gofmt -w .
       - go mod tidy
@@ -21,7 +24,23 @@ tasks:
 
   test:
     desc: Run tests
-    dir: src
+    dir: "{{.SRC_DIR}}"
     cmds:
       - go test -v ./... {{ .CLI_ARGS }}
     silent: true
+
+  testcov:
+    desc: Run tests with code coverage output
+    dir: "{{.SRC_DIR}}"
+    cmds:
+      - go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
+
+  workspace:
+    desc: Setup workspace for cli & opslevel-go development
+    dir: "{{.SRC_DIR}}"
+    cmds:
+      - git submodule update --init
+        # The ":" is a no-op that keeps things rolling
+      - go work init || ":"
+      - go work use . submodules/opslevel-go
+      - echo "Workspace ready!"

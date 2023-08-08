@@ -70,6 +70,21 @@ go run main.go -h
 
 This way you can iterate on the CLI code quickly to test out your new functionality.
 
+#### Local Development with an `opslevel-go` Feature Branch
+
+To test local code against a feature branch in the `opslevel-go` repository, run:
+
+```sh
+# initializes opslevel-go submodule then sets up src/go.work
+task workspace
+
+# git checkouts my-feature-branch in the src/submodules/opslevel-go directory
+git -C ./src/submodules/opslevel-go checkout --track origin/my-feature-branch
+```
+
+Code imported from `github.com/opslevel/opslevel-go` will now be sourced from the
+local `my-feature-branch`.
+
 ### Changie (Change log generation)
 
 Before submitting the pull request, you need add a change entry via Changie so that your contribution changes can be tracked for our next release.
