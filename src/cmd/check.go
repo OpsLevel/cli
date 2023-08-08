@@ -139,9 +139,9 @@ var deleteCheckCmd = &cobra.Command{
 }
 
 func init() {
-	checkCreateCmd.Flags().Bool("noninteractive", false, "don't use promptui - all linked fields must be defined in yaml")
+	checkCreateCmd.Flags().Bool("noninteractive", false, "turns off automated prompts for fields missing data in the spec")
 	createCmd.AddCommand(checkCreateCmd)
-	checkUpdateCmd.Flags().Bool("noninteractive", false, "don't use promptui - all linked fields must be defined in yaml")
+	checkUpdateCmd.Flags().Bool("noninteractive", false, "turns off automated prompts for fields missing data in the spec")
 	updateCmd.AddCommand(checkUpdateCmd)
 	getCmd.AddCommand(getCheckCmd)
 	listCmd.AddCommand(listCheckCmd)
