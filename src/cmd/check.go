@@ -148,6 +148,72 @@ func init() {
 	deleteCmd.AddCommand(deleteCheckCmd)
 }
 
+// API requests
+
+func createCheck(input CheckInputType, usePrompts bool) (*opslevel.Check, error) {
+	var output *opslevel.Check
+	var err error
+	clientGQL := getClientGQL()
+	opslevel.Cache.CacheCategories(clientGQL)
+	opslevel.Cache.CacheLevels(clientGQL)
+	opslevel.Cache.CacheTeams(clientGQL)
+	opslevel.Cache.CacheFilters(clientGQL)
+	opslevel.Cache.CacheIntegrations(clientGQL)
+	err = input.resolveCategoryAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveLevelAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveTeamAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveFilterAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	if input.Kind == opslevel.CheckTypeGeneric {
+		err = input.resolveIntegrationAliases(clientGQL, usePrompts)
+		cobra.CheckErr(err)
+	}
+
+	checkData, err := opslevel.UnmarshalCheckCreateInput(input.Kind, toJson(input.Spec))
+	cobra.CheckErr(err)
+	output, err = clientGQL.CreateCheck(checkData)
+	cobra.CheckErr(err)
+	if output == nil {
+		return nil, fmt.Errorf("unknown error - no check data returned")
+	}
+	return output, err
+}
+
+func updateCheck(input CheckInputType, usePrompts bool) (*opslevel.Check, error) {
+	var output *opslevel.Check
+	var err error
+	clientGQL := getClientGQL()
+	opslevel.Cache.CacheCategories(clientGQL)
+	opslevel.Cache.CacheLevels(clientGQL)
+	opslevel.Cache.CacheTeams(clientGQL)
+	opslevel.Cache.CacheFilters(clientGQL)
+	opslevel.Cache.CacheIntegrations(clientGQL)
+	err = input.resolveCategoryAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveLevelAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveTeamAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveFilterAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	if input.Kind == opslevel.CheckTypeGeneric {
+		err = input.resolveIntegrationAliases(clientGQL, usePrompts)
+		cobra.CheckErr(err)
+	}
+
+	checkData, err := opslevel.UnmarshalCheckUpdateInput(input.Kind, toJson(input.Spec))
+	cobra.CheckErr(err)
+	output, err = clientGQL.UpdateCheck(checkData)
+	cobra.CheckErr(err)
+	if output == nil {
+		return nil, fmt.Errorf("unknown error - no check data returned")
+	}
+	return output, err
+}
+
 // Resolving foreign keys
 
 func (self *CheckInputType) resolveCategoryAliases(client *opslevel.Client, usePrompt bool) error {
