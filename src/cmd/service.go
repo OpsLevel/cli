@@ -60,8 +60,7 @@ opslevel create service tag --assign my-service foo bar
 		cobra.CheckErr(err)
 		if tagAssign {
 			input := map[string]string{
-				"Key":   tagKey,
-				"Value": tagValue,
+				tagKey: tagValue,
 			}
 			result, err = getClientGQL().AssignTags(serviceKey, input)
 		} else {
