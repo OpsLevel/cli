@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
+	"github.com/spf13/viper"
 )
 
 // CLIServiceDependencyCreateInput This is used to make the user facing CLI experience better
@@ -58,12 +59,7 @@ func init() {
 }
 
 func readCreateServiceDependencyInput() (*opslevel.ServiceDependencyCreateInput, error) {
-	data, err := readInputFile()
-	if err != nil {
-		return nil, err
-	}
-	in := CLIServiceDependencyCreateInput{}
-	err = yaml.Unmarshal(data, in)
+	in, err := readDependencyInput()
 	if err != nil {
 		return nil, err
 	}
@@ -75,4 +71,14 @@ func readCreateServiceDependencyInput() (*opslevel.ServiceDependencyCreateInput,
 		Notes: in.Notes,
 	}
 	return output, nil
+}
+
+func readDependencyInput() (*CLIServiceDependencyCreateInput, error) {
+	readInputConfig()
+	evt := &CLIServiceDependencyCreateInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
 }
