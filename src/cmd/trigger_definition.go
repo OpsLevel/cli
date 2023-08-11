@@ -109,7 +109,7 @@ var deleteTriggerDefinitionCmd = &cobra.Command{
 		key := args[0]
 		err := getClientGQL().DeleteTriggerDefinition(*opslevel.NewIdentifier(key))
 		cobra.CheckErr(err)
-		fmt.Printf("created trigger definition: %s\n", key)
+		fmt.Printf("deleted trigger definition: %s\n", key)
 	},
 }
 

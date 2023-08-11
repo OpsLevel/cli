@@ -120,15 +120,15 @@ var deleteActionCmd = &cobra.Command{
 		key := args[0]
 		err := getClientGQL().DeleteWebhookAction(*opslevel.NewIdentifier(key))
 		cobra.CheckErr(err)
-		fmt.Printf("created webhook action: %s\n", key)
+		fmt.Printf("deleted webhook action: %s\n", key)
 	},
 }
 
 func init() {
 	createCmd.AddCommand(createActionCmd)
-	createCmd.Flags().StringVar(&actionType, "type", "webhook", "action type, default=webhook")
+	createActionCmd.Flags().StringVar(&actionType, "type", "webhook", "action type, default=webhook")
 	updateCmd.AddCommand(updateActionCmd)
-	updateCmd.Flags().StringVar(&actionType, "type", "webhook", "action type, default=webhook")
+	updateActionCmd.Flags().StringVar(&actionType, "type", "webhook", "action type, default=webhook")
 	getCmd.AddCommand(getActionCmd)
 	listCmd.AddCommand(listActionCmd)
 	deleteCmd.AddCommand(deleteActionCmd)
