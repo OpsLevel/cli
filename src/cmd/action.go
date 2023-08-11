@@ -66,9 +66,9 @@ var listActionCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {
-			w := common.NewTabWriter("ID", "NAME")
+			w := common.NewTabWriter("ID", "NAME", "HTTP_METHOD", "WEBHOOK_URL")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t\n", item.Id, item.Name)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Id, item.Name, item.HTTPMethod, item.WebhookURL)
 			}
 			w.Flush()
 		}
