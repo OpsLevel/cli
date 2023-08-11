@@ -28,7 +28,7 @@ EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		switch actionType {
 		case "webhook":
-			input, err := readWebhookActionInput()
+			input, err := readWebhookActionCreateInput()
 			cobra.CheckErr(err)
 			result, err := getClientGQL().CreateWebhookAction(*input)
 			cobra.CheckErr(err)
@@ -89,18 +89,10 @@ EOF`,
 		key := args[0]
 		switch actionType {
 		case "webhook":
-			input, err := readWebhookActionInput()
+			input, err := readWebhookActionUpdateInput()
+			input.Id = *opslevel.NewID(key)
 			cobra.CheckErr(err)
-			updateInput := &opslevel.CustomActionsWebhookActionUpdateInput{
-				Id:             *opslevel.NewID(key),
-				Name:           &input.Name,
-				Description:    input.Description,
-				LiquidTemplate: &input.LiquidTemplate,
-				WebhookURL:     &input.WebhookURL,
-				HTTPMethod:     input.HTTPMethod,
-				Headers:        &input.Headers,
-			}
-			action, err := getClientGQL().UpdateWebhookAction(*updateInput)
+			action, err := getClientGQL().UpdateWebhookAction(*input)
 			cobra.CheckErr(err)
 			common.JsonPrint(json.MarshalIndent(action, "", "    "))
 		default:
@@ -134,9 +126,19 @@ func init() {
 	deleteCmd.AddCommand(deleteActionCmd)
 }
 
-func readWebhookActionInput() (*opslevel.CustomActionsWebhookActionCreateInput, error) {
+func readWebhookActionCreateInput() (*opslevel.CustomActionsWebhookActionCreateInput, error) {
 	readInputConfig()
 	evt := &opslevel.CustomActionsWebhookActionCreateInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
+}
+
+func readWebhookActionUpdateInput() (*opslevel.CustomActionsWebhookActionUpdateInput, error) {
+	readInputConfig()
+	evt := &opslevel.CustomActionsWebhookActionUpdateInput{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
