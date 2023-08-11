@@ -12,15 +12,38 @@ import (
 	"github.com/spf13/viper"
 )
 
-// TODO: examples for create, update
-
 var createTriggerDefinitionCmd = &cobra.Command{
 	Use:   "trigger-definition",
 	Short: "Create a trigger definition",
 	Long:  "Create a trigger definition",
 	Example: `
 cat << EOF | opslevel create trigger-definition -f -
-...
+name: "Page The On Call"
+description: "Pages the On Call"
+owner: "some_team"
+action: "some_action"
+accessControl: "everyone"
+manualInputsDefinition: |
+  version: 1
+  inputs:
+    - identifier: IncidentTitle
+      displayName: Title
+      description: Title of the incident to trigger
+      type: text_input
+      required: true
+      maxLength: 60
+      defaultValue: Service Incident Manual Trigger
+    - identifier: IncidentDescription
+      displayName: Incident Description
+      description: The description of the incident
+      type: text_area
+      required: true
+responseTemplate: |
+  {% if response.status >= 200 and response.status < 300 %}
+  success
+  {% else %}
+  failure
+  {% endif %}
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readTriggerDefinitionCreateInput()
@@ -72,7 +95,8 @@ var updateTriggerDefinitionCmd = &cobra.Command{
 	Long:  "Update a trigger definition",
 	Example: `
 cat << EOF | opslevel update trigger-definition $TRIGGER_ID -f -
-...
+description: "Pages the On Call via PagerDuty"
+accessControl: "service_owners"
 EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
