@@ -13,8 +13,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// TODO: examples for create, update
-
 var actionType string
 
 var createActionCmd = &cobra.Command{
@@ -23,7 +21,29 @@ var createActionCmd = &cobra.Command{
 	Long:  "Create an action",
 	Example: `
 cat << EOF | opslevel create action --type=webhook -f -
-...
+name: "Page The On Call"
+description: "Pages the On Call"
+webhookUrl: "https://api.pagerduty.com/incidents"
+httpMethod: "POST"
+headers:
+  accept: "application/vnd.pagerduty+json;version=2"
+  authorization: "Token token=XXXXXXXXXXXXX"
+  from: "someone@example.com"
+payload: |
+  {
+      "incident": {
+          "type": "incident",
+          "title": "{{manualInputs.IncidentTitle}}",
+          "service": {
+            "id": "{{ service | tag_value: 'pd_id' }}",
+            "type": "service_reference"
+          },
+          "body": {
+            "type": "incident_body",
+            "details": "Incident triggered from OpsLevel by {{user.name}} with the email {{user.email}}. {{manualInputs.IncidentDescription}}"
+          }
+      }
+  }
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		switch actionType {
@@ -81,7 +101,11 @@ var updateActionCmd = &cobra.Command{
 	Long:  "Update an action",
 	Example: `
 cat << EOF | opslevel update action --type=webhook $ACTION_ID -f -
-...
+description: "Pages the oncall and creates an incident"
+headers:
+  accept: "application/vnd.pagerduty+json;version=2"
+  authorization: "Token token=XXXXXXXXXXXXX"
+  from: "someone-else@example.com"
 EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
