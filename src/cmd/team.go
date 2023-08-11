@@ -122,8 +122,7 @@ opslevel create team tag --assign my-team foo bar
 		cobra.CheckErr(err)
 		if tagAssign {
 			input := map[string]string{
-				"Key":   tagKey,
-				"Value": tagValue,
+				tagKey: tagValue,
 			}
 			result, err = getClientGQL().AssignTags(teamKey, input)
 		} else {
