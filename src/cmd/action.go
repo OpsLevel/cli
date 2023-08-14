@@ -61,11 +61,11 @@ EOF`,
 }
 
 var getActionCmd = &cobra.Command{
-	Use:        "action ID",
+	Use:        "action ID|ALIAS",
 	Short:      "Get details about an action",
 	Long:       "Get details about an action",
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"ID"},
+	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		action, err := getClientGQL().GetCustomAction(*opslevel.NewIdentifier(key))
@@ -127,11 +127,11 @@ EOF`,
 }
 
 var deleteActionCmd = &cobra.Command{
-	Use:        "action ID",
+	Use:        "action ID|ALIAS",
 	Short:      "Delete an action",
 	Long:       "Delete an action",
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"ID"},
+	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		err := getClientGQL().DeleteWebhookAction(*opslevel.NewIdentifier(key))

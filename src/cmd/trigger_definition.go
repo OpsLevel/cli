@@ -55,11 +55,11 @@ EOF`,
 }
 
 var getTriggerDefinitionCmd = &cobra.Command{
-	Use:        "trigger-definition ID",
+	Use:        "trigger-definition ID|ALIAS",
 	Short:      "Get details about a trigger definition",
 	Long:       "Get details about a trigger definition",
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"ID"},
+	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		triggerDefinition, err := getClientGQL().GetTriggerDefinition(*opslevel.NewIdentifier(key))
@@ -112,11 +112,11 @@ EOF`,
 }
 
 var deleteTriggerDefinitionCmd = &cobra.Command{
-	Use:        "trigger-definition ID",
+	Use:        "trigger-definition ID|ALIAS",
 	Short:      "Delete a trigger definition",
 	Long:       "Delete a trigger definition",
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"ID"},
+	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		err := getClientGQL().DeleteTriggerDefinition(*opslevel.NewIdentifier(key))
