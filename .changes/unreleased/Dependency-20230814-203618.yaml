@@ -1,0 +1,3 @@
+kind: Dependency
+body: Bump github.com/go-git/go-git/v5 from 5.8.0 to 5.8.1
+time: 2023-08-14T20:36:18.815043-05:00
