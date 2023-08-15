@@ -1,4 +1,0 @@
-kind: Bugfix
-body: 'BREAKING CHANGE: to disable interactive UI pass the --noninteractive flag when
-  creating and updating a check'
-time: 2023-08-10T11:49:39.701004-04:00
