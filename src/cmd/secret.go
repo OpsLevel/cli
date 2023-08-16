@@ -48,9 +48,14 @@ var getSecretCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		// headers := map[string]string{"GraphQL-Visibility": "internal"}
-		// newSecret, err := getClientGQL(opslevel.SetHeaders(headers)).GetSecret(alias, *input)
-		// cobra.CheckErr(err)
+		identifier := args[0]
+		// TODO: remove headers when API is ready
+		headers := map[string]string{"GraphQL-Visibility": "internal"}
+		newSecret, err := getClientGQL(opslevel.SetHeaders(headers)).GetSecret(identifier)
+		cobra.CheckErr(err)
+
+		fmt.Println(newSecret.ID)
+		fmt.Printf("%+v\n", newSecret)
 	},
 }
 
