@@ -50,6 +50,9 @@ var listScorecardCmd = &cobra.Command{
 	Aliases: []string{"scorecards"},
 	Short:   "List scorecards",
 	Long:    "List scorecards",
+	Example: `
+opslevel list scorecards -o json | jq 'map( {(.Name): (.ServiceCount)} )'
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		resp, err := getClientGQL().ListScorecards(nil)
 		cobra.CheckErr(err)
