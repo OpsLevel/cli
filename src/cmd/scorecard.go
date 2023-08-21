@@ -20,7 +20,7 @@ var createScorecardCmd = &cobra.Command{
 cat << EOF | opslevel create scorecard -f -
 name: "new scorecard"
 description: "a newly created scorecard"
-owner: "XXX_team_id_XXX"
+ownerId: "XXX_team_id_XXX"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readScorecardInput()
@@ -77,7 +77,7 @@ var updateScorecardCmd = &cobra.Command{
 cat << EOF | opslevel update scorecard $ID -f -
 name: "updated scorecard"
 description: "an updated scorecard"
-owner: "XXX_team_id_XXX"
+ownerId: "XXX_team_id_XXX"
 EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
