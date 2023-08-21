@@ -20,8 +20,7 @@ var createScorecardCmd = &cobra.Command{
 cat << EOF | opslevel create scorecard -f -
 name: "new scorecard"
 description: "a newly created scorecard"
-owner:
-  alias: "platform"
+owner: "XXX_team_id_XXX"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readScorecardInput()
@@ -75,8 +74,7 @@ var updateScorecardCmd = &cobra.Command{
 cat << EOF | opslevel update scorecard $ID -f -
 name: "updated scorecard"
 description: "an updated scorecard"
-owner:
-  alias: "ownership"
+owner: "XXX_team_id_XXX"
 EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
@@ -98,7 +96,7 @@ var deleteScorecardCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		deletedScorecardId, err := getClientGQL().DeleteScorecard(*opslevel.NewIdentifier(key))
+		deletedScorecardId, err := getClientGQL().DeleteScorecard(key)
 		cobra.CheckErr(err)
 		fmt.Printf("deleted scorecard: %s\n", deletedScorecardId)
 	},
