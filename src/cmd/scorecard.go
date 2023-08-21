@@ -39,7 +39,7 @@ var getScorecardCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		scorecard, err := getClientGQL().GetScorecard(*opslevel.NewIdentifier(key))
+		scorecard, err := getClientGQL().GetScorecard(key)
 		cobra.CheckErr(err)
 		common.PrettyPrint(scorecard)
 	},
@@ -57,9 +57,9 @@ var listScorecardCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {
-			w := common.NewTabWriter("ID", "NAME", "PASSING_CHECKS", "TOTAL_CHECKS", "SERVICE_COUNT")
+			w := common.NewTabWriter("ID", "NAME", "PASSING_CHECKS", "CHECKS_COUNT", "SERVICE_COUNT")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%d\t%d\t%d\n", item.Id, item.Name, item.PassingChecks, item.TotalChecks, item.ServiceCount)
+				fmt.Fprintf(w, "%s\t%s\t%d\t%d\t%d\n", item.Id, item.Name, item.PassingChecks, item.ChecksCount, item.ServiceCount)
 			}
 			w.Flush()
 		}
@@ -82,7 +82,7 @@ EOF`,
 		key := args[0]
 		input, err := readScorecardInput()
 		cobra.CheckErr(err)
-		scorecard, err := getClientGQL().UpdateScorecard(*opslevel.NewIdentifier(key), *input)
+		scorecard, err := getClientGQL().UpdateScorecard(key, *input)
 		cobra.CheckErr(err)
 		common.JsonPrint(json.MarshalIndent(scorecard, "", "    "))
 	},
