@@ -302,8 +302,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/open-policy-agent/opa v0.54.0 h1:mGEsK+R5ZTMV8fzzbNzmYDGbTmY30wmRCIHmtm2VqWs=
 github.com/open-policy-agent/opa v0.54.0/go.mod h1:d8I8jWygKGi4+T4H07qrbeCdH1ITLsEfT0M+bsvxWw0=
-github.com/opslevel/opslevel-go/v2023 v2023.8.14 h1:pLAu7UL+RZDe2dZqQdoAG0l71Uky7ibJNRmOsvgfGj4=
-github.com/opslevel/opslevel-go/v2023 v2023.8.14/go.mod h1:lN01/e5As0E8bgnGHr18KaCzbxj18/sQxjDpCkDRm3k=
+github.com/opslevel/opslevel-go/v2023 v2023.8.18 h1:7VsrgdZHFvDiZ1SYAqvbBx5P1m3M7xGMvs2kW7T/hr8=
+github.com/opslevel/opslevel-go/v2023 v2023.8.18/go.mod h1:lN01/e5As0E8bgnGHr18KaCzbxj18/sQxjDpCkDRm3k=
 github.com/pelletier/go-toml/v2 v2.0.8 h1:0ctb6s9mE31h0/lhu+J6OPmVeDxJn+kYnJc2jZR9tGQ=
 github.com/pelletier/go-toml/v2 v2.0.8/go.mod h1:vuYfssBdrU2XDZ9bYydBu6t+6a6PYNcZljzZR9VXg+4=
 github.com/pjbgf/sha1cd v0.3.0 h1:4D5XXmUUBUl/xQ6IjCkEAbqXskkq/4O7LmGn0AqMDs4=

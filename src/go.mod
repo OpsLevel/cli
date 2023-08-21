@@ -10,7 +10,7 @@ require (
 	github.com/itchyny/gojq v0.12.13
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.54.0
-	github.com/opslevel/opslevel-go/v2023 v2023.8.14
+	github.com/opslevel/opslevel-go/v2023 v2023.8.18
 	github.com/relvacode/iso8601 v1.3.0
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.30.0
