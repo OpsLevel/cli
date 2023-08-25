@@ -31,13 +31,10 @@ EOF`,
 		input, err := readSecretInput()
 		cobra.CheckErr(err)
 		fmt.Println("creating secret...")
-		// TODO: remove headers when API is ready
-		headers := map[string]string{"GraphQL-Visibility": "internal"}
-		newSecret, err := getClientGQL(opslevel.SetHeaders(headers)).CreateSecret(secretAlias, *input)
+		newSecret, err := getClientGQL().CreateSecret(secretAlias, *input)
 		cobra.CheckErr(err)
 
 		fmt.Println(newSecret.ID)
-		fmt.Printf("%+v\n", newSecret)
 	},
 }
 
@@ -49,13 +46,16 @@ var getSecretCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		identifier := args[0]
-		// TODO: remove headers when API is ready
-		headers := map[string]string{"GraphQL-Visibility": "internal"}
-		newSecret, err := getClientGQL(opslevel.SetHeaders(headers)).GetSecret(identifier)
+		fmt.Println("getting secret...")
+		result, err := getClientGQL().GetSecret(identifier)
 		cobra.CheckErr(err)
 
-		fmt.Println(newSecret.ID)
-		fmt.Printf("%+v\n", newSecret)
+		common.WasFound(result.ID == "", identifier)
+		if isYamlOutput() {
+			common.YamlPrint(result)
+		} else {
+			common.PrettyPrint(result)
+		}
 	},
 }
 
@@ -66,9 +66,7 @@ var listSecretsCmd = &cobra.Command{
 	Long:    `List secrets`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("listing secrets...")
-		// TODO: remove headers when API is ready
-		headers := map[string]string{"GraphQL-Visibility": "internal"}
-		resp, err := getClientGQL(opslevel.SetHeaders(headers)).ListSecretsVaultsSecret(nil)
+		resp, err := getClientGQL().ListSecretsVaultsSecret(nil)
 		list := resp.Nodes
 
 		cobra.CheckErr(err)
@@ -99,11 +97,10 @@ var updateSecretCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		secretId := args[0]
 		input, err := readSecretInput()
-		// TODO: remove headers when API is ready
-		headers := map[string]string{"GraphQL-Visibility": "internal"}
-		secret, err := getClientGQL(opslevel.SetHeaders(headers)).UpdateSecret(secretId, *input)
+		fmt.Println("updating secret...")
+		secret, err := getClientGQL().UpdateSecret(secretId, *input)
 		cobra.CheckErr(err)
-		fmt.Printf("Updated '%s' at %s", secret.Alias, secret.Timestamps.UpdatedAt.Time)
+		fmt.Println(secret.ID)
 	},
 }
 
@@ -115,9 +112,8 @@ var deleteSecretCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		secretId := args[0]
-		// TODO: remove headers when API is ready
-		headers := map[string]string{"GraphQL-Visibility": "internal"}
-		err := getClientGQL(opslevel.SetHeaders(headers)).DeleteSecret(secretId)
+		fmt.Println("deleting secret...")
+		err := getClientGQL().DeleteSecret(secretId)
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' secret\n", secretId)
 	},
