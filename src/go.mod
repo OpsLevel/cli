@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/creasty/defaults v1.7.0
+	github.com/fatih/color v1.13.0
 	github.com/go-git/go-git/v5 v5.8.1
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gosimple/slug v1.13.1
