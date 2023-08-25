@@ -1,3 +1,0 @@
-kind: Bugfix
-body: Fix inability to read YAML from stdin in containers
-time: 2023-08-01T16:51:31.147078-04:00

@@ -42,8 +42,8 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: public.ecr.aws
-          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          username: ${{ secrets.ECR_PUBLIC_AWS_ACCESS_KEY_ID }}
+          password: ${{ secrets.ECR_PUBLIC_AWS_SECRET_ACCESS_KEY }}
         env:
           AWS_REGION: us-east-1
       - name: Set Release Version
@@ -75,7 +75,7 @@ jobs:
           git tag -f ${{ steps.version.outputs.RELEASE_VERSION }} -m "Cut Release '${{ steps.version.outputs.RELEASE_VERSION }}'"
           git push -f origin refs/tags/${{ steps.version.outputs.RELEASE_VERSION }}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4.3.0
+        uses: goreleaser/goreleaser-action@v4.4.0
         with:
           args: release --rm-dist --release-notes=../.changes/${{ steps.version.outputs.RELEASE_VERSION }}.md
           workdir: ./src

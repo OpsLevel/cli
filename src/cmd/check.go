@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Commands
+
 var getCheckCmd = &cobra.Command{
 	Use:        "check ID",
 	Short:      "Get details about a rubic check",
@@ -54,19 +56,71 @@ var listCheckCmd = &cobra.Command{
 var checkCreateCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Create a rubric check",
-	Long: `Create a rubric check
-
-Examples:
-
-	opslevel create check -f my_cec.yaml
-`,
+	Long:  `Create a rubric check`,
+	Example: `
+cat << EOF | opslevel create check -f -
+Version: "1"
+kind: "repo_grep"
+spec:
+  name: "new repo grep check"
+  enabled: false
+  category: "misc"
+  level: "silver"
+  notes: "some notes"
+  directorySearch: false
+  filePaths:
+  - "Taskfile.yml"
+  fileContentsPredicate:
+    type: "exists"
+    value: ""
+EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		usePrompts := !hasStdin()
-		input, err := readCheckCreateInput()
+		input, err := readCheckInput()
 		cobra.CheckErr(err)
+		usePrompts := true
+		if cmd.Flag("noninteractive").Changed {
+			usePrompts = false
+		} else if dataFile == "-" {
+			log.Warn().Msg("running noninteractively since using heredoc")
+			usePrompts = false
+		}
 		check, err := createCheck(*input, usePrompts)
 		cobra.CheckErr(err)
 		fmt.Printf("Created Check '%s' with id '%s'\n", check.Name, check.Id)
+	},
+}
+
+var checkUpdateCmd = &cobra.Command{
+	Use:   "check",
+	Short: "Update a rubric check",
+	Long:  `Update a rubric check`,
+	Example: `
+cat << EOF | opslevel update check $CHECK_ID -f -
+Version: "1"
+kind: "repo_grep"
+spec:
+  name: "updated repo grep check"
+  enabled: true
+  fileContentsPredicate:
+    type: "does_not_match_regex"
+    value: "gofmt"
+EOF`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		input, err := readCheckInput()
+		cobra.CheckErr(err)
+		input.Spec["id"] = *opslevel.NewID(args[0])
+		usePrompts := true
+		if cmd.Flag("noninteractive").Changed {
+			usePrompts = false
+		} else if dataFile == "-" {
+			log.Warn().Msg("running noninteractively since using heredoc")
+			usePrompts = false
+		}
+		check, err := updateCheck(*input, usePrompts)
+		cobra.CheckErr(err)
+		common.JsonPrint(json.MarshalIndent(check, "", "    "))
 	},
 }
 
@@ -85,19 +139,84 @@ var deleteCheckCmd = &cobra.Command{
 }
 
 func init() {
+	checkCreateCmd.Flags().Bool("noninteractive", false, "turns off automated prompts for fields missing data in the spec")
 	createCmd.AddCommand(checkCreateCmd)
+	checkUpdateCmd.Flags().Bool("noninteractive", false, "turns off automated prompts for fields missing data in the spec")
+	updateCmd.AddCommand(checkUpdateCmd)
 	getCmd.AddCommand(getCheckCmd)
 	listCmd.AddCommand(listCheckCmd)
 	deleteCmd.AddCommand(deleteCheckCmd)
 }
 
-type CheckCreateType struct {
-	Version string
-	Kind    opslevel.CheckType
-	Spec    map[string]interface{}
+// API requests
+
+func createCheck(input CheckInputType, usePrompts bool) (*opslevel.Check, error) {
+	var output *opslevel.Check
+	var err error
+	clientGQL := getClientGQL()
+	opslevel.Cache.CacheCategories(clientGQL)
+	opslevel.Cache.CacheLevels(clientGQL)
+	opslevel.Cache.CacheTeams(clientGQL)
+	opslevel.Cache.CacheFilters(clientGQL)
+	opslevel.Cache.CacheIntegrations(clientGQL)
+	err = input.resolveCategoryAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveLevelAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveTeamAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveFilterAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	if input.Kind == opslevel.CheckTypeGeneric {
+		err = input.resolveIntegrationAliases(clientGQL, usePrompts)
+		cobra.CheckErr(err)
+	}
+
+	checkData, err := opslevel.UnmarshalCheckCreateInput(input.Kind, toJson(input.Spec))
+	cobra.CheckErr(err)
+	output, err = clientGQL.CreateCheck(checkData)
+	cobra.CheckErr(err)
+	if output == nil {
+		return nil, fmt.Errorf("unknown error - no check data returned")
+	}
+	return output, err
 }
 
-func (self *CheckCreateType) resolveCategoryAliases(client *opslevel.Client, usePrompt bool) error {
+func updateCheck(input CheckInputType, usePrompts bool) (*opslevel.Check, error) {
+	var output *opslevel.Check
+	var err error
+	clientGQL := getClientGQL()
+	opslevel.Cache.CacheCategories(clientGQL)
+	opslevel.Cache.CacheLevels(clientGQL)
+	opslevel.Cache.CacheTeams(clientGQL)
+	opslevel.Cache.CacheFilters(clientGQL)
+	opslevel.Cache.CacheIntegrations(clientGQL)
+	err = input.resolveCategoryAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveLevelAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveTeamAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	err = input.resolveFilterAliases(clientGQL, usePrompts)
+	cobra.CheckErr(err)
+	if input.Kind == opslevel.CheckTypeGeneric {
+		err = input.resolveIntegrationAliases(clientGQL, usePrompts)
+		cobra.CheckErr(err)
+	}
+
+	checkData, err := opslevel.UnmarshalCheckUpdateInput(input.Kind, toJson(input.Spec))
+	cobra.CheckErr(err)
+	output, err = clientGQL.UpdateCheck(checkData)
+	cobra.CheckErr(err)
+	if output == nil {
+		return nil, fmt.Errorf("unknown error - no check data returned")
+	}
+	return output, err
+}
+
+// Resolving foreign keys
+
+func (self *CheckInputType) resolveCategoryAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["category"]; ok {
 		delete(self.Spec, "category")
 		if value, ok := opslevel.Cache.TryGetCategory(item.(string)); ok {
@@ -114,12 +233,16 @@ func (self *CheckCreateType) resolveCategoryAliases(client *opslevel.Client, use
 		}
 		self.Spec["categoryId"] = category.Id
 	} else {
+		if self.IsUpdateInput() {
+			return nil
+		}
+
 		return fmt.Errorf("no valid value supplied for field 'category'")
 	}
 	return nil
 }
 
-func (self *CheckCreateType) resolveLevelAliases(client *opslevel.Client, usePrompt bool) error {
+func (self *CheckInputType) resolveLevelAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["level"]; ok {
 		delete(self.Spec, "level")
 		if value, ok := opslevel.Cache.TryGetLevel(item.(string)); ok {
@@ -136,12 +259,16 @@ func (self *CheckCreateType) resolveLevelAliases(client *opslevel.Client, usePro
 		}
 		self.Spec["levelId"] = level.Id
 	} else {
+		if self.IsUpdateInput() {
+			return nil
+		}
+
 		return fmt.Errorf("no valid value supplied for field 'level'")
 	}
 	return nil
 }
 
-func (self *CheckCreateType) resolveTeamAliases(client *opslevel.Client, usePrompt bool) error {
+func (self *CheckInputType) resolveTeamAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["owner"]; ok {
 		delete(self.Spec, "owner")
 		if value, ok := opslevel.Cache.TryGetTeam(item.(string)); ok {
@@ -165,7 +292,7 @@ func (self *CheckCreateType) resolveTeamAliases(client *opslevel.Client, useProm
 	return nil
 }
 
-func (self *CheckCreateType) resolveFilterAliases(client *opslevel.Client, usePrompt bool) error {
+func (self *CheckInputType) resolveFilterAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["filter"]; ok {
 		delete(self.Spec, "filter")
 		if value, ok := opslevel.Cache.TryGetFilter(item.(string)); ok {
@@ -189,103 +316,7 @@ func (self *CheckCreateType) resolveFilterAliases(client *opslevel.Client, usePr
 	return nil
 }
 
-func toJson(data map[string]interface{}) []byte {
-	output, err := json.Marshal(data)
-	cobra.CheckErr(err)
-	return output
-}
-
-func (self *CheckCreateType) AsServiceOwnershipCreateInput() *opslevel.CheckServiceOwnershipCreateInput {
-	payload := &opslevel.CheckServiceOwnershipCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsHasRecentDeployCreateInput() *opslevel.CheckHasRecentDeployCreateInput {
-	payload := &opslevel.CheckHasRecentDeployCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsServicePropertyCreateInput() *opslevel.CheckServicePropertyCreateInput {
-	payload := &opslevel.CheckServicePropertyCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsServiceConfigurationCreateInput() *opslevel.CheckServiceConfigurationCreateInput {
-	payload := &opslevel.CheckServiceConfigurationCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsHasDocumentationCreateInput() *opslevel.CheckHasDocumentationCreateInput {
-	payload := &opslevel.CheckHasDocumentationCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsRepositoryIntegratedCreateInput() *opslevel.CheckRepositoryIntegratedCreateInput {
-	payload := &opslevel.CheckRepositoryIntegratedCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsToolUsageCreateInput() *opslevel.CheckToolUsageCreateInput {
-	payload := &opslevel.CheckToolUsageCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsTagDefinedCreateInput() *opslevel.CheckTagDefinedCreateInput {
-	payload := &opslevel.CheckTagDefinedCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsRepositoryFileCreateInput() *opslevel.CheckRepositoryFileCreateInput {
-	payload := &opslevel.CheckRepositoryFileCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsRepositoryGrepCreateInput() *opslevel.CheckRepositoryGrepCreateInput {
-	payload := &opslevel.CheckRepositoryGrepCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsRepositorySearchCreateInput() *opslevel.CheckRepositorySearchCreateInput {
-	payload := &opslevel.CheckRepositorySearchCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsManualCreateInput() *opslevel.CheckManualCreateInput {
-	payload := &opslevel.CheckManualCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsAlertSourceUsageCreateInput() *opslevel.CheckAlertSourceUsageCreateInput {
-	payload := &opslevel.CheckAlertSourceUsageCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsGitBranchProtectionCreateInput() *opslevel.CheckGitBranchProtectionCreateInput {
-	payload := &opslevel.CheckGitBranchProtectionCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) AsServiceDependencyCreateInput() *opslevel.CheckServiceDependencyCreateInput {
-	payload := &opslevel.CheckServiceDependencyCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
-}
-
-func (self *CheckCreateType) resolveIntegrationAliases(client *opslevel.Client, usePrompt bool) error {
+func (self *CheckInputType) resolveIntegrationAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := self.Spec["integration"]; ok {
 		delete(self.Spec, "integration")
 		if value, ok := opslevel.Cache.TryGetIntegration(item.(string)); ok {
@@ -302,95 +333,25 @@ func (self *CheckCreateType) resolveIntegrationAliases(client *opslevel.Client, 
 		}
 		self.Spec["integrationId"] = integration.Id
 	} else {
+		if self.IsUpdateInput() {
+			return nil
+		}
+
 		return fmt.Errorf("no valid value supplied for field 'integration'")
 	}
 	return nil
 }
 
-func (self *CheckCreateType) AsCustomEventCreateInput() *opslevel.CheckCustomEventCreateInput {
-	self.Spec["resultMessage"] = self.Spec["message"]
-	payload := &opslevel.CheckCustomEventCreateInput{}
-	json.Unmarshal(toJson(self.Spec), payload)
-	return payload
+// Serialization
+
+func toJson(data map[string]interface{}) []byte {
+	output, err := json.Marshal(data)
+	cobra.CheckErr(err)
+	return output
 }
 
-func createCheck(input CheckCreateType, usePrompts bool) (*opslevel.Check, error) {
-	var output *opslevel.Check
-	var err error
-	clientGQL := getClientGQL()
-	opslevel.Cache.CacheCategories(clientGQL)
-	opslevel.Cache.CacheLevels(clientGQL)
-	opslevel.Cache.CacheTeams(clientGQL)
-	opslevel.Cache.CacheFilters(clientGQL)
-	err = input.resolveCategoryAliases(clientGQL, usePrompts)
-	cobra.CheckErr(err)
-	err = input.resolveLevelAliases(clientGQL, usePrompts)
-	cobra.CheckErr(err)
-	err = input.resolveTeamAliases(clientGQL, usePrompts)
-	cobra.CheckErr(err)
-	err = input.resolveFilterAliases(clientGQL, usePrompts)
-	cobra.CheckErr(err)
-	switch input.Kind {
-	case opslevel.CheckTypeHasOwner:
-		output, err = clientGQL.CreateCheckServiceOwnership(*input.AsServiceOwnershipCreateInput())
-
-	case opslevel.CheckTypeHasRecentDeploy:
-		output, err = clientGQL.CreateCheckHasRecentDeploy(*input.AsHasRecentDeployCreateInput())
-
-	case opslevel.CheckTypeServiceProperty:
-		output, err = clientGQL.CreateCheckServiceProperty(*input.AsServicePropertyCreateInput())
-
-	case opslevel.CheckTypeHasServiceConfig:
-		output, err = clientGQL.CreateCheckServiceConfiguration(*input.AsServiceConfigurationCreateInput())
-
-	case opslevel.CheckTypeHasDocumentation:
-		output, err = clientGQL.CreateCheckHasDocumentation(*input.AsHasDocumentationCreateInput())
-
-	case opslevel.CheckTypeHasRepository:
-		output, err = clientGQL.CreateCheckRepositoryIntegrated(*input.AsRepositoryIntegratedCreateInput())
-
-	case opslevel.CheckTypeToolUsage:
-		output, err = clientGQL.CreateCheckToolUsage(*input.AsToolUsageCreateInput())
-
-	case opslevel.CheckTypeTagDefined:
-		output, err = clientGQL.CreateCheckTagDefined(*input.AsTagDefinedCreateInput())
-
-	case opslevel.CheckTypeRepoFile:
-		output, err = clientGQL.CreateCheckRepositoryFile(*input.AsRepositoryFileCreateInput())
-
-	case opslevel.CheckTypeRepoGrep:
-		output, err = clientGQL.CreateCheckRepositoryGrep(*input.AsRepositoryGrepCreateInput())
-
-	case opslevel.CheckTypeRepoSearch:
-		output, err = clientGQL.CreateCheckRepositorySearch(*input.AsRepositorySearchCreateInput())
-
-	case opslevel.CheckTypeManual:
-		output, err = clientGQL.CreateCheckManual(*input.AsManualCreateInput())
-
-	case opslevel.CheckTypeGeneric:
-		opslevel.Cache.CacheIntegrations(clientGQL)
-		err = input.resolveIntegrationAliases(clientGQL, usePrompts)
-		cobra.CheckErr(err)
-		output, err = clientGQL.CreateCheckCustomEvent(*input.AsCustomEventCreateInput())
-
-	case opslevel.CheckTypeAlertSourceUsage:
-		output, err = clientGQL.CreateCheckAlertSourceUsage(*input.AsAlertSourceUsageCreateInput())
-
-	case opslevel.CheckTypeGitBranchProtection:
-		output, err = clientGQL.CreateCheckGitBranchProtection(*input.AsGitBranchProtectionCreateInput())
-
-	case opslevel.CheckTypeServiceDependency:
-		output, err = clientGQL.CreateCheckServiceDependency(*input.AsServiceDependencyCreateInput())
-	}
-	cobra.CheckErr(err)
-	if output == nil {
-		return nil, fmt.Errorf("unknown error - no check data returned")
-	}
-	return output, err
-}
-
-func marshalCheck(check opslevel.Check) *CheckCreateType {
-	output := &CheckCreateType{
+func marshalCheck(check opslevel.Check) *CheckInputType {
+	output := &CheckInputType{
 		Version: "1",
 		Kind:    check.Type,
 		Spec: map[string]interface{}{
@@ -475,13 +436,26 @@ func marshalCheck(check opslevel.Check) *CheckCreateType {
 	return output
 }
 
+// Types
+
 var CheckConfigCurrentVersion = "1"
 
 type ConfigVersion struct {
 	Version string
 }
 
-func readCheckCreateInput() (*CheckCreateType, error) {
+type CheckInputType struct {
+	Version string
+	Kind    opslevel.CheckType
+	Spec    map[string]interface{}
+}
+
+func (self *CheckInputType) IsUpdateInput() bool {
+	_, ok := self.Spec["id"]
+	return ok
+}
+
+func readCheckInput() (*CheckInputType, error) {
 	readInputConfig()
 	// Validate Version
 	v := &ConfigVersion{}
@@ -490,7 +464,7 @@ func readCheckCreateInput() (*CheckCreateType, error) {
 		return nil, fmt.Errorf("Supported config version is '%s' but found '%s' | Please update config file", CheckConfigCurrentVersion, v.Version)
 	}
 	// Unmarshall
-	evt := &CheckCreateType{}
+	evt := &CheckInputType{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
