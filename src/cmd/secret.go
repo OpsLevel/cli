@@ -30,7 +30,6 @@ EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readSecretInput()
 		cobra.CheckErr(err)
-		fmt.Println("creating secret...")
 		newSecret, err := getClientGQL().CreateSecret(secretAlias, *input)
 		cobra.CheckErr(err)
 
@@ -46,7 +45,6 @@ var getSecretCmd = &cobra.Command{
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		identifier := args[0]
-		fmt.Println("getting secret...")
 		result, err := getClientGQL().GetSecret(identifier)
 		cobra.CheckErr(err)
 
@@ -65,7 +63,6 @@ var listSecretsCmd = &cobra.Command{
 	Short:   "List secrets",
 	Long:    `List secrets`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("listing secrets...")
 		resp, err := getClientGQL().ListSecretsVaultsSecret(nil)
 		list := resp.Nodes
 
@@ -97,7 +94,6 @@ var updateSecretCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		secretId := args[0]
 		input, err := readSecretInput()
-		fmt.Println("updating secret...")
 		secret, err := getClientGQL().UpdateSecret(secretId, *input)
 		cobra.CheckErr(err)
 		fmt.Println(secret.ID)
@@ -112,7 +108,6 @@ var deleteSecretCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		secretId := args[0]
-		fmt.Println("deleting secret...")
 		err := getClientGQL().DeleteSecret(secretId)
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' secret\n", secretId)
