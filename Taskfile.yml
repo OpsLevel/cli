@@ -40,7 +40,6 @@ tasks:
     dir: "{{.SRC_DIR}}"
     cmds:
       - git submodule update --init
-        # The ":" is a no-op that keeps things rolling
-      - go work init || ":"
+      - go work init || exit 0
       - go work use . submodules/opslevel-go
       - echo "Workspace ready!"
