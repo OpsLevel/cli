@@ -1,6 +1,6 @@
 module github.com/opslevel/cli
 
-go 1.20
+go 1.21
 
 require (
 	github.com/creasty/defaults v1.7.0
