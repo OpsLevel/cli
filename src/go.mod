@@ -10,7 +10,7 @@ require (
 	github.com/itchyny/gojq v0.12.13
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.54.0
-	github.com/opslevel/opslevel-go/v2023 v2023.8.14
+	github.com/opslevel/opslevel-go/v2023 v2023.8.28
 	github.com/relvacode/iso8601 v1.3.0
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.30.0
@@ -42,7 +42,7 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.3.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect

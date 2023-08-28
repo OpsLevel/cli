@@ -35,6 +35,13 @@ tasks:
     cmds:
       - go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
 
+  update-opslevel-go:
+    desc: Update opslevel-go version to latest release
+    dir: "{{.SRC_DIR}}"
+    cmds:
+      - go get -u github.com/opslevel/opslevel-go/v2023
+      - go mod tidy
+
   workspace:
     desc: Setup workspace for cli & opslevel-go development
     dir: "{{.SRC_DIR}}"
