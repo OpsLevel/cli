@@ -54,7 +54,7 @@ EOF`,
 			cobra.CheckErr(err)
 			fmt.Printf("created webhook action: %s\n", result.Id)
 		default:
-			err := errors.New("unknown action type: " + args[0])
+			err := errors.New("unknown action type: " + actionType)
 			cobra.CheckErr(err)
 		}
 	},
