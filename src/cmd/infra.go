@@ -32,6 +32,9 @@ data:
     endpoint: "https://google.com"
     engine: "BigQuery"
     replica: false
+    storage_size: |-
+        value: 1024,
+        unit: "GB"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readInfraInput()

@@ -97,6 +97,9 @@ var updateTriggerDefinitionCmd = &cobra.Command{
 cat << EOF | opslevel update trigger-definition $TRIGGER_ID -f -
 description: "Pages the On Call via PagerDuty"
 accessControl: "service_owners"
+extendedTeamAccess:
+- alias: "team_alias_1"
+- id: "XXX_team_id_XXX"
 EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
