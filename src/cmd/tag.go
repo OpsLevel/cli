@@ -13,12 +13,11 @@ import (
 var resourceType string
 
 var createTagCmd = &cobra.Command{
-	Use:   "tag --type=RESOURCE_TYPE RESOURCE_ID KEY VALUE",
+	Use:   "tag --type=RESOURCE_TYPE [--assign] RESOURCE_ID KEY VALUE",
 	Short: "Create/assign a tag",
 	Long:  "Create/assign a tag",
 	Example: `
 opslevel create tag --type=Team ID|ALIAS KEY VALUE
-opslevel create tag --type=Repository --assign ID|ALIAS KEY VALUE
 `,
 	Args:       cobra.ExactArgs(3),
 	ArgAliases: []string{"RESOURCE_ID", "KEY", "VALUE"},
@@ -56,9 +55,9 @@ opslevel create tag --type=Repository --assign ID|ALIAS KEY VALUE
 				}
 			}
 
-			_, err := getClientGQL().AssignTag(input)
+			result, err := getClientGQL().AssignTag(input)
 			cobra.CheckErr(err)
-			fmt.Printf("updated new tag on %s\n", resource)
+			fmt.Printf("updated new tag on %s: %s\n", resource, result[0].Id)
 		} else {
 			var input opslevel.TagCreateInput
 			if opslevel.IsID(resource) {
@@ -83,8 +82,28 @@ opslevel create tag --type=Repository --assign ID|ALIAS KEY VALUE
 	},
 }
 
+var deleteTagCmd = &cobra.Command{
+	Use:   "tag TAG_ID",
+	Short: "Delete a tag",
+	Long:  "Delete a tag",
+	Example: `
+opslevel delete tag TAG_ID
+`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"TAG_ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		tag := opslevel.ID(args[0])
+
+		err := getClientGQL().DeleteTag(tag)
+		cobra.CheckErr(err)
+		fmt.Printf("deleted a tag: %s\n", tag)
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createTagCmd)
 	createTagCmd.Flags().StringVar(&resourceType, "type", "", "resource type")
 	createTagCmd.Flags().Bool("assign", false, "assign a tag instead of creating it")
+
+	deleteCmd.AddCommand(deleteTagCmd)
 }
