@@ -16,6 +16,12 @@
 - Ripped out `oldFunction()`
 - Combined `file1` and `file2`
 
+## Follow up items
+
+- [ ] Update this other repo
+- [ ] Make a post in `#demo`
+- [ ] Failover some service
+
 ## Tophatting
 
 <!-- Examples of your change working - this could be terminal output and screenshots. -->
