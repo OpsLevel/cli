@@ -40,47 +40,6 @@ EOF`,
 	},
 }
 
-var createServiceTagCmd = &cobra.Command{
-	Use:   "tag ID|ALIAS TAG_KEY TAG_VALUE",
-	Short: "Create a service tag",
-	Long: `Create a service tag
-
-opslevel create service tag my-service foo bar
-opslevel create service tag --assign my-service foo bar
-`,
-	Args:       cobra.ExactArgs(3),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY", "TAG_VALUE"},
-	Run: func(cmd *cobra.Command, args []string) {
-		var result interface{}
-		var err error
-		serviceKey := args[0]
-		tagKey := args[1]
-		tagValue := args[2]
-		tagAssign, err := cmd.Flags().GetBool("assign")
-		cobra.CheckErr(err)
-		if tagAssign {
-			input := map[string]string{
-				tagKey: tagValue,
-			}
-			result, err = getClientGQL().AssignTags(serviceKey, input)
-		} else {
-			input := opslevel.TagCreateInput{
-				Key:   tagKey,
-				Value: tagValue,
-			}
-			if common.IsID(serviceKey) {
-				input.Id = opslevel.ID(serviceKey)
-			} else {
-				input.Alias = serviceKey
-			}
-			input.Type = opslevel.TaggableResourceService
-			result, err = getClientGQL().CreateTag(input)
-		}
-		cobra.CheckErr(err)
-		common.PrettyPrint(result)
-	},
-}
-
 var getServiceCmd = &cobra.Command{
 	Use:        "service ID|ALIAS",
 	Short:      "Get details about a service",
@@ -105,49 +64,6 @@ var getServiceCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		common.WasFound(service.Id == "", key)
 		common.PrettyPrint(service)
-	},
-}
-
-var getServiceTagCmd = &cobra.Command{
-	Use:   "tag ID|ALIAS TAG_KEY",
-	Short: "Get a service's tag",
-	Long: `Get a service's' tag
-
-opslevel get service tag my-service | jq 'from_entries'
-opslevel get service tag my-service my-tag
-`,
-	Args:       cobra.MinimumNArgs(1),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
-	Run: func(cmd *cobra.Command, args []string) {
-		serviceKey := args[0]
-		singleTag := len(args) == 2
-		var tagKey string
-		if singleTag {
-			tagKey = args[1]
-		}
-
-		var result *opslevel.Service
-		var err error
-		if common.IsID(serviceKey) {
-			result, err = getClientGQL().GetService(opslevel.ID(serviceKey))
-			cobra.CheckErr(err)
-		} else {
-			result, err = getClientGQL().GetServiceWithAlias(serviceKey)
-			cobra.CheckErr(err)
-		}
-		if result.Id == "" {
-			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
-		}
-		var output []opslevel.Tag
-		for _, tag := range result.Tags.Nodes {
-			if !singleTag || tagKey == tag.Key {
-				output = append(output, tag)
-			}
-		}
-		if len(output) == 0 {
-			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on service '%s'", tagKey, serviceKey))
-		}
-		common.PrettyPrint(output)
 	},
 }
 
@@ -221,44 +137,6 @@ var deleteServiceCmd = &cobra.Command{
 	},
 }
 
-var deleteServiceTagCmd = &cobra.Command{
-	Use:        "tag ID|ALIAS TAG_KEY|TAG_ID",
-	Short:      "Delete a service's tag",
-	Long:       `Delete a service's tag'`,
-	Args:       cobra.ExactArgs(2),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY", "TAG_ID"},
-	Run: func(cmd *cobra.Command, args []string) {
-		serviceKey := args[0]
-		tagKey := args[1]
-		var result *opslevel.Service
-		var err error
-		if common.IsID(serviceKey) {
-			result, err = getClientGQL().GetService(opslevel.ID(serviceKey))
-			cobra.CheckErr(err)
-		} else {
-			result, err = getClientGQL().GetServiceWithAlias(serviceKey)
-			cobra.CheckErr(err)
-		}
-		if result.Id == "" {
-			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
-		}
-
-		if common.IsID(tagKey) {
-			err := getClientGQL().DeleteTag(opslevel.ID(tagKey))
-			cobra.CheckErr(err)
-			fmt.Println("Deleted Tag")
-		} else {
-			for _, tag := range result.Tags.Nodes {
-				if tagKey == tag.Key {
-					getClientGQL().DeleteTag(tag.Id)
-					fmt.Println("Deleted Tag")
-					common.PrettyPrint(tag)
-				}
-			}
-		}
-	},
-}
-
 var importServicesCmd = &cobra.Command{
 	Use:     "service",
 	Aliases: []string{"services"},
@@ -327,13 +205,7 @@ func init() {
 	updateCmd.AddCommand(updateServiceCmd)
 	deleteCmd.AddCommand(deleteServiceCmd)
 
-	createServiceCmd.AddCommand(createServiceTagCmd)
-	getServiceCmd.AddCommand(getServiceTagCmd)
-	deleteServiceCmd.AddCommand(deleteServiceTagCmd)
-
 	importCmd.AddCommand(importServicesCmd)
-
-	createServiceTagCmd.Flags().Bool("assign", false, "Use the `tagAssign` mutation instead of `tagCreate`")
 }
 
 func readServiceCreateInput() (*opslevel.ServiceCreateInput, error) {
