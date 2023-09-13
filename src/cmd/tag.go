@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
+	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"golang.org/x/exp/slices"
 
@@ -82,6 +84,32 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 	},
 }
 
+var updateTagCmd = &cobra.Command{
+	Use:   "tag TAG_ID KEY VALUE",
+	Short: "Update a tag",
+	Long:  "Update a tag",
+	Example: `
+opslevel update tag TAG_ID KEY VALUE
+`,
+	Args:       cobra.ExactArgs(3),
+	ArgAliases: []string{"TAG_ID", "KEY", "VALUE"},
+	Run: func(cmd *cobra.Command, args []string) {
+		tag := args[0]
+		key := args[1]
+		value := args[2]
+
+		input := opslevel.TagUpdateInput{
+			Id:    opslevel.ID(tag),
+			Key:   key,
+			Value: value,
+		}
+
+		result, err := getClientGQL().UpdateTag(input)
+		cobra.CheckErr(err)
+		common.JsonPrint(json.MarshalIndent(result, "", "    "))
+	},
+}
+
 var deleteTagCmd = &cobra.Command{
 	Use:   "tag TAG_ID",
 	Short: "Delete a tag",
@@ -104,6 +132,8 @@ func init() {
 	createCmd.AddCommand(createTagCmd)
 	createTagCmd.Flags().StringVar(&resourceType, "type", "", "resource type")
 	createTagCmd.Flags().Bool("assign", false, "assign a tag instead of creating it")
+
+	updateCmd.AddCommand(updateTagCmd)
 
 	deleteCmd.AddCommand(deleteTagCmd)
 }
