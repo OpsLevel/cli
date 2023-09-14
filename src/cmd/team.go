@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/creasty/defaults"
@@ -103,6 +104,16 @@ opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 	}
 )
 
+var createTeamTagCmd = &cobra.Command{
+	Use:   "tag",
+	Short: "Create a team tag",
+	Long:  `Create a team tag`,
+	Run: func(cmd *cobra.Command, args []string) {
+		err := errors.New("This command is deprecated! Please use \nopslevel create tag <args>")
+		cobra.CheckErr(err)
+	},
+}
+
 var updateTeamCmd = &cobra.Command{
 	Use:   "team {ID|ALIAS}",
 	Short: "Update a team",
@@ -174,6 +185,48 @@ opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))'
 	},
 }
 
+var getTeamTagCmd = &cobra.Command{
+	Use:   "tag {ID|ALIAS} TAG_KEY",
+	Short: "Get a team's tag",
+	Example: `
+opslevel get team tag my-team my-tag
+opslevel get team tag my-team | jq 'from_entries'
+`,
+	Args:       cobra.MinimumNArgs(1),
+	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+	Run: func(cmd *cobra.Command, args []string) {
+		teamKey := args[0]
+		singleTag := len(args) == 2
+		var tagKey string
+		if singleTag {
+			tagKey = args[1]
+		}
+
+		var result *opslevel.Team
+		var err error
+		if common.IsID(teamKey) {
+			result, err = getClientGQL().GetTeam(opslevel.ID(teamKey))
+			cobra.CheckErr(err)
+		} else {
+			result, err = getClientGQL().GetTeamWithAlias(teamKey)
+			cobra.CheckErr(err)
+		}
+		if result.Id == "" {
+			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
+		}
+		var output []opslevel.Tag
+		for _, tag := range result.Tags.Nodes {
+			if !singleTag || tagKey == tag.Key {
+				output = append(output, tag)
+			}
+		}
+		if len(output) == 0 {
+			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on team '%s'", tagKey, teamKey))
+		}
+		common.PrettyPrint(output)
+	},
+}
+
 var deleteTeamCmd = &cobra.Command{
 	Use:   "team {ID|ALIAS}",
 	Short: "Delete a team",
@@ -235,6 +288,16 @@ var deleteContactCmd = &cobra.Command{
 	},
 }
 
+var deleteTeamTagCmd = &cobra.Command{
+	Use:   "tag",
+	Short: "Delete a team's tag",
+	Long:  `Delete a team's tag`,
+	Run: func(cmd *cobra.Command, args []string) {
+		err := errors.New("This command is deprecated! Please use \nopslevel delete tag <args>")
+		cobra.CheckErr(err)
+	},
+}
+
 var importTeamsCmd = &cobra.Command{
 	Use:     "team",
 	Aliases: []string{"teams"},
@@ -276,12 +339,15 @@ func init() {
 	createCmd.AddCommand(createTeamCmd)
 	createCmd.AddCommand(createMemberCmd)
 	createCmd.AddCommand(createContactCmd)
+	createTeamCmd.AddCommand(createTeamTagCmd)
 	updateCmd.AddCommand(updateTeamCmd)
 	getCmd.AddCommand(getTeamCmd)
+	getTeamCmd.AddCommand(getTeamTagCmd)
 	listCmd.AddCommand(listTeamCmd)
 	deleteCmd.AddCommand(deleteTeamCmd)
 	deleteCmd.AddCommand(deleteMemberCmd)
 	deleteCmd.AddCommand(deleteContactCmd)
+	deleteTeamCmd.AddCommand(deleteTeamTagCmd)
 	importCmd.AddCommand(importTeamsCmd)
 
 	createContactCmd.Flags().StringVarP(&contactType, "type", "t", "slack", "The contact type. One of: slack|email|web [default: slack]")

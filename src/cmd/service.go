@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -40,6 +41,16 @@ EOF`,
 	},
 }
 
+var createServiceTagCmd = &cobra.Command{
+	Use:   "tag",
+	Short: "Create a service tag",
+	Long:  `Create a service tag`,
+	Run: func(cmd *cobra.Command, args []string) {
+		err := errors.New("This command is deprecated! Please use \nopslevel create tag <args>")
+		cobra.CheckErr(err)
+	},
+}
+
 var getServiceCmd = &cobra.Command{
 	Use:        "service ID|ALIAS",
 	Short:      "Get details about a service",
@@ -64,6 +75,49 @@ var getServiceCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		common.WasFound(service.Id == "", key)
 		common.PrettyPrint(service)
+	},
+}
+
+var getServiceTagCmd = &cobra.Command{
+	Use:   "tag ID|ALIAS TAG_KEY",
+	Short: "Get a service's tag",
+	Long: `Get a service's' tag
+
+opslevel get service tag my-service | jq 'from_entries'
+opslevel get service tag my-service my-tag
+`,
+	Args:       cobra.MinimumNArgs(1),
+	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+	Run: func(cmd *cobra.Command, args []string) {
+		serviceKey := args[0]
+		singleTag := len(args) == 2
+		var tagKey string
+		if singleTag {
+			tagKey = args[1]
+		}
+
+		var result *opslevel.Service
+		var err error
+		if common.IsID(serviceKey) {
+			result, err = getClientGQL().GetService(opslevel.ID(serviceKey))
+			cobra.CheckErr(err)
+		} else {
+			result, err = getClientGQL().GetServiceWithAlias(serviceKey)
+			cobra.CheckErr(err)
+		}
+		if result.Id == "" {
+			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
+		}
+		var output []opslevel.Tag
+		for _, tag := range result.Tags.Nodes {
+			if !singleTag || tagKey == tag.Key {
+				output = append(output, tag)
+			}
+		}
+		if len(output) == 0 {
+			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on service '%s'", tagKey, serviceKey))
+		}
+		common.PrettyPrint(output)
 	},
 }
 
@@ -137,6 +191,16 @@ var deleteServiceCmd = &cobra.Command{
 	},
 }
 
+var deleteServiceTagCmd = &cobra.Command{
+	Use:   "tag",
+	Short: "Delete a service's tag",
+	Long:  `Delete a service's tag'`,
+	Run: func(cmd *cobra.Command, args []string) {
+		err := errors.New("This command is deprecated! Please use \nopslevel delete tag <args>")
+		cobra.CheckErr(err)
+	},
+}
+
 var importServicesCmd = &cobra.Command{
 	Use:     "service",
 	Aliases: []string{"services"},
@@ -204,6 +268,10 @@ func init() {
 	listCmd.AddCommand(listServiceCmd)
 	updateCmd.AddCommand(updateServiceCmd)
 	deleteCmd.AddCommand(deleteServiceCmd)
+
+	createServiceCmd.AddCommand(createServiceTagCmd)
+	getServiceCmd.AddCommand(getServiceTagCmd)
+	deleteServiceCmd.AddCommand(deleteServiceTagCmd)
 
 	importCmd.AddCommand(importServicesCmd)
 }
