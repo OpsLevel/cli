@@ -24,14 +24,8 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 	Args:       cobra.ExactArgs(3),
 	ArgAliases: []string{"RESOURCE_ID", "KEY", "VALUE"},
 	Run: func(cmd *cobra.Command, args []string) {
-		if resourceType == "" {
-			err := errors.New("must specify a taggable resource type using --type=RESOURCE_TYPE")
-			cobra.CheckErr(err)
-		}
-		if !slices.Contains(opslevel.AllTaggableResource, resourceType) {
-			err := errors.New("not a taggable resource type: " + resourceType)
-			cobra.CheckErr(err)
-		}
+		err := validateResourceTypeArg(resourceType)
+		cobra.CheckErr(err)
 
 		resource := args[0]
 		key := args[1]
@@ -136,4 +130,15 @@ func init() {
 	updateCmd.AddCommand(updateTagCmd)
 
 	deleteCmd.AddCommand(deleteTagCmd)
+}
+
+func validateResourceTypeArg(resourceType string) error {
+	if resourceType == "" {
+		return errors.New("must specify a taggable resource type using --type=RESOURCE_TYPE")
+	}
+	if !slices.Contains(opslevel.AllTaggableResource, resourceType) {
+		return errors.New("not a taggable resource type: " + resourceType)
+	}
+
+	return nil
 }
