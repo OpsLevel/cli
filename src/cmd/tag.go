@@ -32,23 +32,17 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 		value := args[2]
 
 		if cmd.Flag("assign").Changed {
-			var input opslevel.TagAssignInput
 			tagInput := opslevel.TagInput{
 				Key:   key,
 				Value: value,
 			}
+			input := opslevel.TagAssignInput{Tags: []opslevel.TagInput{tagInput}}
 
 			if opslevel.IsID(resource) {
-				input = opslevel.TagAssignInput{
-					Id:   opslevel.ID(resource),
-					Tags: []opslevel.TagInput{tagInput},
-				}
+				input.Id = opslevel.ID(resource)
 			} else {
-				input = opslevel.TagAssignInput{
-					Alias: resource,
-					Type:  opslevel.TaggableResource(resourceType),
-					Tags:  []opslevel.TagInput{tagInput},
-				}
+				input.Alias = resource
+				input.Type = opslevel.TaggableResource(resourceType)
 			}
 
 			result, err := getClientGQL().AssignTag(input)
