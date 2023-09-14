@@ -55,20 +55,15 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 			cobra.CheckErr(err)
 			fmt.Printf("updated new tag on %s: %s\n", resource, result[0].Id)
 		} else {
-			var input opslevel.TagCreateInput
+			input := opslevel.TagCreateInput{
+				Key:   key,
+				Value: value,
+			}
 			if opslevel.IsID(resource) {
-				input = opslevel.TagCreateInput{
-					Id:    opslevel.ID(resource),
-					Key:   key,
-					Value: value,
-				}
+				input.Id = opslevel.ID(resource)
 			} else {
-				input = opslevel.TagCreateInput{
-					Alias: resource,
-					Type:  opslevel.TaggableResource(resourceType),
-					Key:   key,
-					Value: value,
-				}
+				input.Alias = resource
+				input.Type = opslevel.TaggableResource(resourceType)
 			}
 
 			result, err := getClientGQL().CreateTag(input)
