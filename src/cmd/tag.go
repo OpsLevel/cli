@@ -145,7 +145,7 @@ opslevel get tag --type=Team ID|ALIAS | jq 'from_entries'   # values of all keys
 			}
 		}
 
-		if singleTag && len(output) == 0 {
+		if len(output) == 0 {
 			err := fmt.Errorf("tag with key '%s' not found on %s '%s'", tagKey, resourceType, resource)
 			cobra.CheckErr(err)
 		}
