@@ -186,44 +186,12 @@ opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))'
 }
 
 var getTeamTagCmd = &cobra.Command{
-	Use:   "tag {ID|ALIAS} TAG_KEY",
+	Use:   "tag",
 	Short: "Get a team's tag",
-	Example: `
-opslevel get team tag my-team my-tag
-opslevel get team tag my-team | jq 'from_entries'
-`,
-	Args:       cobra.MinimumNArgs(1),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+	Long:  `Get a team's tag`,
 	Run: func(cmd *cobra.Command, args []string) {
-		teamKey := args[0]
-		singleTag := len(args) == 2
-		var tagKey string
-		if singleTag {
-			tagKey = args[1]
-		}
-
-		var result *opslevel.Team
-		var err error
-		if common.IsID(teamKey) {
-			result, err = getClientGQL().GetTeam(opslevel.ID(teamKey))
-			cobra.CheckErr(err)
-		} else {
-			result, err = getClientGQL().GetTeamWithAlias(teamKey)
-			cobra.CheckErr(err)
-		}
-		if result.Id == "" {
-			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
-		}
-		var output []opslevel.Tag
-		for _, tag := range result.Tags.Nodes {
-			if !singleTag || tagKey == tag.Key {
-				output = append(output, tag)
-			}
-		}
-		if len(output) == 0 {
-			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on team '%s'", tagKey, teamKey))
-		}
-		common.PrettyPrint(output)
+		err := errors.New("This command is deprecated! Please use \nopslevel get tag <args>")
+		cobra.CheckErr(err)
 	},
 }
 

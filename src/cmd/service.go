@@ -79,45 +79,12 @@ var getServiceCmd = &cobra.Command{
 }
 
 var getServiceTagCmd = &cobra.Command{
-	Use:   "tag ID|ALIAS TAG_KEY",
+	Use:   "tag",
 	Short: "Get a service's tag",
-	Long: `Get a service's' tag
-
-opslevel get service tag my-service | jq 'from_entries'
-opslevel get service tag my-service my-tag
-`,
-	Args:       cobra.MinimumNArgs(1),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+	Long:  `Get a service's tag`,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceKey := args[0]
-		singleTag := len(args) == 2
-		var tagKey string
-		if singleTag {
-			tagKey = args[1]
-		}
-
-		var result *opslevel.Service
-		var err error
-		if common.IsID(serviceKey) {
-			result, err = getClientGQL().GetService(opslevel.ID(serviceKey))
-			cobra.CheckErr(err)
-		} else {
-			result, err = getClientGQL().GetServiceWithAlias(serviceKey)
-			cobra.CheckErr(err)
-		}
-		if result.Id == "" {
-			cobra.CheckErr(fmt.Errorf("service '%s' not found", serviceKey))
-		}
-		var output []opslevel.Tag
-		for _, tag := range result.Tags.Nodes {
-			if !singleTag || tagKey == tag.Key {
-				output = append(output, tag)
-			}
-		}
-		if len(output) == 0 {
-			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on service '%s'", tagKey, serviceKey))
-		}
-		common.PrettyPrint(output)
+		err := errors.New("This command is deprecated! Please use \nopslevel get tag <args>")
+		cobra.CheckErr(err)
 	},
 }
 
