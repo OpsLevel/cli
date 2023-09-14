@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
@@ -24,7 +25,7 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 	Args:       cobra.ExactArgs(3),
 	ArgAliases: []string{"RESOURCE_ID", "KEY", "VALUE"},
 	Run: func(cmd *cobra.Command, args []string) {
-		err := validateResourceTypeArg(resourceType)
+		err := validateResourceTypeArg()
 		cobra.CheckErr(err)
 
 		resource := args[0]
@@ -121,13 +122,26 @@ func init() {
 	deleteCmd.AddCommand(deleteTagCmd)
 }
 
-func validateResourceTypeArg(resourceType string) error {
+func validateResourceTypeArg() error {
 	if resourceType == "" {
 		return errors.New("must specify a taggable resource type using --type=RESOURCE_TYPE")
 	}
-	if !slices.Contains(opslevel.AllTaggableResource, resourceType) {
+
+	// if ProperCase, continue
+	if slices.Contains(opslevel.AllTaggableResource, resourceType) {
+		return nil
+	}
+
+	// if lowercase, check if it exists. if not, error out
+	lowercaseInput := strings.ToLower(resourceType)
+	lowercaseMap := make(map[string]string)
+	for _, s := range opslevel.AllTaggableResource {
+		lowercaseMap[strings.ToLower(s)] = s
+	}
+	if lowercaseMap[lowercaseInput] == "" {
 		return errors.New("not a taggable resource type: " + resourceType)
 	}
+	resourceType = lowercaseMap[lowercaseInput]
 
 	return nil
 }
