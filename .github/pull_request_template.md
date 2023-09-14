@@ -10,18 +10,13 @@
 
 <!-- Paste any issue links here, even issues from Gitlab --> 
 
-## Changelog
+## Proposed changes/checklist
 
-- Upgraded dependency from 1.0 to 1.1
-- Ripped out `oldFunction()`
-- Combined `file1` and `file2`
-
-## Follow up items
-
-- [ ] Update this other repo
-- [ ] Make a post in `#demo`
-- [ ] Failover some service
+- [ ] Develop X, replace Y with Z, optimize A and B...
+- [ ] Update the examples and documentation we have
+- [ ] Ensure test coverage is the same/better than before
+- [ ] Make a `changie` entry
 
 ## Tophatting
 
-<!-- Examples of your change working - this could be terminal output and screenshots. -->
+<!-- tophatting means sharing CLI output, log messages or even screenshots of your changes working. -->
