@@ -85,7 +85,7 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 
 			result, err := getClientGQL().AssignTag(input)
 			cobra.CheckErr(err)
-			fmt.Printf("updated new tag on %s: %s\n", resource, result[0].Id)
+			fmt.Printf("assigned tag for %s: %s\n", resource, result[0].Id)
 		} else {
 			input := opslevel.TagCreateInput{
 				Key:   key,
@@ -100,7 +100,7 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 
 			result, err := getClientGQL().CreateTag(input)
 			cobra.CheckErr(err)
-			fmt.Printf("added new tag on %s: %s\n", resource, result.Id)
+			fmt.Printf("created tag for %s: %s\n", resource, result.Id)
 		}
 	},
 }
