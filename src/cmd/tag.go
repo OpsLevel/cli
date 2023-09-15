@@ -14,6 +14,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: combine TaggableResourceFetchFunction and TaggableResourceFetchAliasFunction once the ObjectGet functions have been
+// harmonized to support both get by ID and get by Alias
 type TaggableResourceFetchFunction func(id opslevel.ID) (any, error)
 
 var TaggableResourceFetchFunctions = map[opslevel.TaggableResource]TaggableResourceFetchFunction{
