@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"time"
 )
 
 func NewGraphClient(version string, options ...opslevel.Option) *opslevel.Client {

@@ -10,7 +10,7 @@ tasks:
     desc: Formatting and linting
     dir: "{{.SRC_DIR}}"
     cmds:
-      - gofmt -d .
+      - gofumpt -d .
       - go vet ./...
       - golangci-lint run
 
@@ -18,7 +18,7 @@ tasks:
     desc: Fix formatting and linting
     dir: "{{.SRC_DIR}}"
     cmds:
-      - gofmt -w .
+      - gofumpt -w .
       - go mod tidy
       - golangci-lint run --fix
 
