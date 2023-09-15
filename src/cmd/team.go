@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/creasty/defaults"
@@ -104,42 +105,12 @@ opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 )
 
 var createTeamTagCmd = &cobra.Command{
-	Use:   "tag {ID|ALIAS} TAG_KEY TAG_VALUE",
+	Use:   "tag",
 	Short: "Create a team tag",
-	Example: `
-opslevel create team tag my-team foo bar
-opslevel create team tag --assign my-team foo bar
-`,
-	Args:       cobra.ExactArgs(3),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY", "TAG_VALUE"},
+	Long:  `Create a team tag`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var result interface{}
-		var err error
-		teamKey := args[0]
-		tagKey := args[1]
-		tagValue := args[2]
-		tagAssign, err := cmd.Flags().GetBool("assign")
+		err := errors.New("This command is deprecated! Please use \nopslevel create tag <args>")
 		cobra.CheckErr(err)
-		if tagAssign {
-			input := map[string]string{
-				tagKey: tagValue,
-			}
-			result, err = getClientGQL().AssignTags(teamKey, input)
-		} else {
-			input := opslevel.TagCreateInput{
-				Key:   tagKey,
-				Value: tagValue,
-			}
-			if common.IsID(teamKey) {
-				input.Id = opslevel.ID(teamKey)
-			} else {
-				input.Alias = teamKey
-			}
-			input.Type = opslevel.TaggableResourceTeam
-			result, err = getClientGQL().CreateTag(input)
-		}
-		cobra.CheckErr(err)
-		common.PrettyPrint(result)
 	},
 }
 
@@ -215,44 +186,12 @@ opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))'
 }
 
 var getTeamTagCmd = &cobra.Command{
-	Use:   "tag {ID|ALIAS} TAG_KEY",
+	Use:   "tag",
 	Short: "Get a team's tag",
-	Example: `
-opslevel get team tag my-team my-tag
-opslevel get team tag my-team | jq 'from_entries'
-`,
-	Args:       cobra.MinimumNArgs(1),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY"},
+	Long:  `Get a team's tag`,
 	Run: func(cmd *cobra.Command, args []string) {
-		teamKey := args[0]
-		singleTag := len(args) == 2
-		var tagKey string
-		if singleTag {
-			tagKey = args[1]
-		}
-
-		var result *opslevel.Team
-		var err error
-		if common.IsID(teamKey) {
-			result, err = getClientGQL().GetTeam(opslevel.ID(teamKey))
-			cobra.CheckErr(err)
-		} else {
-			result, err = getClientGQL().GetTeamWithAlias(teamKey)
-			cobra.CheckErr(err)
-		}
-		if result.Id == "" {
-			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
-		}
-		var output []opslevel.Tag
-		for _, tag := range result.Tags.Nodes {
-			if !singleTag || tagKey == tag.Key {
-				output = append(output, tag)
-			}
-		}
-		if len(output) == 0 {
-			cobra.CheckErr(fmt.Errorf("tag with key '%s' not found on team '%s'", tagKey, teamKey))
-		}
-		common.PrettyPrint(output)
+		err := errors.New("This command is deprecated! Please use \nopslevel get tag <args>")
+		cobra.CheckErr(err)
 	},
 }
 
@@ -318,40 +257,12 @@ var deleteContactCmd = &cobra.Command{
 }
 
 var deleteTeamTagCmd = &cobra.Command{
-	Use:        "tag {ID|ALIAS} {TAG_KEY|TAG_ID}",
-	Short:      "Delete a team's tag",
-	Example:    `opslevel delete team tag my-team foo`,
-	Args:       cobra.ExactArgs(2),
-	ArgAliases: []string{"ID", "ALIAS", "TAG_KEY", "TAG_ID"},
+	Use:   "tag",
+	Short: "Delete a team's tag",
+	Long:  `Delete a team's tag`,
 	Run: func(cmd *cobra.Command, args []string) {
-		teamKey := args[0]
-		tagKey := args[1]
-		var result *opslevel.Team
-		var err error
-		if common.IsID(teamKey) {
-			result, err = getClientGQL().GetTeam(opslevel.ID(teamKey))
-			cobra.CheckErr(err)
-		} else {
-			result, err = getClientGQL().GetTeamWithAlias(teamKey)
-			cobra.CheckErr(err)
-		}
-		if result.Id == "" {
-			cobra.CheckErr(fmt.Errorf("team '%s' not found", teamKey))
-		}
-
-		if common.IsID(tagKey) {
-			err := getClientGQL().DeleteTag(opslevel.ID(tagKey))
-			cobra.CheckErr(err)
-			fmt.Println("Deleted Tag")
-		} else {
-			for _, tag := range result.Tags.Nodes {
-				if tagKey == tag.Key {
-					getClientGQL().DeleteTag(tag.Id)
-					fmt.Println("Deleted Tag")
-					common.PrettyPrint(tag)
-				}
-			}
-		}
+		err := errors.New("This command is deprecated! Please use \nopslevel delete tag <args>")
+		cobra.CheckErr(err)
 	},
 }
 
@@ -407,7 +318,6 @@ func init() {
 	deleteTeamCmd.AddCommand(deleteTeamTagCmd)
 	importCmd.AddCommand(importTeamsCmd)
 
-	createTeamTagCmd.Flags().Bool("assign", false, "Use the `tagAssign` mutation instead of `tagCreate`")
 	createContactCmd.Flags().StringVarP(&contactType, "type", "t", "slack", "The contact type. One of: slack|email|web [default: slack]")
 }
 
