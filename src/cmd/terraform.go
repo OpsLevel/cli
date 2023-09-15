@@ -40,7 +40,7 @@ func newFile(filename string, makeExecutable bool) *os.File {
 		panic(err)
 	}
 	if makeExecutable {
-		if err := os.Chmod(filename, 0755); err != nil {
+		if err := os.Chmod(filename, 0o755); err != nil {
 			panic(err)
 		}
 	}

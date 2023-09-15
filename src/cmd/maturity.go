@@ -4,12 +4,13 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2023"
-	"github.com/spf13/cobra"
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/opslevel/cli/common"
+	"github.com/opslevel/opslevel-go/v2023"
+	"github.com/spf13/cobra"
 )
 
 var listServiceMaturityCmd = &cobra.Command{

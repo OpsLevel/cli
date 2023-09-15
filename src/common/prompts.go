@@ -2,8 +2,9 @@ package common
 
 import (
 	"fmt"
-	"github.com/opslevel/opslevel-go/v2023"
 	"sort"
+
+	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/manifoldco/promptui"
 )
