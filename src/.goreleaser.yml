@@ -16,7 +16,7 @@ builds:
       - openbsd
     goarch:
       - amd64
-      - 386
+      - '386'
       - arm
       - arm64
     ignore:
@@ -25,6 +25,7 @@ builds:
     binary: '{{ .ProjectName }}'
 dockers:
   - image_templates:
+    - "public.ecr.aws/opslevel/cli:latest"
     - "public.ecr.aws/opslevel/cli:{{ .Tag }}"
     build_flag_templates:
     - "--label=org.opencontainers.image.created={{ .Date }}"
