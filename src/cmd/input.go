@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/spf13/viper"
 )
@@ -15,7 +16,7 @@ func readInputConfig() {
 		viper.SetConfigFile("./data.yaml")
 	case "-":
 		if isStdInFromTerminal() {
-			fmt.Println("Reading input directly from command line...")
+			log.Info().Msg("Reading input directly from command line...")
 		}
 		viper.SetConfigType("yaml")
 		viper.ReadConfig(os.Stdin)
