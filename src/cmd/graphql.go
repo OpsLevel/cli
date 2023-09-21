@@ -165,7 +165,7 @@ func init() {
 	graphqlCmd.Flags().BoolP("paginate", "p", false, "Automatically make additional requests to fetch all pages of results")
 	graphqlCmd.Flags().StringP("aggregate", "a", ".", "JQ expression to use to aggregate results")
 	graphqlCmd.Flags().StringP("query", "q", "", "The query or mutation body to use")
-	graphqlCmd.Flags().StringP("operationName", "o", "Raw", "The query or mutation 'operation name' to use")
+	graphqlCmd.Flags().StringP("operationName", "o", "", "The query or mutation 'operation name' to use")
 	graphqlCmd.Flags().StringArrayP("field", "f", nil, "Add a variable in `key=value` format")
 }
 
