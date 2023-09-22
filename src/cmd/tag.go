@@ -109,8 +109,8 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 
 var getObjectTagCmd = &cobra.Command{
 	Use:   "tag --type=RESOURCE_TYPE RESOURCE_ID KEY",
-	Short: "Get value(s) of a tag on an object",
-	Long:  "Get value(s) of a tag on an object",
+	Short: "Get tags on an object matching key",
+	Long:  "Get tags on an object matching key",
 	Example: `
 opslevel get tag --type=Service ID|ALIAS KEY | jq
 `,
@@ -147,6 +147,38 @@ opslevel get tag --type=Service ID|ALIAS KEY | jq
 			output = make([]opslevel.Tag, 0)
 		}
 		common.PrettyPrint(output)
+	},
+}
+
+var listObjectTagCmd = &cobra.Command{
+	Use:     "tag --type=RESOURCE_TYPE RESOURCE_ID",
+	Aliases: []string{"tags"},
+	Short:   "Get all tags on an object",
+	Long:    "Get all tags on an object",
+	Example: `
+opslevel list tag --type=Service ID|ALIAS
+`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"RESOURCE_ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		err := validateResourceTypeArg()
+		cobra.CheckErr(err)
+
+		resource := args[0]
+
+		var result any
+		if opslevel.IsID(resource) {
+			id := opslevel.ID(resource)
+			result, err = TaggableResourceFetchFunctions[opslevel.TaggableResource(resourceType)](id)
+		} else {
+			alias := args[0]
+			result, err = TaggableResourceFetchAliasFunctions[opslevel.TaggableResource(resourceType)](alias)
+		}
+
+		tags, err := GetTags(result)
+		cobra.CheckErr(err)
+
+		common.PrettyPrint(tags.Nodes)
 	},
 }
 
@@ -201,6 +233,9 @@ func init() {
 
 	getCmd.AddCommand(getObjectTagCmd)
 	getObjectTagCmd.Flags().StringVar(&resourceType, "type", "", "resource type")
+
+	listCmd.AddCommand(listObjectTagCmd)
+	listObjectTagCmd.Flags().StringVar(&resourceType, "type", "", "resource type")
 
 	updateCmd.AddCommand(updateTagCmd)
 
