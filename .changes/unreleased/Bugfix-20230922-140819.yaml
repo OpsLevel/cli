@@ -1,0 +1,4 @@
+kind: Bugfix
+body: BREAKING CHANGE - fix get/list tags on an object returning a nonzero exit code
+  if no tag matches, return empty JSON array instead
+time: 2023-09-22T14:08:19.025844-04:00
