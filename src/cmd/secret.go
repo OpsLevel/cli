@@ -28,7 +28,6 @@ value: "my-really-secure-secret-shhhh"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readSecretInput()
-		fmt.Printf("%+v\n", input)
 		cobra.CheckErr(err)
 		newSecret, err := getClientGQL().CreateSecret(secretAlias, *input)
 		cobra.CheckErr(err)
@@ -84,16 +83,17 @@ var updateSecretCmd = &cobra.Command{
 	Short: "Update an OpsLevel secret",
 	Long:  `Update an OpsLevel secret`,
 	Example: `
-		cat << EOF | opslevel update secret XXX_secret_id_XXX -f -
-    owner:
-	  alias: "platform"
-    value: "09sdf09werlkewlkjs0-9sdf
+cat << EOF | opslevel update secret XXX_secret_id_XXX -f -
+owner:
+  alias: "platform"
+value: "09sdf09werlkewlkjs0-9sdf
 EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		secretId := args[0]
 		input, err := readSecretInput()
+		cobra.CheckErr(err)
 		secret, err := getClientGQL().UpdateSecret(secretId, *input)
 		cobra.CheckErr(err)
 		fmt.Println(secret.ID)
