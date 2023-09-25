@@ -14,6 +14,6 @@ var createCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(createCmd)
 
-	createCmd.PersistentFlags().StringVarP(&dataFile, "file", "f", "", "File to read data from. If '.' then reads from './data.yaml'. Defaults to reading from stdin.")
+	createCmd.PersistentFlags().StringVarP(&dataFile, "file", "f", "-", "File to read data from. If '.' then reads from './data.yaml'. Defaults to reading from stdin.")
 	viper.BindPFlags(createCmd.Flags())
 }

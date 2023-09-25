@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/rs/zerolog/log"
@@ -12,25 +11,18 @@ import (
 var dataFile string
 
 func readInputConfig() {
-	fmt.Printf("dataFile is %s\n", dataFile)
-	viper.SetConfigType("yaml")
-
-	if dataFile == "." {
-		// TODO: validate file exists, if doesn't exist, check data.yml
-		fmt.Printf("using data.yaml\n")
+	switch dataFile {
+	case ".":
 		viper.SetConfigFile("./data.yaml")
-	} else if dataFile == "-" || dataFile == "" {
-		fmt.Printf("using stdin\n")
+	case "-":
 		if isStdInFromTerminal() {
 			log.Info().Msg("Reading input directly from command line...")
 		}
+		viper.SetConfigType("yaml")
 		viper.ReadConfig(os.Stdin)
-	} else {
-		// TODO: validate file exists
-		fmt.Printf("using %s\n", dataFile)
+	default:
 		viper.SetConfigFile(dataFile)
 	}
-
 	viper.ReadInConfig()
 }
 
