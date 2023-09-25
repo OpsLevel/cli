@@ -69,9 +69,9 @@ var listSecretsCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {
-			w := common.NewTabWriter("ALIAS", "ID", "OWNER")
+			w := common.NewTabWriter("ALIAS", "ID", "OWNER", "UPDATED_AT")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Alias, item.ID, item.Owner.Alias)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Alias, item.ID, item.Owner.Alias, item.Timestamps.UpdatedAt.Time)
 			}
 			w.Flush()
 		}
