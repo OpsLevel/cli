@@ -1,22 +1,12 @@
-## TL;DR
-
-<!-- Put 1-2 sentences here, at max. -->
-
-## Depends on
-
-<!-- add a link here for something this PR depends on, like another PR -->
-
 ## Issues
 
-<!-- Paste any issue links here, even issues from Gitlab --> 
+<!-- paste an issue link here from github/gitlab -->
 
-## Proposed changes/checklist
+## Changelog
 
-- [ ] Develop X, replace Y with Z, optimize A and B...
-- [ ] Update the examples and documentation we have
-- [ ] Ensure test coverage is the same/better than before
+- [ ] List your changes here
 - [ ] Make a `changie` entry
 
 ## Tophatting
 
-<!-- tophatting means sharing CLI output, log messages or even screenshots of your changes working. -->
+<!-- paste in CLI output, log messages or screenshots showing your change works -->
