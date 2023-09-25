@@ -14,6 +14,6 @@ var updateCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(updateCmd)
 
-	updateCmd.PersistentFlags().StringVarP(&dataFile, "file", "f", "-", "File to read update from. If '.' then reads from './data.yaml'. Defaults to reading from stdin.")
+	updateCmd.PersistentFlags().StringVarP(&dataFile, "file", "f", "", "File to read update from. If '.' then reads from './data.yaml'. Defaults to reading from stdin.")
 	viper.BindPFlags(updateCmd.Flags())
 }

@@ -12,19 +12,25 @@ import (
 var dataFile string
 
 func readInputConfig() {
-	viper.SetConfigType("yaml")
 	fmt.Printf("dataFile is %s\n", dataFile)
-	switch dataFile {
-	case ".":
+	viper.SetConfigType("yaml")
+
+	if dataFile == "." {
+		// TODO: validate file exists, if doesn't exist, check data.yml
+		fmt.Printf("using data.yaml\n")
 		viper.SetConfigFile("./data.yaml")
-	case "-":
+	} else if dataFile == "-" || dataFile == "" {
+		fmt.Printf("using stdin\n")
 		if isStdInFromTerminal() {
 			log.Info().Msg("Reading input directly from command line...")
 		}
 		viper.ReadConfig(os.Stdin)
-	default:
+	} else {
+		// TODO: validate file exists
+		fmt.Printf("using %s\n", dataFile)
 		viper.SetConfigFile(dataFile)
 	}
+
 	viper.ReadInConfig()
 }
 
