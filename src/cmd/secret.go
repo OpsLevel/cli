@@ -3,17 +3,15 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"os"
 
 	"github.com/creasty/defaults"
 
 	"github.com/opslevel/opslevel-go/v2023"
-	"gopkg.in/yaml.v3"
 
 	"github.com/opslevel/cli/common"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var secretAlias string
@@ -24,11 +22,13 @@ var createSecretCmd = &cobra.Command{
 	Long:  `Create a team-owned secret`,
 	Example: `
 cat << EOF | opslevel create secret --alias=my-secret-alias -f -
-owner: "devs"
+owner:
+  alias: "devs"
 value: "my-really-secure-secret-shhhh"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readSecretInput()
+		fmt.Printf("%+v\n", input)
 		cobra.CheckErr(err)
 		newSecret, err := getClientGQL().CreateSecret(secretAlias, *input)
 		cobra.CheckErr(err)
@@ -85,10 +85,10 @@ var updateSecretCmd = &cobra.Command{
 	Long:  `Update an OpsLevel secret`,
 	Example: `
 		cat << EOF | opslevel update secret XXX_secret_id_XXX -f -
-    owner: "platform"
+    owner:
+	  alias: "platform"
     value: "09sdf09werlkewlkjs0-9sdf
-		EOF
-		`,
+EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -102,8 +102,8 @@ var updateSecretCmd = &cobra.Command{
 
 var deleteSecretCmd = &cobra.Command{
 	Use:        "secret ID|ALIAS",
-	Short:      "Delete a system",
-	Long:       `Delete a system from OpsLevel`,
+	Short:      "Delete a secret",
+	Long:       `Delete a secret from OpsLevel`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -115,21 +115,13 @@ var deleteSecretCmd = &cobra.Command{
 }
 
 func readSecretInput() (*opslevel.SecretInput, error) {
-	file, err := io.ReadAll(os.Stdin)
-	cobra.CheckErr(err)
-	var evt struct {
-		Owner string `yaml:"owner"`
-		Value string `yaml:"value"`
-	}
-	cobra.CheckErr(yaml.Unmarshal(file, &evt))
-	secretInput := &opslevel.SecretInput{}
-	if err := defaults.Set(secretInput); err != nil {
+	readInputConfig()
+	evt := &opslevel.SecretInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}
-
-	secretInput.Value = evt.Value
-	secretInput.Owner = *opslevel.NewIdentifier(evt.Owner)
-	return secretInput, nil
+	return evt, nil
 }
 
 func init() {
