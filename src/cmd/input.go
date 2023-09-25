@@ -18,6 +18,7 @@ func readInputConfig() {
 		viper.SetConfigFile("./data.yaml")
 	case "-":
 		if isStdInFromTerminal() {
+			// TODO: this can take up to half a second to output which interrupts the user's experience
 			log.Info().Msg("Reading input directly from command line... Press CTRL+D to stop typing")
 		}
 		viper.ReadConfig(os.Stdin)
