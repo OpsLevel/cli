@@ -135,17 +135,13 @@ opslevel get tag --type=Service ID|ALIAS KEY | jq
 		tags, err := GetTags(result)
 		cobra.CheckErr(err)
 
-		var output []opslevel.Tag
+		output := []opslevel.Tag{}
 		for _, tag := range tags.Nodes {
 			if tagKey == tag.Key {
 				output = append(output, tag)
 			}
 		}
 
-		// return empty JSON array instead of null
-		if len(output) == 0 {
-			output = make([]opslevel.Tag, 0)
-		}
 		common.PrettyPrint(output)
 	},
 }
