@@ -108,25 +108,20 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 }
 
 var getObjectTagCmd = &cobra.Command{
-	Use:   "tag --type=RESOURCE_TYPE RESOURCE_ID [KEY]",
-	Short: "Get values of tags on objects",
-	Long:  "Get values of tags on objects",
+	Use:   "tag --type=RESOURCE_TYPE RESOURCE_ID KEY",
+	Short: "Get tags on an object matching key",
+	Long:  "Get tags on an object matching key",
 	Example: `
-opslevel get tag --type=Service ID|ALIAS KEY                # search for values of a specific key
-opslevel get tag --type=Team ID|ALIAS | jq 'from_entries'   # values of all keys
+opslevel get tag --type=Service ID|ALIAS KEY | jq
 `,
-	Args:       cobra.MinimumNArgs(1),
+	Args:       cobra.ExactArgs(2),
 	ArgAliases: []string{"RESOURCE_ID", "KEY"},
 	Run: func(cmd *cobra.Command, args []string) {
 		err := validateResourceTypeArg()
 		cobra.CheckErr(err)
 
 		resource := args[0]
-		singleTag := len(args) == 2
-		var tagKey string
-		if singleTag {
-			tagKey = args[1]
-		}
+		tagKey := args[1]
 
 		var result any
 		if opslevel.IsID(resource) {
@@ -140,18 +135,46 @@ opslevel get tag --type=Team ID|ALIAS | jq 'from_entries'   # values of all keys
 		tags, err := GetTags(result)
 		cobra.CheckErr(err)
 
-		var output []opslevel.Tag
+		output := []opslevel.Tag{}
 		for _, tag := range tags.Nodes {
-			if !singleTag || tagKey == tag.Key {
+			if tagKey == tag.Key {
 				output = append(output, tag)
 			}
 		}
 
-		if len(output) == 0 {
-			err := fmt.Errorf("tag with key '%s' not found on %s '%s'", tagKey, resourceType, resource)
-			cobra.CheckErr(err)
-		}
 		common.PrettyPrint(output)
+	},
+}
+
+var listObjectTagCmd = &cobra.Command{
+	Use:     "tag --type=RESOURCE_TYPE RESOURCE_ID",
+	Aliases: []string{"tags"},
+	Short:   "Get all tags on an object",
+	Long:    "Get all tags on an object",
+	Example: `
+opslevel list tag --type=Service ID|ALIAS
+`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"RESOURCE_ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		err := validateResourceTypeArg()
+		cobra.CheckErr(err)
+
+		resource := args[0]
+
+		var result any
+		if opslevel.IsID(resource) {
+			id := opslevel.ID(resource)
+			result, err = TaggableResourceFetchFunctions[opslevel.TaggableResource(resourceType)](id)
+		} else {
+			alias := args[0]
+			result, err = TaggableResourceFetchAliasFunctions[opslevel.TaggableResource(resourceType)](alias)
+		}
+
+		tags, err := GetTags(result)
+		cobra.CheckErr(err)
+
+		common.PrettyPrint(tags.Nodes)
 	},
 }
 
@@ -206,6 +229,9 @@ func init() {
 
 	getCmd.AddCommand(getObjectTagCmd)
 	getObjectTagCmd.Flags().StringVar(&resourceType, "type", "", "resource type")
+
+	listCmd.AddCommand(listObjectTagCmd)
+	listObjectTagCmd.Flags().StringVar(&resourceType, "type", "", "resource type")
 
 	updateCmd.AddCommand(updateTagCmd)
 
