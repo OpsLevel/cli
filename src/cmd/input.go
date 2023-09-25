@@ -11,14 +11,16 @@ import (
 var dataFile string
 
 func readInputConfig() {
+	viper.SetConfigType("yaml")
 	switch dataFile {
 	case ".":
+		// TODO: does this block ever actually ever run?
 		viper.SetConfigFile("./data.yaml")
 	case "-":
 		if isStdInFromTerminal() {
-			log.Info().Msg("Reading input directly from command line...")
+			// TODO: this can take up to half a second to output which interrupts the user's experience
+			log.Info().Msg("Reading input directly from command line... Press CTRL+D to stop typing")
 		}
-		viper.SetConfigType("yaml")
 		viper.ReadConfig(os.Stdin)
 	default:
 		viper.SetConfigFile(dataFile)

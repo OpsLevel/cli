@@ -3,17 +3,15 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"os"
 
 	"github.com/creasty/defaults"
 
 	"github.com/opslevel/opslevel-go/v2023"
-	"gopkg.in/yaml.v3"
 
 	"github.com/opslevel/cli/common"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var secretAlias string
@@ -24,7 +22,8 @@ var createSecretCmd = &cobra.Command{
 	Long:  `Create a team-owned secret`,
 	Example: `
 cat << EOF | opslevel create secret --alias=my-secret-alias -f -
-owner: "devs"
+owner:
+  alias: "devs"
 value: "my-really-secure-secret-shhhh"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -70,9 +69,9 @@ var listSecretsCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {
-			w := common.NewTabWriter("ALIAS", "ID", "OWNER")
+			w := common.NewTabWriter("ALIAS", "ID", "OWNER", "UPDATED_AT")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Alias, item.ID, item.Owner.Alias)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Alias, item.ID, item.Owner.Alias, item.Timestamps.UpdatedAt.Time)
 			}
 			w.Flush()
 		}
@@ -84,16 +83,17 @@ var updateSecretCmd = &cobra.Command{
 	Short: "Update an OpsLevel secret",
 	Long:  `Update an OpsLevel secret`,
 	Example: `
-		cat << EOF | opslevel update secret XXX_secret_id_XXX -f -
-    owner: "platform"
-    value: "09sdf09werlkewlkjs0-9sdf
-		EOF
-		`,
+cat << EOF | opslevel update secret XXX_secret_id_XXX -f -
+owner:
+  alias: "platform"
+value: "09sdf09werlkewlkjs0-9sdf
+EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		secretId := args[0]
 		input, err := readSecretInput()
+		cobra.CheckErr(err)
 		secret, err := getClientGQL().UpdateSecret(secretId, *input)
 		cobra.CheckErr(err)
 		fmt.Println(secret.ID)
@@ -102,8 +102,8 @@ var updateSecretCmd = &cobra.Command{
 
 var deleteSecretCmd = &cobra.Command{
 	Use:        "secret ID|ALIAS",
-	Short:      "Delete a system",
-	Long:       `Delete a system from OpsLevel`,
+	Short:      "Delete a secret",
+	Long:       `Delete a secret from OpsLevel`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -115,21 +115,13 @@ var deleteSecretCmd = &cobra.Command{
 }
 
 func readSecretInput() (*opslevel.SecretInput, error) {
-	file, err := io.ReadAll(os.Stdin)
-	cobra.CheckErr(err)
-	var evt struct {
-		Owner string `yaml:"owner"`
-		Value string `yaml:"value"`
-	}
-	cobra.CheckErr(yaml.Unmarshal(file, &evt))
-	secretInput := &opslevel.SecretInput{}
-	if err := defaults.Set(secretInput); err != nil {
+	readInputConfig()
+	evt := &opslevel.SecretInput{}
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}
-
-	secretInput.Value = evt.Value
-	secretInput.Owner = *opslevel.NewIdentifier(evt.Owner)
-	return secretInput, nil
+	return evt, nil
 }
 
 func init() {
