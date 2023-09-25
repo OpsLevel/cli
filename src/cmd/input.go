@@ -24,6 +24,7 @@ func readInputConfig() {
 	default:
 		viper.SetConfigFile(dataFile)
 	}
+	viper.ReadInConfig()
 }
 
 func isStdInFromTerminal() bool {
