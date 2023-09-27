@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/opslevel/cli/common"
@@ -16,40 +15,46 @@ import (
 
 // TODO: combine TaggableResourceFetchFunction and TaggableResourceFetchAliasFunction once the ObjectGet functions have been
 // harmonized to support both get by ID and get by Alias
-type TaggableResourceFetchFunction func(id opslevel.ID) (any, error)
+type TaggableResourceFetchFunction func(id opslevel.ID) (opslevel.TaggableResourceInterface, error)
 
 var TaggableResourceFetchFunctions = map[opslevel.TaggableResource]TaggableResourceFetchFunction{
-	opslevel.TaggableResourceService:                func(id opslevel.ID) (any, error) { return getClientGQL().GetService(id) },
-	opslevel.TaggableResourceRepository:             func(id opslevel.ID) (any, error) { return getClientGQL().GetRepository(id) },
-	opslevel.TaggableResourceTeam:                   func(id opslevel.ID) (any, error) { return getClientGQL().GetTeam(id) },
-	opslevel.TaggableResourceUser:                   func(id opslevel.ID) (any, error) { return getClientGQL().GetUser(string(id)) },
-	opslevel.TaggableResourceDomain:                 func(id opslevel.ID) (any, error) { return getClientGQL().GetDomain(string(id)) },
-	opslevel.TaggableResourceSystem:                 func(id opslevel.ID) (any, error) { return getClientGQL().GetSystem(string(id)) },
-	opslevel.TaggableResourceInfrastructureresource: func(id opslevel.ID) (any, error) { return getClientGQL().GetInfrastructure(string(id)) },
+	opslevel.TaggableResourceService: func(id opslevel.ID) (opslevel.TaggableResourceInterface, error) { return getClientGQL().GetService(id) },
+	opslevel.TaggableResourceRepository: func(id opslevel.ID) (opslevel.TaggableResourceInterface, error) {
+		return getClientGQL().GetRepository(id)
+	},
+	opslevel.TaggableResourceTeam: func(id opslevel.ID) (opslevel.TaggableResourceInterface, error) { return getClientGQL().GetTeam(id) },
+	// opslevel.TaggableResourceUser: func(id opslevel.ID) (opslevel.TaggableResourceInterface, error) {
+	// 	return getClientGQL().GetUser(string(id))
+	// },
+	opslevel.TaggableResourceDomain: func(id opslevel.ID) (opslevel.TaggableResourceInterface, error) {
+		return getClientGQL().GetDomain(string(id))
+	},
+	opslevel.TaggableResourceSystem: func(id opslevel.ID) (opslevel.TaggableResourceInterface, error) {
+		return getClientGQL().GetSystem(string(id))
+	},
+	// opslevel.TaggableResourceInfrastructureresource: func(id opslevel.ID) (opslevel.TaggableResourceInterface, error) {
+	// 	return getClientGQL().GetInfrastructure(string(id))
+	// },
 }
 
-type TaggableResourceFetchAliasFunction func(alias string) (any, error)
+type TaggableResourceFetchAliasFunction func(alias string) (opslevel.TaggableResourceInterface, error)
 
 var TaggableResourceFetchAliasFunctions = map[opslevel.TaggableResource]TaggableResourceFetchAliasFunction{
-	opslevel.TaggableResourceService:                func(alias string) (any, error) { return getClientGQL().GetServiceWithAlias(alias) },
-	opslevel.TaggableResourceRepository:             func(alias string) (any, error) { return getClientGQL().GetRepositoryWithAlias(alias) },
-	opslevel.TaggableResourceTeam:                   func(alias string) (any, error) { return getClientGQL().GetTeamWithAlias(alias) },
-	opslevel.TaggableResourceUser:                   func(alias string) (any, error) { return getClientGQL().GetUser(alias) },
-	opslevel.TaggableResourceDomain:                 func(alias string) (any, error) { return getClientGQL().GetDomain(alias) },
-	opslevel.TaggableResourceSystem:                 func(alias string) (any, error) { return getClientGQL().GetSystem(alias) },
-	opslevel.TaggableResourceInfrastructureresource: func(alias string) (any, error) { return getClientGQL().GetInfrastructure(alias) },
-}
-
-func GetTags(obj interface{}) (*opslevel.TagConnection, error) {
-	// call Elem because input is a ptr
-	v := reflect.ValueOf(obj).Elem()
-	tagsField := v.FieldByName("Tags")
-
-	if tagsField.IsValid() {
-		return tagsField.Interface().(*opslevel.TagConnection), nil
-	} else {
-		return nil, errors.New("reflection error")
-	}
+	opslevel.TaggableResourceService: func(alias string) (opslevel.TaggableResourceInterface, error) {
+		return getClientGQL().GetServiceWithAlias(alias)
+	},
+	opslevel.TaggableResourceRepository: func(alias string) (opslevel.TaggableResourceInterface, error) {
+		return getClientGQL().GetRepositoryWithAlias(alias)
+	},
+	opslevel.TaggableResourceTeam: func(alias string) (opslevel.TaggableResourceInterface, error) {
+		return getClientGQL().GetTeamWithAlias(alias)
+	},
+	// opslevel.TaggableResourceUser:   func(alias string) (opslevel.TaggableResourceInterface, error) { return getClientGQL().GetUser(alias) },
+	opslevel.TaggableResourceDomain: func(alias string) (opslevel.TaggableResourceInterface, error) { return getClientGQL().GetDomain(alias) },
+	opslevel.TaggableResourceSystem: func(alias string) (opslevel.TaggableResourceInterface, error) { return getClientGQL().GetSystem(alias) },
+	// opslevel.TaggableResourceInfrastructureresource: func(alias string) (opslevel.TaggableResourceInterface, error) {
+	// 	return getClientGQL().GetInfrastructure(alias)
+	// },
 }
 
 var resourceType string
@@ -123,7 +128,7 @@ opslevel get tag --type=Service ID|ALIAS KEY | jq
 		resource := args[0]
 		tagKey := args[1]
 
-		var result any
+		var result opslevel.TaggableResourceInterface
 		if opslevel.IsID(resource) {
 			id := opslevel.ID(resource)
 			result, err = TaggableResourceFetchFunctions[opslevel.TaggableResource(resourceType)](id)
@@ -132,7 +137,7 @@ opslevel get tag --type=Service ID|ALIAS KEY | jq
 			result, err = TaggableResourceFetchAliasFunctions[opslevel.TaggableResource(resourceType)](alias)
 		}
 
-		tags, err := GetTags(result)
+		tags, err := result.GetTags(_clientGQL, nil)
 		cobra.CheckErr(err)
 
 		output := []opslevel.Tag{}
@@ -162,7 +167,7 @@ opslevel list tag --type=Service ID|ALIAS
 
 		resource := args[0]
 
-		var result any
+		var result opslevel.TaggableResourceInterface
 		if opslevel.IsID(resource) {
 			id := opslevel.ID(resource)
 			result, err = TaggableResourceFetchFunctions[opslevel.TaggableResource(resourceType)](id)
@@ -171,7 +176,7 @@ opslevel list tag --type=Service ID|ALIAS
 			result, err = TaggableResourceFetchAliasFunctions[opslevel.TaggableResource(resourceType)](alias)
 		}
 
-		tags, err := GetTags(result)
+		tags, err := result.GetTags(_clientGQL, nil)
 		cobra.CheckErr(err)
 
 		common.PrettyPrint(tags.Nodes)
