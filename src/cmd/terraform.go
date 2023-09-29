@@ -279,7 +279,12 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 		if len(aliases) > 0 {
 			aliases = fmt.Sprintf("aliases = [\"%s\"]", aliases)
 		}
-		tags := flattenTags(service.Tags.Nodes)
+		serviceTags, err := service.GetTags(c, nil)
+		if err != nil {
+			// TODO address this properly later
+			fmt.Println(err)
+		}
+		tags := flattenTags(serviceTags.Nodes)
 		if len(tags) > 0 {
 			tags = fmt.Sprintf("tags = [\"%s\"]", tags)
 		}
