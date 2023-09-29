@@ -90,10 +90,15 @@ opslevel get tag --type=Service ID|ALIAS KEY | jq
 
 		tags, err := result.GetTags(client, nil)
 		cobra.CheckErr(err)
-		foundTag, err := tags.GetTagById(*opslevel.NewID(tagKey))
-		cobra.CheckErr(err)
+		foundTag := opslevel.Tag{}
+		for _, tag := range tags.Nodes {
+			if tag.Key == tagKey {
+				foundTag = tag
+				break
+			}
+		}
 
-		output := []opslevel.Tag{*foundTag}
+		output := []opslevel.Tag{foundTag}
 
 		common.PrettyPrint(output)
 	},
