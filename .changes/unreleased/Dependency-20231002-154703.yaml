@@ -1,0 +1,4 @@
+kind: "Dependency"
+body: "Bump github.com/open-policy-agent/opa from 0.54.0 to 0.57.0 in /src"
+time: 2023-10-02T15:47:03.00000Z
+
