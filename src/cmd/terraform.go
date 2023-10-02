@@ -280,9 +280,7 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 			aliases = fmt.Sprintf("aliases = [\"%s\"]", aliases)
 		}
 		serviceTags, err := service.GetTags(c, nil)
-		if err != nil {
-			cobra.CheckErr(err)
-		}
+		cobra.CheckErr(err)
 		tags := flattenTags(serviceTags.Nodes)
 		if len(tags) > 0 {
 			tags = fmt.Sprintf("tags = [\"%s\"]", tags)
