@@ -281,8 +281,7 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 		}
 		serviceTags, err := service.GetTags(c, nil)
 		if err != nil {
-			// TODO address this properly later
-			fmt.Println(err)
+			cobra.CheckErr(err)
 		}
 		tags := flattenTags(serviceTags.Nodes)
 		if len(tags) > 0 {
