@@ -201,6 +201,10 @@ func validateResourceTypeArg() error {
 
 	// if lowercase, check if it exists. if not, error out
 	lowercaseInput := strings.ToLower(resourceType)
+	if lowercaseInput == "infra" {
+		resourceType = string(opslevel.TaggableResourceInfrastructureresource)
+		return nil
+	}
 	lowercaseMap := make(map[string]string)
 	for _, s := range opslevel.AllTaggableResource {
 		lowercaseMap[strings.ToLower(s)] = s
