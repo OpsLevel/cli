@@ -1,4 +1,0 @@
-kind: Feature
-body: BREAKING CHANGE - split up `get tag KEY` and `list tags`. `get tag KEY` gets
-  all tags matching `KEY`. `list tags` lists all tags on an object
-time: 2023-09-22T14:09:08.031392-04:00
