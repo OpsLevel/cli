@@ -16,11 +16,13 @@ import (
 var resourceType string
 
 var createTagCmd = &cobra.Command{
-	Use:   "tag --type=RESOURCE_TYPE [--assign] RESOURCE_ID KEY VALUE",
+	Use:   "tag --type=RESOURCE_TYPE [--assign] ID|ALIAS KEY VALUE",
 	Short: "Create/assign a tag",
 	Long:  "Create/assign a tag",
 	Example: `
-opslevel create tag --type=Team ID|ALIAS KEY VALUE
+opslevel create tag --type=Service my-service-alias foo bar
+opslevel create tag --type=Team my-team-alias foo bar
+opslevel create tag --type=Infra my-infra-alias foo bar
 `,
 	Args:       cobra.ExactArgs(3),
 	ArgAliases: []string{"RESOURCE_ID", "KEY", "VALUE"},
@@ -69,11 +71,11 @@ opslevel create tag --type=Team ID|ALIAS KEY VALUE
 }
 
 var getObjectTagCmd = &cobra.Command{
-	Use:   "tag --type=RESOURCE_TYPE RESOURCE_ID KEY",
+	Use:   "tag --type=RESOURCE_TYPE ID|ALIAS KEY",
 	Short: "Get tags on an object matching key",
 	Long:  "Get tags on an object matching key",
 	Example: `
-opslevel get tag --type=Service ID|ALIAS KEY | jq
+opslevel get tag --type=Service my-service-alias foo
 `,
 	Args:       cobra.ExactArgs(2),
 	ArgAliases: []string{"RESOURCE_ID", "KEY"},
@@ -103,12 +105,12 @@ opslevel get tag --type=Service ID|ALIAS KEY | jq
 }
 
 var listObjectTagCmd = &cobra.Command{
-	Use:     "tag --type=RESOURCE_TYPE RESOURCE_ID",
+	Use:     "tag --type=RESOURCE_TYPE ID|ALIAS",
 	Aliases: []string{"tags"},
 	Short:   "Get all tags on an object",
 	Long:    "Get all tags on an object",
 	Example: `
-opslevel list tag --type=Service ID|ALIAS
+opslevel list tag --type=Service my-service-alias -o json | jq
 `,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"RESOURCE_ID"},
@@ -134,7 +136,7 @@ var updateTagCmd = &cobra.Command{
 	Short: "Update a tag",
 	Long:  "Update a tag",
 	Example: `
-opslevel update tag TAG_ID KEY VALUE
+opslevel update tag XXX_TAG_ID_XXX foo baz
 `,
 	Args:       cobra.ExactArgs(3),
 	ArgAliases: []string{"TAG_ID", "KEY", "VALUE"},
@@ -160,7 +162,7 @@ var deleteTagCmd = &cobra.Command{
 	Short: "Delete a tag",
 	Long:  "Delete a tag",
 	Example: `
-opslevel delete tag TAG_ID
+opslevel delete tag XXX_TAG_ID_XXX
 `,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"TAG_ID"},

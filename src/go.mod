@@ -5,12 +5,12 @@ go 1.21
 require (
 	github.com/creasty/defaults v1.7.0
 	github.com/go-git/go-git/v5 v5.9.0
-	github.com/go-resty/resty/v2 v2.8.0
+	github.com/go-resty/resty/v2 v2.9.1
 	github.com/gosimple/slug v1.13.1
 	github.com/itchyny/gojq v0.12.13
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.57.0
-	github.com/opslevel/opslevel-go/v2023 v2023.9.12
+	github.com/opslevel/opslevel-go/v2023 v2023.10.8
 	github.com/relvacode/iso8601 v1.3.0
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.31.0
