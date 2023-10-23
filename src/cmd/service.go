@@ -216,7 +216,7 @@ EOF
 			owner := reader.Text("Owner")
 			if tier != "" {
 				if item, ok := opslevel.Cache.Teams[owner]; ok {
-					input.Owner = *opslevel.NewIdentifier(item.Alias)
+					input.Owner = opslevel.NewIdentifier(item.Alias)
 				}
 			}
 			service, err := getClientGQL().CreateService(input)
