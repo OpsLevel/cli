@@ -208,13 +208,13 @@ EOF
 				}
 			}
 			lifecycle := reader.Text("Lifecycle")
-			if tier != "" {
+			if lifecycle != "" {
 				if item, ok := opslevel.Cache.Lifecycles[lifecycle]; ok {
 					input.Lifecycle = item.Alias
 				}
 			}
 			owner := reader.Text("Owner")
-			if tier != "" {
+			if owner != "" {
 				if item, ok := opslevel.Cache.Teams[owner]; ok {
 					input.Owner = opslevel.NewIdentifier(item.Alias)
 				}
