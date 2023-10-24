@@ -227,7 +227,7 @@ func flattenTier(value opslevel.Tier) string {
 
 func flattenOwner(value opslevel.TeamId) string {
 	if value.Id != "" {
-		return fmt.Sprintf("owner_alias = opslevel_team.%s.alias", value.Alias)
+		return fmt.Sprintf("owner = opslevel_team.%s.alias", value.Alias)
 	}
 	return ""
 }
