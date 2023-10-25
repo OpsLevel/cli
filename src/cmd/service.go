@@ -30,7 +30,8 @@ product: "OSS"
 language: "Go"
 tier: "tier_4"
 framework: "fasthttp"
-owner: "Platform"
+owner:
+  alias: "Platform"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readServiceCreateInput()
@@ -207,15 +208,15 @@ EOF
 				}
 			}
 			lifecycle := reader.Text("Lifecycle")
-			if tier != "" {
+			if lifecycle != "" {
 				if item, ok := opslevel.Cache.Lifecycles[lifecycle]; ok {
 					input.Lifecycle = item.Alias
 				}
 			}
 			owner := reader.Text("Owner")
-			if tier != "" {
+			if owner != "" {
 				if item, ok := opslevel.Cache.Teams[owner]; ok {
-					input.Owner = item.Alias
+					input.Owner = opslevel.NewIdentifier(item.Alias)
 				}
 			}
 			service, err := getClientGQL().CreateService(input)
