@@ -21,6 +21,7 @@ cat << EOF | opslevel create scorecard -f -
 name: "new scorecard"
 description: "a newly created scorecard"
 ownerId: "XXX_team_id_XXX"
+affectsOverallServiceLevels: false
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readScorecardInput()
@@ -78,6 +79,7 @@ cat << EOF | opslevel update scorecard $ID -f -
 name: "updated scorecard"
 description: "an updated scorecard"
 ownerId: "XXX_team_id_XXX"
+affectsOverallServiceLevels: true
 EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
