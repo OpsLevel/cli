@@ -20,9 +20,9 @@ var createTeamCmd = &cobra.Command{
 	Example: `opslevel create team my-team
 
 cat << EOF | opslevel create team my-team" -f -
-managerEmail: "manager@example.com""
-group:
-  alias: "my-group"
+managerEmail: "manager@example.com"
+parentTeam:
+  alias: "parent-team"
 responsibilities: "all the things"
 EOF`,
 	Args:       cobra.ExactArgs(1),
@@ -120,8 +120,8 @@ var updateTeamCmd = &cobra.Command{
 	Example: `
 cat << EOF | opslevel update team my-team" -f -
 managerEmail: "manager@example.com""
-group:
-  alias: "my-group"
+parentTeam:
+  alias: "parent-team-2"
 responsibilities: "all the things"
 EOF
 `,
@@ -271,10 +271,10 @@ var importTeamsCmd = &cobra.Command{
 	Aliases: []string{"teams"},
 	Short:   "Imports teams from a CSV",
 	Long: `Imports a list of teams from a CSV file with the column headers:
-Name,Manager,Responsibilities,Group`,
+Name,Manager,Responsibilities,ParentTeam`,
 	Example: `
 cat << EOF | opslevel import teams -f -
-Name,Manager,Responsibilities,Group
+Name,Manager,Responsibilities,ParentTeam
 Platform,kyle@opslevel.com,Makes Tools,engineering
 Sales,john@opslevel.com,Sells Tools,product
 EOF
@@ -289,9 +289,9 @@ EOF
 				ManagerEmail:     reader.Text("Manager"),
 				Responsibilities: reader.Text("Responsibilities"),
 			}
-			group := reader.Text("Group")
-			if group != "" {
-				input.Group = opslevel.NewIdentifier(group)
+			parentTeam := reader.Text("ParentTeam")
+			if parentTeam != "" {
+				input.ParentTeam = opslevel.NewIdentifier(parentTeam)
 			}
 			team, err := getClientGQL().CreateTeam(input)
 			if err != nil {
