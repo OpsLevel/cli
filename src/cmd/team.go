@@ -105,9 +105,10 @@ opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 )
 
 var createTeamTagCmd = &cobra.Command{
-	Use:   "tag",
-	Short: "Create a team tag",
-	Long:  `Create a team tag`,
+	Use:        "tag",
+	Short:      "Create a team tag",
+	Long:       `Create a team tag`,
+	Deprecated: `Please use \nopslevel create tag <args>`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := errors.New("This command is deprecated! Please use \nopslevel create tag <args>")
 		cobra.CheckErr(err)
@@ -186,9 +187,10 @@ opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))'
 }
 
 var getTeamTagCmd = &cobra.Command{
-	Use:   "tag",
-	Short: "Get a team's tag",
-	Long:  `Get a team's tag`,
+	Use:        "tag",
+	Short:      "Get a team's tag",
+	Long:       `Get a team's tag`,
+	Deprecated: `Please use \nopslevel get tag <args>`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := errors.New("This command is deprecated! Please use \nopslevel get tag <args>")
 		cobra.CheckErr(err)
@@ -257,9 +259,10 @@ var deleteContactCmd = &cobra.Command{
 }
 
 var deleteTeamTagCmd = &cobra.Command{
-	Use:   "tag",
-	Short: "Delete a team's tag",
-	Long:  `Delete a team's tag`,
+	Use:        "tag",
+	Short:      "Delete a team's tag",
+	Long:       `Delete a team's tag`,
+	Deprecated: `Please use \nopslevel delete tag <args>`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := errors.New("This command is deprecated! Please use \nopslevel delete tag <args>")
 		cobra.CheckErr(err)
