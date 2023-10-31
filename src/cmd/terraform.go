@@ -313,6 +313,7 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 	teamConfig := `resource "opslevel_team" "%s" {
   name = "%s"
   manager_email = "%s"
+  parent = "%s"
   %s
   %s
 }
@@ -325,7 +326,15 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 		if len(aliases) > 0 {
 			aliases = fmt.Sprintf("aliases = [\"%s\"]", aliases)
 		}
-		config.WriteString(templateConfig(teamConfig, team.Alias, team.Name, team.Manager.Email, aliases, buildMultilineStringArg("responsibilities", team.Responsibilities)))
+		config.WriteString(templateConfig(
+			teamConfig,
+			team.Alias,
+			team.Name,
+			team.Manager.Email,
+			team.ParentTeam.Alias,
+			aliases,
+			buildMultilineStringArg("responsibilities", team.Responsibilities),
+		))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_team.%s %s\n", team.Alias, team.Id))
 	}
 	shell.WriteString("##########\n\n")
