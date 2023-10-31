@@ -16,7 +16,7 @@ var createGroupCmd = &cobra.Command{
 	Use:        "group",
 	Short:      "Create a group (deprecated). Use teams instead.",
 	Long:       `Create a group (deprecated). Use teams instead.`,
-	Deprecated: `Please use Teams instead.`,
+	Deprecated: `Please use Teams instead. See https://docs.opslevel.com/docs/groups`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := errors.New("Groups are deprecated! Please use Teams instead.\nopslevel create team <args>")
 		cobra.CheckErr(err)
@@ -28,7 +28,7 @@ var getGroupCommand = &cobra.Command{
 	Aliases:    []string{"groups"},
 	Short:      "Get details about a group",
 	Long:       `Get details about a group`,
-	Deprecated: `Please convert this Group into a Team.`,
+	Deprecated: `Please convert this Group into a Team. See https://docs.opslevel.com/docs/groups`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -51,7 +51,7 @@ var getGroupMembersCommand = &cobra.Command{
 	Aliases:    []string{"members"},
 	Short:      "Get members for a group",
 	Long:       `The users who are members of the group.`,
-	Deprecated: `Please convert this Group into a Team.`,
+	Deprecated: `Please convert this Group into a Team. See https://docs.opslevel.com/docs/groups`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -85,7 +85,7 @@ var getGroupDescendantRepositoriesCommand = &cobra.Command{
 	Aliases:    []string{"repositories"},
 	Short:      "Get descendant repositories for a group",
 	Long:       `All the repositories that fall under this group - ex. this group's child repositories, all the child repositories of this group's descendants, etc.`,
-	Deprecated: `Please convert this Group into a Team.`,
+	Deprecated: `Please convert this Group into a Team. See https://docs.opslevel.com/docs/groups`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -119,7 +119,7 @@ var getGroupDescendantServicesCommand = &cobra.Command{
 	Aliases:    []string{"services"},
 	Short:      "Get descendant services for a group",
 	Long:       `All the services that fall under this group - ex. this group's child services, all the child services of this group's descendants, etc.`,
-	Deprecated: `Please convert this Group into a Team.`,
+	Deprecated: `Please convert this Group into a Team. See https://docs.opslevel.com/docs/groups`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -153,7 +153,7 @@ var getGroupDescendantSubgroupsCommand = &cobra.Command{
 	Aliases:    []string{"subgroups"},
 	Short:      "Get descendant subgroups for a group",
 	Long:       `All the groups that fall under this group - ex. this group's child groups, children of those groups, etc.`,
-	Deprecated: `Please convert this Group into a Team.`,
+	Deprecated: `Please convert this Group into a Team. See https://docs.opslevel.com/docs/groups`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -187,7 +187,7 @@ var getGroupDescendantTeamsCommand = &cobra.Command{
 	Aliases:    []string{"teams"},
 	Short:      "Get descendant teams for a group",
 	Long:       `All the teams that fall under this group - ex. this group's child teams, all the child teams of this group's descendants, etc.`,
-	Deprecated: `Please convert this parent Group into a Team.`,
+	Deprecated: `Please convert this parent Group into a Team. See https://docs.opslevel.com/docs/groups`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -221,7 +221,7 @@ var listGroupCmd = &cobra.Command{
 	Aliases:    []string{"groups"},
 	Short:      "Lists the groups",
 	Long:       `Lists the groups`,
-	Deprecated: `Please convert these Groups into Teams.`,
+	Deprecated: `Please convert these Groups into Teams. See https://docs.opslevel.com/docs/groups`,
 	Run: func(cmd *cobra.Command, args []string) {
 		resp, err := getClientGQL().ListGroups(nil)
 		list := resp.Nodes
@@ -242,7 +242,7 @@ var updateGroupCmd = &cobra.Command{
 	Use:        "group ID|ALIAS",
 	Short:      "Update a group",
 	Long:       `Update a group (deprecated). Use teams instead.`,
-	Deprecated: `Please convert this Group into a Team.`,
+	Deprecated: `Please convert this Group into a Team. See https://docs.opslevel.com/docs/groups`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -274,7 +274,7 @@ var importGroupsCmd = &cobra.Command{
 	Use:        "group",
 	Aliases:    []string{"groups"},
 	Short:      "Imports groups from a CSV",
-	Deprecated: `Please convert all Groups into Teams.`,
+	Deprecated: `Please convert all Groups into Teams. See https://docs.opslevel.com/docs/groups`,
 	Long: `Imports a list of groups from a CSV file with the column headers:
 Name,Description,Parent
 
