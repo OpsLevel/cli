@@ -188,7 +188,11 @@ EOF
 					log.Error().Err(err).Msgf("error finding team '%s' for user '%s'", team, user.Email)
 					continue
 				}
-				_, err = getClientGQL().AddMember(&t.TeamId, user.Email)
+				newMembership := opslevel.TeamMembershipUserInput{
+					User: opslevel.UserIdentifierInput{Email: user.Email},
+					Role: string(user.Role),
+				}
+				_, err = getClientGQL().AddMember(&t.TeamId, newMembership)
 				if err != nil {
 					log.Error().Err(err).Msgf("error adding user '%s' to team '%s'", user.Email, t.Name)
 					continue
