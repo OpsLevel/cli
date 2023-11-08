@@ -63,7 +63,7 @@ var createMemberCmd = &cobra.Command{
 			User: opslevel.UserIdentifierInput{Email: email},
 			Role: role,
 		}
-		_, addErr := getClientGQL().AddMembers(&team.TeamId, teamMembershipUserInput)
+		_, addErr := getClientGQL().AddMemberships(&team.TeamId, teamMembershipUserInput)
 		cobra.CheckErr(addErr)
 		fmt.Printf("added member '%s' on team '%s'\n", email, team.Alias)
 	},
@@ -246,7 +246,7 @@ var deleteMemberCmd = &cobra.Command{
 		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
 			User: opslevel.UserIdentifierInput{Email: email},
 		}
-		_, removeErr := getClientGQL().RemoveMembers(&team.TeamId, teamMembershipUserInput)
+		_, removeErr := getClientGQL().RemoveMemberships(&team.TeamId, teamMembershipUserInput)
 		cobra.CheckErr(removeErr)
 		fmt.Printf("member '%s' on team '%s' removed\n", email, key)
 	},

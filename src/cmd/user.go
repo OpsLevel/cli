@@ -192,7 +192,7 @@ EOF
 					User: opslevel.UserIdentifierInput{Email: user.Email},
 					Role: string(user.Role),
 				}
-				_, err = getClientGQL().AddMember(&t.TeamId, newMembership)
+				_, err = getClientGQL().AddMemberships(&t.TeamId, newMembership)
 				if err != nil {
 					log.Error().Err(err).Msgf("error adding user '%s' to team '%s'", user.Email, t.Name)
 					continue
