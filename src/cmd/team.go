@@ -39,14 +39,15 @@ EOF`,
 }
 
 var createMemberCmd = &cobra.Command{
-	Use:        "member {TEAM_ID|TEAM_ALIAS} EMAIL",
+	Use:        "member {TEAM_ID|TEAM_ALIAS} EMAIL ROLE",
 	Short:      "Add a member to a team",
 	Example:    `opslevel create member my-team john@example.com`,
-	Args:       cobra.ExactArgs(2),
-	ArgAliases: []string{"TEAM_ID", "TEAM_ALIAS", "EMAIL"},
+	Args:       cobra.MinimumNArgs(2),
+	ArgAliases: []string{"TEAM_ID", "TEAM_ALIAS", "EMAIL", "ROLE"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		email := args[1]
+		role := common.GetArg(args, 2, "")
 
 		var team *opslevel.Team
 		var err error
@@ -58,9 +59,13 @@ var createMemberCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		common.WasFound(team.Id == "", key)
 
-		_, addErr := getClientGQL().AddMember(&team.TeamId, email)
+		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
+			User: opslevel.UserIdentifierInput{Email: email},
+			Role: role,
+		}
+		_, addErr := getClientGQL().AddMemberships(&team.TeamId, teamMembershipUserInput)
 		cobra.CheckErr(addErr)
-		fmt.Printf("add member '%s' on team '%s'\n", email, team.Alias)
+		fmt.Printf("added member '%s' on team '%s'\n", email, team.Alias)
 	},
 }
 
@@ -238,7 +243,10 @@ var deleteMemberCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		common.WasFound(team.Id == "", key)
 
-		_, removeErr := getClientGQL().RemoveMember(&team.TeamId, email)
+		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
+			User: opslevel.UserIdentifierInput{Email: email},
+		}
+		_, removeErr := getClientGQL().RemoveMemberships(&team.TeamId, teamMembershipUserInput)
 		cobra.CheckErr(removeErr)
 		fmt.Printf("member '%s' on team '%s' removed\n", email, key)
 	},
