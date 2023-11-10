@@ -60,7 +60,7 @@ var createMemberCmd = &cobra.Command{
 		common.WasFound(team.Id == "", key)
 
 		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
-			User: opslevel.UserIdentifierInput{Email: opslevel.NewString(email)},
+			User: opslevel.NewUserIdentifier(email),
 			Role: role,
 		}
 		_, addErr := getClientGQL().AddMemberships(&team.TeamId, teamMembershipUserInput)
@@ -244,7 +244,7 @@ var deleteMemberCmd = &cobra.Command{
 		common.WasFound(team.Id == "", key)
 
 		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
-			User: opslevel.UserIdentifierInput{Email: opslevel.NewString(email)},
+			User: opslevel.NewUserIdentifier(email),
 		}
 		_, removeErr := getClientGQL().RemoveMemberships(&team.TeamId, teamMembershipUserInput)
 		cobra.CheckErr(removeErr)
