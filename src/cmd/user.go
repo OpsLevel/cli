@@ -189,7 +189,7 @@ EOF
 					continue
 				}
 				newMembership := opslevel.TeamMembershipUserInput{
-					User: opslevel.UserIdentifierInput{Email: user.Email},
+					User: opslevel.UserIdentifierInput{Email: opslevel.NewString(user.Email)},
 					Role: string(user.Role),
 				}
 				_, err = getClientGQL().AddMemberships(&t.TeamId, newMembership)
