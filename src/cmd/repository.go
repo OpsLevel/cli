@@ -20,7 +20,7 @@ var getRepositoryCmd = &cobra.Command{
 		key := args[0]
 		var repository *opslevel.Repository
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			repository, err = getClientGQL().GetRepository(opslevel.ID(key))
 			cobra.CheckErr(err)
 		} else {

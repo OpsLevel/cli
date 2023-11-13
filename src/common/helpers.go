@@ -2,9 +2,7 @@ package common
 
 import (
 	"bytes"
-	b64 "encoding/base64"
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -21,15 +19,6 @@ func WasFound(condition bool, key string) {
 	if condition {
 		cobra.CheckErr(fmt.Errorf("Not found - '%s'", key))
 	}
-}
-
-// TODO: we should probably move this into opslevel-go
-func IsID(value string) bool {
-	decoded, err := b64.RawURLEncoding.DecodeString(value)
-	if err != nil {
-		return false
-	}
-	return strings.HasPrefix(string(decoded), "gid://")
 }
 
 func JsonPrint(jsonBytes []byte, err error) {

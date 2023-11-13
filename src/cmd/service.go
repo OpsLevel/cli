@@ -63,7 +63,7 @@ var getServiceCmd = &cobra.Command{
 		client := getClientGQL()
 		var service *opslevel.Service
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			service, err = getClientGQL().GetService(opslevel.ID(key))
 			cobra.CheckErr(err)
 		} else {
@@ -145,7 +145,7 @@ var deleteServiceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			err = getClientGQL().DeleteService(opslevel.ServiceDeleteInput{
 				Id: opslevel.ID(key),
 			})
