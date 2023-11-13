@@ -51,7 +51,7 @@ var createMemberCmd = &cobra.Command{
 
 		var team *opslevel.Team
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			team, err = getClientGQL().GetTeam(opslevel.ID(key))
 		} else {
 			team, err = getClientGQL().GetTeamWithAlias(key)
@@ -85,7 +85,7 @@ opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 
 			var team *opslevel.Team
 			var err error
-			if common.IsID(key) {
+			if opslevel.IsID(key) {
 				team, err = getClientGQL().GetTeam(opslevel.ID(key))
 			} else {
 				team, err = getClientGQL().GetTeamWithAlias(key)
@@ -160,7 +160,7 @@ var getTeamCmd = &cobra.Command{
 }
 
 func GetTeam(key string) (*opslevel.Team, error) {
-	if common.IsID(key) {
+	if opslevel.IsID(key) {
 		return getClientGQL().GetTeam(opslevel.ID(key))
 	} else {
 		return getClientGQL().GetTeamWithAlias(key)
@@ -212,7 +212,7 @@ opslevel delete team my-team
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			err := getClientGQL().DeleteTeam(opslevel.ID(key))
 			cobra.CheckErr(err)
 		} else {
@@ -235,7 +235,7 @@ var deleteMemberCmd = &cobra.Command{
 
 		var team *opslevel.Team
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			team, err = getClientGQL().GetTeam(opslevel.ID(key))
 		} else {
 			team, err = getClientGQL().GetTeamWithAlias(key)

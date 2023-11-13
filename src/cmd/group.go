@@ -34,7 +34,7 @@ var getGroupCommand = &cobra.Command{
 		key := args[0]
 		var group *opslevel.Group
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
@@ -57,7 +57,7 @@ var getGroupMembersCommand = &cobra.Command{
 		key := args[0]
 		var group *opslevel.Group
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
@@ -91,7 +91,7 @@ var getGroupDescendantRepositoriesCommand = &cobra.Command{
 		key := args[0]
 		var group *opslevel.Group
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
@@ -125,7 +125,7 @@ var getGroupDescendantServicesCommand = &cobra.Command{
 		key := args[0]
 		var group *opslevel.Group
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
@@ -159,7 +159,7 @@ var getGroupDescendantSubgroupsCommand = &cobra.Command{
 		key := args[0]
 		var group *opslevel.Group
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
@@ -193,7 +193,7 @@ var getGroupDescendantTeamsCommand = &cobra.Command{
 		key := args[0]
 		var group *opslevel.Group
 		var err error
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			group, err = getClientGQL().GetGroup(opslevel.ID(key))
 		} else {
 			group, err = getClientGQL().GetGroupWithAlias(key)
@@ -258,7 +258,7 @@ var deleteGroupCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		if common.IsID(key) {
+		if opslevel.IsID(key) {
 			err := getClientGQL().DeleteGroup(key)
 			cobra.CheckErr(err)
 		} else {
