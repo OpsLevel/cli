@@ -1,3 +1,0 @@
-kind: Bugfix
-body: update UserIdentifierInput to accept pointers, matches updates to opslevel-go
-time: 2023-11-10T14:17:48.981065-06:00

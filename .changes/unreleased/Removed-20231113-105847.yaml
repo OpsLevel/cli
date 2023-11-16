@@ -1,3 +1,0 @@
-kind: Removed
-body: drop func IsID() from common, exists in opslevel-go
-time: 2023-11-13T10:58:47.667172-06:00
