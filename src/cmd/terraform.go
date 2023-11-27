@@ -310,8 +310,7 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 	shell.WriteString("# Teams\n")
 
-	teamConfig := `resource "opslevel_team" "%s" {
-%s
+	teamConfig := `resource "opslevel_team" "%s" {%s
 }
 `
 	resp, err := c.ListTeams(nil)
@@ -322,31 +321,31 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 
 		aliases := flattenAliases(team.Aliases)
 		if len(aliases) > 0 {
-			teamBody += fmt.Sprintf("  aliases = [\"%s\"]\n", aliases)
+			teamBody += fmt.Sprintf("\n  aliases = [\"%s\"]", aliases)
 		}
-		teamBody += fmt.Sprintf("  name = \"%s\"\n", team.Name)
+		teamBody += fmt.Sprintf("\n  name = \"%s\"", team.Name)
 
-		if team.Group.Alias != "" {
-			teamBody += fmt.Sprintf("  group = \"%s\"\n", team.Group.Alias)
+		if len(team.Group.Alias) > 0 {
+			teamBody += fmt.Sprintf("\n  group = \"%s\"", team.Group.Alias)
 		}
 		membersOutput := ""
 		for _, member := range team.Memberships.Nodes {
-			memberConfig := `  member {
+			memberConfig := `
+  member {
     email = "%s"
     role = "%s"
-  }
-`
+  }`
 			membersOutput += fmt.Sprintf(memberConfig, member.User.Email, member.Role)
 		}
 		if len(membersOutput) > 0 {
 			teamBody += membersOutput
 		}
-		if team.ParentTeam.Alias != "" {
-			teamBody += fmt.Sprintf("  parent = [\"%s\"]\n", team.ParentTeam.Alias)
+		if len(team.ParentTeam.Alias) > 0 {
+			teamBody += fmt.Sprintf("\n  parent = [\"%s\"]", team.ParentTeam.Alias)
 		}
-		responsibilities := buildMultilineStringArg("responsibilities", team.Responsibilities)
-		if len(responsibilities) > 0 {
-			teamBody += fmt.Sprintf("  %s", responsibilities)
+		if len(team.Responsibilities) > 0 {
+			responsibilities := buildMultilineStringArg("responsibilities", team.Responsibilities)
+			teamBody += fmt.Sprintf("\n  %s", responsibilities)
 		}
 
 		config.WriteString(templateConfig(
