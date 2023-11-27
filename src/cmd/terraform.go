@@ -96,13 +96,13 @@ provider "opslevel" {
 
 	graphqlClient := getClientGQL()
 
-	// exportConstants(graphqlClient, constants)
-	// exportRepos(graphqlClient, repos, bash)
-	// exportServices(graphqlClient, bash, directory)
+	exportConstants(graphqlClient, constants)
+	exportRepos(graphqlClient, repos, bash)
+	exportServices(graphqlClient, bash, directory)
 	exportTeams(graphqlClient, teams, bash)
-	// exportFilters(graphqlClient, filters, bash)
-	// exportRubric(graphqlClient, rubric, bash)
-	// exportChecks(graphqlClient, bash, directory)
+	exportFilters(graphqlClient, filters, bash)
+	exportRubric(graphqlClient, rubric, bash)
+	exportChecks(graphqlClient, bash, directory)
 	fmt.Println("Complete!")
 }
 
