@@ -311,9 +311,10 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 	shell.WriteString("# Teams\n")
 
 	teamConfig := `resource "opslevel_team" "%s" {
+  %s
   name = "%s"
-  manager_email = "%s"
-  parent = "%s"
+  %s
+  %s
   %s
   %s
 }
@@ -326,13 +327,41 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 		if len(aliases) > 0 {
 			aliases = fmt.Sprintf("aliases = [\"%s\"]", aliases)
 		}
+
+		group := ""
+		if team.Group.Alias != "" {
+			group = fmt.Sprintf("group = [\"%s\"]", team.Group.Alias)
+		}
+
+		membersOutput := ""
+		for _, member := range team.Memberships.Nodes {
+			memberConfig := `member {
+  email = "%s"
+  role = "%s"
+}
+`
+
+			config.WriteString(templateConfig(
+				memberConfig,
+				member.User.Email,
+				member.Role,
+			))
+			membersOutput += memberConfig
+		}
+
+		parent := ""
+		if team.ParentTeam.Alias != "" {
+			parent = fmt.Sprintf("parent = [\"%s\"]", team.ParentTeam.Alias)
+		}
+
 		config.WriteString(templateConfig(
 			teamConfig,
 			team.Alias,
-			team.Name,
-			team.Manager.Email,
-			team.ParentTeam.Alias,
 			aliases,
+			team.Name,
+			group,
+			membersOutput,
+			parent,
 			buildMultilineStringArg("responsibilities", team.Responsibilities),
 		))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_team.%s %s\n", team.Alias, team.Id))
