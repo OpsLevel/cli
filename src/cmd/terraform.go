@@ -312,6 +312,7 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 
 	teamConfig := `resource "opslevel_team" "%s" {%s
 }
+
 `
 	resp, err := c.ListTeams(nil)
 	teams := resp.Nodes
