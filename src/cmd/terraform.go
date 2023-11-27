@@ -96,13 +96,13 @@ provider "opslevel" {
 
 	graphqlClient := getClientGQL()
 
-	exportConstants(graphqlClient, constants)
-	exportRepos(graphqlClient, repos, bash)
-	exportServices(graphqlClient, bash, directory)
+	// exportConstants(graphqlClient, constants)
+	// exportRepos(graphqlClient, repos, bash)
+	// exportServices(graphqlClient, bash, directory)
 	exportTeams(graphqlClient, teams, bash)
-	exportFilters(graphqlClient, filters, bash)
-	exportRubric(graphqlClient, rubric, bash)
-	exportChecks(graphqlClient, bash, directory)
+	// exportFilters(graphqlClient, filters, bash)
+	// exportRubric(graphqlClient, rubric, bash)
+	// exportChecks(graphqlClient, bash, directory)
 	fmt.Println("Complete!")
 }
 
@@ -311,58 +311,48 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 	shell.WriteString("# Teams\n")
 
 	teamConfig := `resource "opslevel_team" "%s" {
-  %s
-  name = "%s"
-  %s
-  %s
-  %s
-  %s
+%s
 }
 `
 	resp, err := c.ListTeams(nil)
 	teams := resp.Nodes
 	cobra.CheckErr(err)
 	for _, team := range teams {
+		teamBody := ""
+
 		aliases := flattenAliases(team.Aliases)
 		if len(aliases) > 0 {
-			aliases = fmt.Sprintf("aliases = [\"%s\"]", aliases)
+			teamBody += fmt.Sprintf("  aliases = [\"%s\"]\n", aliases)
 		}
+		teamBody += fmt.Sprintf("  name = \"%s\"\n", team.Name)
 
-		group := ""
 		if team.Group.Alias != "" {
-			group = fmt.Sprintf("group = [\"%s\"]", team.Group.Alias)
+			teamBody += fmt.Sprintf("  group = \"%s\"\n", team.Group.Alias)
 		}
-
 		membersOutput := ""
 		for _, member := range team.Memberships.Nodes {
-			memberConfig := `member {
-  email = "%s"
-  role = "%s"
-}
+			memberConfig := `  member {
+    email = "%s"
+    role = "%s"
+  }
 `
-
-			config.WriteString(templateConfig(
-				memberConfig,
-				member.User.Email,
-				member.Role,
-			))
-			membersOutput += memberConfig
+			membersOutput += fmt.Sprintf(memberConfig, member.User.Email, member.Role)
 		}
-
-		parent := ""
+		if len(membersOutput) > 0 {
+			teamBody += membersOutput
+		}
 		if team.ParentTeam.Alias != "" {
-			parent = fmt.Sprintf("parent = [\"%s\"]", team.ParentTeam.Alias)
+			teamBody += fmt.Sprintf("  parent = [\"%s\"]\n", team.ParentTeam.Alias)
+		}
+		responsibilities := buildMultilineStringArg("responsibilities", team.Responsibilities)
+		if len(responsibilities) > 0 {
+			teamBody += fmt.Sprintf("  %s", responsibilities)
 		}
 
 		config.WriteString(templateConfig(
 			teamConfig,
 			team.Alias,
-			aliases,
-			team.Name,
-			group,
-			membersOutput,
-			parent,
-			buildMultilineStringArg("responsibilities", team.Responsibilities),
+			teamBody,
 		))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_team.%s %s\n", team.Alias, team.Id))
 	}
