@@ -335,9 +335,7 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
   }`
 			membersOutput += fmt.Sprintf(memberConfig, member.User.Email, member.Role)
 		}
-		if len(membersOutput) > 0 {
-			teamBody.WriteString(membersOutput)
-		}
+		teamBody.WriteString(membersOutput)
 		if len(team.ParentTeam.Alias) > 0 {
 			teamBody.WriteString(fmt.Sprintf("\n  parent = [\"%s\"]", team.ParentTeam.Alias))
 		}
