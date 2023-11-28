@@ -307,6 +307,19 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 	}
 }
 
+func getMembershipsAsTerraformConfig(members []opslevel.TeamMembership) string {
+	membersBody := strings.Builder{}
+	for _, member := range members {
+		memberConfig := `
+  member {
+    email = "%s"
+    role = "%s"
+  }`
+		membersBody.WriteString(fmt.Sprintf(memberConfig, member.User.Email, member.Role))
+	}
+	return membersBody.String()
+}
+
 func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 	shell.WriteString("# Teams\n")
 
@@ -326,15 +339,7 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 		if len(team.Group.Alias) > 0 {
 			teamBody.WriteString(fmt.Sprintf("\n  group = \"%s\"", team.Group.Alias))
 		}
-		membersOutput := ""
-		for _, member := range team.Memberships.Nodes {
-			memberConfig := `
-  member {
-    email = "%s"
-    role = "%s"
-  }`
-			membersOutput += fmt.Sprintf(memberConfig, member.User.Email, member.Role)
-		}
+		membersOutput := getMembershipsAsTerraformConfig(team.Memberships.Nodes)
 		teamBody.WriteString(membersOutput)
 		if len(team.ParentTeam.Alias) > 0 {
 			teamBody.WriteString(fmt.Sprintf("\n  parent = [\"%s\"]", team.ParentTeam.Alias))
