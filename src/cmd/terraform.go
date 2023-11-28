@@ -317,17 +317,14 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 	resp, err := c.ListTeams(nil)
 	teams := resp.Nodes
 	cobra.CheckErr(err)
+	teamBody := strings.Builder{}
 	for _, team := range teams {
-		teamBody := ""
-
 		aliases := flattenAliases(team.Aliases)
-		if len(aliases) > 0 {
-			teamBody += fmt.Sprintf("\n  aliases = [\"%s\"]", aliases)
-		}
-		teamBody += fmt.Sprintf("\n  name = \"%s\"", team.Name)
+		teamBody.WriteString(fmt.Sprintf("\n  aliases = [\"%s\"]", aliases))
+		teamBody.WriteString(fmt.Sprintf("\n  name = \"%s\"", team.Name))
 
 		if len(team.Group.Alias) > 0 {
-			teamBody += fmt.Sprintf("\n  group = \"%s\"", team.Group.Alias)
+			teamBody.WriteString(fmt.Sprintf("\n  group = \"%s\"", team.Group.Alias))
 		}
 		membersOutput := ""
 		for _, member := range team.Memberships.Nodes {
@@ -339,22 +336,23 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 			membersOutput += fmt.Sprintf(memberConfig, member.User.Email, member.Role)
 		}
 		if len(membersOutput) > 0 {
-			teamBody += membersOutput
+			teamBody.WriteString(membersOutput)
 		}
 		if len(team.ParentTeam.Alias) > 0 {
-			teamBody += fmt.Sprintf("\n  parent = [\"%s\"]", team.ParentTeam.Alias)
+			teamBody.WriteString(fmt.Sprintf("\n  parent = [\"%s\"]", team.ParentTeam.Alias))
 		}
 		if len(team.Responsibilities) > 0 {
 			responsibilities := buildMultilineStringArg("responsibilities", team.Responsibilities)
-			teamBody += fmt.Sprintf("\n  %s", responsibilities)
+			teamBody.WriteString(fmt.Sprintf("\n  %s", responsibilities))
 		}
 
 		config.WriteString(templateConfig(
 			teamConfig,
 			team.Alias,
-			teamBody,
+			teamBody.String(),
 		))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_team.%s %s\n", team.Alias, team.Id))
+		teamBody.Reset()
 	}
 	shell.WriteString("##########\n\n")
 }
