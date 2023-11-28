@@ -1,0 +1,4 @@
+kind: Bugfix
+body: Fix exporting Teams in Terraform to have up to have a schema compatible with
+  v0.8.13
+time: 2023-11-27T17:18:54.983105-05:00
