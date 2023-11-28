@@ -308,13 +308,14 @@ func exportServices(c *opslevel.Client, shell *os.File, directory string) {
 }
 
 func getMembershipsAsTerraformConfig(members []opslevel.TeamMembership) string {
-	membersBody := strings.Builder{}
-	for _, member := range members {
-		memberConfig := `
+	memberConfig := `
   member {
     email = "%s"
     role = "%s"
   }`
+
+	membersBody := strings.Builder{}
+	for _, member := range members {
 		membersBody.WriteString(fmt.Sprintf(memberConfig, member.User.Email, member.Role))
 	}
 	return membersBody.String()
