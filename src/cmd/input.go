@@ -31,12 +31,12 @@ func readInputConfig() {
 
 func readResourceInput[T any]() (*T, error) {
 	readInputConfig()
-	var evt *T
+	var evt T
 	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
+	if err := defaults.Set(&evt); err != nil {
 		return nil, err
 	}
-	return evt, nil
+	return &evt, nil
 }
 
 func isStdInFromTerminal() bool {
