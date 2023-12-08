@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var createFilterCmd = &cobra.Command{
@@ -30,7 +28,7 @@ predicates:
     value: "rds"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readFilterInput()
+		input, err := readResourceInput[opslevel.FilterCreateInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateFilter(*input)
 		cobra.CheckErr(err)
@@ -93,7 +91,7 @@ EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readFilterInput()
+		input, err := readResourceInput[opslevel.FilterCreateInput]()
 		cobra.CheckErr(err)
 
 		// hack: in the future all ObjectUpdateInput and ObjectCreateInput
@@ -131,14 +129,4 @@ func init() {
 	getCmd.AddCommand(getFilterCmd)
 	listCmd.AddCommand(listFilterCmd)
 	deleteCmd.AddCommand(deleteFilterCmd)
-}
-
-func readFilterInput() (*opslevel.FilterCreateInput, error) {
-	readInputConfig()
-	evt := &opslevel.FilterCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }

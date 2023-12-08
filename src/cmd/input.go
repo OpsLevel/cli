@@ -5,6 +5,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/creasty/defaults"
 	"github.com/spf13/viper"
 )
 
@@ -26,6 +27,16 @@ func readInputConfig() {
 		viper.SetConfigFile(dataFile)
 	}
 	viper.ReadInConfig()
+}
+
+func readResourceInput[T any]() (*T, error) {
+	readInputConfig()
+	var evt *T
+	viper.Unmarshal(&evt)
+	if err := defaults.Set(evt); err != nil {
+		return nil, err
+	}
+	return evt, nil
 }
 
 func isStdInFromTerminal() bool {

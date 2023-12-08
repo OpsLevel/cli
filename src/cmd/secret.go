@@ -4,14 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/creasty/defaults"
-
 	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var secretAlias string
@@ -27,7 +24,7 @@ owner:
 value: "my-really-secure-secret-shhhh"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readSecretInput()
+		input, err := readResourceInput[opslevel.SecretInput]()
 		cobra.CheckErr(err)
 		newSecret, err := getClientGQL().CreateSecret(secretAlias, *input)
 		cobra.CheckErr(err)
@@ -92,7 +89,7 @@ EOF`,
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		secretId := args[0]
-		input, err := readSecretInput()
+		input, err := readResourceInput[opslevel.SecretInput]()
 		cobra.CheckErr(err)
 		secret, err := getClientGQL().UpdateSecret(secretId, *input)
 		cobra.CheckErr(err)
@@ -112,16 +109,6 @@ var deleteSecretCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' secret\n", secretId)
 	},
-}
-
-func readSecretInput() (*opslevel.SecretInput, error) {
-	readInputConfig()
-	evt := &opslevel.SecretInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }
 
 func init() {

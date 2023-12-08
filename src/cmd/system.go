@@ -7,11 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var createSystemCmd = &cobra.Command{
@@ -29,7 +27,7 @@ var createSystemCmd = &cobra.Command{
 		EOF
 		`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readSystemInput()
+		input, err := readResourceInput[opslevel.SystemInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateSystem(*input)
 		cobra.CheckErr(err)
@@ -106,7 +104,7 @@ var updateSystemCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readSystemInput()
+		input, err := readResourceInput[opslevel.SystemInput]()
 		cobra.CheckErr(err)
 		system, err := getClientGQL().UpdateSystem(key, *input)
 		cobra.CheckErr(err)
@@ -137,14 +135,4 @@ func init() {
 	listCmd.AddCommand(listSystemCmd)
 	updateCmd.AddCommand(updateSystemCmd)
 	deleteCmd.AddCommand(deleteSystemCmd)
-}
-
-func readSystemInput() (*opslevel.SystemInput, error) {
-	readInputConfig()
-	evt := &opslevel.SystemInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }
