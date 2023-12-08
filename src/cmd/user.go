@@ -8,12 +8,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var createUserCmd = &cobra.Command{
@@ -62,7 +60,7 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readUserInput()
+		input, err := readResourceInput[opslevel.UserInput]()
 		cobra.CheckErr(err)
 		filter, err := getClientGQL().UpdateUser(key, *input)
 		cobra.CheckErr(err)
@@ -213,14 +211,4 @@ func init() {
 	listCmd.AddCommand(listUserCmd)
 	deleteCmd.AddCommand(deleteUserCmd)
 	importCmd.AddCommand(importUsersCmd)
-}
-
-func readUserInput() (*opslevel.UserInput, error) {
-	readInputConfig()
-	evt := &opslevel.UserInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }

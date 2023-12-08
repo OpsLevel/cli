@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -29,7 +27,7 @@ EOF`,
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readTeamCreateInput()
+		input, err := readResourceInput[opslevel.TeamCreateInput]()
 		input.Name = key
 		cobra.CheckErr(err)
 		team, err := getClientGQL().CreateTeam(*input)
@@ -124,7 +122,7 @@ var updateTeamCmd = &cobra.Command{
 	Use:   "team {ID|ALIAS}",
 	Short: "Update a team",
 	Example: `
-cat << EOF | opslevel update team my-team" -f -
+cat << EOF | opslevel update team my-team -f -
 managerEmail: "manager@example.com""
 parentTeam:
   alias: "parent-team-2"
@@ -135,7 +133,7 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readTeamUpdateInput()
+		input, err := readResourceInput[opslevel.TeamUpdateInput]()
 		input.Id = opslevel.ID(key)
 		cobra.CheckErr(err)
 		team, err := getClientGQL().UpdateTeam(*input)
@@ -330,24 +328,4 @@ func init() {
 	importCmd.AddCommand(importTeamsCmd)
 
 	createContactCmd.Flags().StringVarP(&contactType, "type", "t", "slack", "The contact type. One of: slack|email|web [default: slack]")
-}
-
-func readTeamCreateInput() (*opslevel.TeamCreateInput, error) {
-	readInputConfig()
-	evt := &opslevel.TeamCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
-}
-
-func readTeamUpdateInput() (*opslevel.TeamUpdateInput, error) {
-	readInputConfig()
-	evt := &opslevel.TeamUpdateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }

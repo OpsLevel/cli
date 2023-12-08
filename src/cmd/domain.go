@@ -7,11 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var createDomainCmd = &cobra.Command{
@@ -28,7 +26,7 @@ note: "Additional details"
 EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readDomainInput()
+		input, err := readResourceInput[opslevel.DomainInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateDomain(*input)
 		cobra.CheckErr(err)
@@ -122,7 +120,7 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readDomainInput()
+		input, err := readResourceInput[opslevel.DomainInput]()
 		cobra.CheckErr(err)
 		domain, err := getClientGQL().UpdateDomain(key, *input)
 		cobra.CheckErr(err)
@@ -136,14 +134,4 @@ func init() {
 	getCmd.AddCommand(getDomainCmd)
 	listCmd.AddCommand(listDomainCmd)
 	updateCmd.AddCommand(updateDomainCmd)
-}
-
-func readDomainInput() (*opslevel.DomainInput, error) {
-	readInputConfig()
-	evt := &opslevel.DomainInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }
