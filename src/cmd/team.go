@@ -17,7 +17,7 @@ var createTeamCmd = &cobra.Command{
 	Short: "Create a team",
 	Example: `opslevel create team my-team
 
-cat << EOF | opslevel create team my-team" -f -
+cat << EOF | opslevel create team my-team -f -
 managerEmail: "manager@example.com"
 parentTeam:
   alias: "parent-team"
