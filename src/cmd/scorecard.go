@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var createScorecardCmd = &cobra.Command{
@@ -24,7 +22,7 @@ ownerId: "XXX_team_id_XXX"
 affectsOverallServiceLevels: false
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readScorecardInput()
+		input, err := readResourceInput[opslevel.ScorecardInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateScorecard(*input)
 		cobra.CheckErr(err)
@@ -85,7 +83,7 @@ EOF`,
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readScorecardInput()
+		input, err := readResourceInput[opslevel.ScorecardInput]()
 		cobra.CheckErr(err)
 		scorecard, err := getClientGQL().UpdateScorecard(key, *input)
 		cobra.CheckErr(err)
@@ -113,14 +111,4 @@ func init() {
 	getCmd.AddCommand(getScorecardCmd)
 	listCmd.AddCommand(listScorecardCmd)
 	deleteCmd.AddCommand(deleteScorecardCmd)
-}
-
-func readScorecardInput() (*opslevel.ScorecardInput, error) {
-	readInputConfig()
-	evt := &opslevel.ScorecardInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }
