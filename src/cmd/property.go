@@ -41,7 +41,6 @@ var getPropertyDefinition = &cobra.Command{
 		result, err := getClientGQL().GetPropertyDefinition(identifier)
 		cobra.CheckErr(err)
 
-		common.WasFound(result.Id == "", identifier)
 		if isYamlOutput() {
 			common.YamlPrint(result)
 		} else {
@@ -73,9 +72,10 @@ func getExamplePropertyDefinitionYaml() string {
 }
 
 var listPropertyDefinitionsCmd = &cobra.Command{
-	Use:   "property-definitions",
-	Short: "List property definitions",
-	Long:  "List property definitions",
+	Use:     "property-definition",
+	Short:   "List property definitions",
+	Aliases: []string{"property-definitions"},
+	Long:    "List property definitions",
 	Run: func(cmd *cobra.Command, args []string) {
 		resp, err := getClientGQL().ListPropertyDefinitions(nil)
 		list := resp.Nodes
@@ -103,7 +103,7 @@ var deletePropertyDefinitonCmd = &cobra.Command{
 		propertyDefinitionId := args[0]
 		err := getClientGQL().DeletePropertyDefinition(propertyDefinitionId)
 		cobra.CheckErr(err)
-		fmt.Printf("deleted '%s' property definition\n", propertyDefinitionId)
+		fmt.Printf("deleted property definition '%s'\n", propertyDefinitionId)
 	},
 }
 
