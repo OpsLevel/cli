@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/opslevel/opslevel-go/v2023"
 
@@ -15,11 +16,10 @@ var createPropertyDefinitonCmd = &cobra.Command{
 	Use:   "property-definition",
 	Short: "Create a property-definition",
 	Long:  `Create a property-definition`,
-	Example: `
+	Example: fmt.Sprintf(`
 cat << EOF | opslevel create property-definition -f -
-name: "Is Beta Feature"
-schema: {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"boolean"}
-EOF`,
+%s
+EOF`, getExamplePropertyDefinitionYaml()),
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.PropertyDefinitionInput]()
 		cobra.CheckErr(err)
@@ -55,17 +55,21 @@ var genPropertyDefinition = &cobra.Command{
 	Short: "Generate example yaml of a Property Definition",
 	Long:  `Generate example yaml of a Property Definition`,
 	Run: func(cmd *cobra.Command, args []string) {
-		schema := `{"$schema":"https://json-schema.org/draft/2020-12/schema", "type": "boolean"}`
-		yaml, err := opslevel.GenYamlFrom[opslevel.PropertyDefinitionInput](
-			opslevel.PropertyDefinitionInput{
-				Name:   "Example Property Definition",
-				Schema: opslevel.JSONString(schema),
-			})
-		if err != nil {
-			cobra.CheckErr(err)
-		}
-		fmt.Println(yaml)
+		fmt.Println(getExamplePropertyDefinitionYaml())
 	},
+}
+
+func getExamplePropertyDefinitionYaml() string {
+	schema := `{"$schema":"https://json-schema.org/draft/2020-12/schema", "type": "boolean"}`
+	examplePropertyDefinition, err := opslevel.GenYamlFrom[opslevel.PropertyDefinitionInput](
+		opslevel.PropertyDefinitionInput{
+			Name:   "Example Property Definition",
+			Schema: opslevel.JSONString(schema),
+		})
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	return strings.TrimSpace(examplePropertyDefinition)
 }
 
 var listPropertyDefinitionsCmd = &cobra.Command{
