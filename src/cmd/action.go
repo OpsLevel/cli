@@ -27,7 +27,7 @@ headers:
   accept: "application/vnd.pagerduty+json;version=2"
   authorization: "Token token=XXXXXXXXXXXXX"
   from: "someone@example.com"
-payload: |
+liquidTemplate: |
   {
       "incident": {
           "type": "incident",

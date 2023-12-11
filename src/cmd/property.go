@@ -16,18 +16,14 @@ var createPropertyDefinitonCmd = &cobra.Command{
 	Short: "Create a property-definition",
 	Long:  `Create a property-definition`,
 	Example: `
-cat << EOF | opslevel create property-definition  -f -
+cat << EOF | opslevel create property-definition -f -
 name: "Is Beta Feature"
 schema: {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"boolean"}
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// input, err := readResourceInput[opslevel.PropertyDefinitionInput]()
-		// cobra.CheckErr(err)
-		input := opslevel.PropertyDefinitionInput{
-			Name:   "Is Beta Feature",
-			Schema: opslevel.JSONString(`{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"boolean"}`),
-		}
-		newPropertyDefinition, err := getClientGQL().CreatePropertyDefinition(input)
+		input, err := readResourceInput[opslevel.PropertyDefinitionInput]()
+		cobra.CheckErr(err)
+		newPropertyDefinition, err := getClientGQL().CreatePropertyDefinition(*input)
 		cobra.CheckErr(err)
 
 		fmt.Println(newPropertyDefinition.Id)
@@ -54,6 +50,24 @@ var getPropertyDefinition = &cobra.Command{
 	},
 }
 
+var genPropertyDefinition = &cobra.Command{
+	Use:   "property-definition",
+	Short: "Generate example yaml of a Property Definition",
+	Long:  `Generate example yaml of a Property Definition`,
+	Run: func(cmd *cobra.Command, args []string) {
+		schema := `{"$schema":"https://json-schema.org/draft/2020-12/schema", "type": "boolean"}`
+		yaml, err := opslevel.GenYamlFrom[opslevel.PropertyDefinitionInput](
+			opslevel.PropertyDefinitionInput{
+				Name:   "Example Property Definition",
+				Schema: opslevel.JSONString(schema),
+			})
+		if err != nil {
+			cobra.CheckErr(err)
+		}
+		fmt.Println(yaml)
+	},
+}
+
 var listPropertyDefinitionsCmd = &cobra.Command{
 	Use:   "property-definitions",
 	Short: "List property definitions",
@@ -75,28 +89,6 @@ var listPropertyDefinitionsCmd = &cobra.Command{
 	},
 }
 
-// var updateSecretCmd = &cobra.Command{
-// 	Use:   "secret",
-// 	Short: "Update an OpsLevel secret",
-// 	Long:  `Update an OpsLevel secret`,
-// 	Example: `
-// cat << EOF | opslevel update secret XXX_secret_id_XXX -f -
-// owner:
-//   alias: "platform"
-// value: "09sdf09werlkewlkjs0-9sdf
-// EOF`,
-// 	Args:       cobra.ExactArgs(1),
-// 	ArgAliases: []string{"ID"},
-// 	Run: func(cmd *cobra.Command, args []string) {
-// 		secretId := args[0]
-// 		input, err := readSecretInput()
-// 		cobra.CheckErr(err)
-// 		secret, err := getClientGQL().UpdateSecret(secretId, *input)
-// 		cobra.CheckErr(err)
-// 		fmt.Println(secret.ID)
-// 	},
-// }
-
 var deletePropertyDefinitonCmd = &cobra.Command{
 	Use:        "property-definition ID",
 	Short:      "Delete a property definitions",
@@ -113,6 +105,7 @@ var deletePropertyDefinitonCmd = &cobra.Command{
 
 func init() {
 	createCmd.AddCommand(createPropertyDefinitonCmd)
+	genCmd.AddCommand(genPropertyDefinition)
 	getCmd.AddCommand(getPropertyDefinition)
 	listCmd.AddCommand(listPropertyDefinitionsCmd)
 	deleteCmd.AddCommand(deletePropertyDefinitonCmd)
