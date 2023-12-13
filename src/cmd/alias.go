@@ -10,6 +10,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exampleAliasCmd = &cobra.Command{
+	Use:   "alias",
+	Short: "Example alias",
+	Long:  `Example alias`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.AliasCreateInput]())
+	},
+}
+
 var createAliasCommand = &cobra.Command{
 	Use:     "alias ID ALIAS",
 	Short:   "Create an alias",
@@ -64,6 +73,7 @@ opslevel delete alias -t infrastructure-resource my-infra-alias`,
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleAliasCmd)
 	createCmd.AddCommand(createAliasCommand)
 	deleteCmd.AddCommand(deleteAliasCommand)
 

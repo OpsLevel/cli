@@ -16,6 +16,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var exampleInfraCmd = &cobra.Command{
+	Use:   "infra",
+	Short: "Example infrastructure resource",
+	Long:  `Example infrastructure resource`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.InfrastructureResourceInput]())
+	},
+}
+
 var createInfraCmd = &cobra.Command{
 	Use:   "infra",
 	Short: "Create an infrastructure resource",
@@ -225,6 +234,7 @@ var deleteInfraCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleInfraCmd)
 	createCmd.AddCommand(createInfraCmd)
 	getCmd.AddCommand(getInfraSchemaCmd)
 	getCmd.AddCommand(getInfraCmd)

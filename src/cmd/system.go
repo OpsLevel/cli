@@ -12,6 +12,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exampleSystemCmd = &cobra.Command{
+	Use:   "system",
+	Short: "Example system",
+	Long:  `Example system`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.SystemInput]())
+	},
+}
+
 var createSystemCmd = &cobra.Command{
 	Use:   "system",
 	Short: "Create a system",
@@ -130,6 +139,7 @@ var deleteSystemCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleSystemCmd)
 	createCmd.AddCommand(createSystemCmd)
 	getCmd.AddCommand(getSystemCmd)
 	listCmd.AddCommand(listSystemCmd)

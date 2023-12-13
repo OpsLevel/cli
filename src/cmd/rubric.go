@@ -10,6 +10,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exampleCategoryCmd = &cobra.Command{
+	Use:   "category",
+	Short: "Example rubric category",
+	Long:  `Example rubric category`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.CategoryCreateInput]())
+	},
+}
+
 var createCategoryCmd = &cobra.Command{
 	Use:        "category NAME",
 	Short:      "Create a rubric category",
@@ -71,6 +80,15 @@ var deleteCategoryCmd = &cobra.Command{
 		err := getClientGQL().DeleteCategory(opslevel.ID(key))
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' category\n", key)
+	},
+}
+
+var exampleLevelCmd = &cobra.Command{
+	Use:   "level",
+	Short: "Example rubric level",
+	Long:  `Example rubric level`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.LevelCreateInput]())
 	},
 }
 
@@ -138,11 +156,13 @@ var deleteLevelCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleCategoryCmd)
 	createCmd.AddCommand(createCategoryCmd)
 	getCmd.AddCommand(getCategoryCmd)
 	listCmd.AddCommand(listCategoryCmd)
 	deleteCmd.AddCommand(deleteCategoryCmd)
 
+	exampleCmd.AddCommand(exampleLevelCmd)
 	createCmd.AddCommand(createLevelCmd)
 	getCmd.AddCommand(getLevelCmd)
 	listCmd.AddCommand(listLevelCmd)

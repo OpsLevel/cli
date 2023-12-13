@@ -13,6 +13,15 @@ import (
 
 var actionType string
 
+var exampleActionCmd = &cobra.Command{
+	Use:   "action",
+	Short: "Example action",
+	Long:  `Example action`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.CustomActionsWebhookActionCreateInput]())
+	},
+}
+
 var createActionCmd = &cobra.Command{
 	Use:   "action --type=$ACTION_TYPE",
 	Short: "Create an action",
@@ -139,6 +148,7 @@ var deleteActionCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleActionCmd)
 	createCmd.AddCommand(createActionCmd)
 	createActionCmd.Flags().StringVar(&actionType, "type", "webhook", "action type, default=webhook")
 	updateCmd.AddCommand(updateActionCmd)

@@ -13,6 +13,15 @@ import (
 
 var secretAlias string
 
+var exampleSecretCmd = &cobra.Command{
+	Use:   "secret",
+	Short: "Example Secret",
+	Long:  `Example Secret`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.SecretInput]())
+	},
+}
+
 var createSecretCmd = &cobra.Command{
 	Use:   "secret",
 	Short: "Create a team-owned secret",
@@ -115,6 +124,7 @@ func init() {
 	createSecretCmd.Flags().StringVar(&secretAlias, "alias", "", "The alias for the secret")
 	createSecretCmd.MarkFlagRequired("alias")
 
+	exampleCmd.AddCommand(exampleSecretCmd)
 	createCmd.AddCommand(createSecretCmd)
 	getCmd.AddCommand(getSecretCmd)
 	listCmd.AddCommand(listSecretsCmd)

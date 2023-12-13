@@ -16,6 +16,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exampleServiceCmd = &cobra.Command{
+	Use:   "service",
+	Short: "Example service",
+	Long:  `Example service`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.ServiceCreateInput]())
+	},
+}
+
 var createServiceCmd = &cobra.Command{
 	Use:   "service",
 	Short: "Create a service",
@@ -229,6 +238,7 @@ EOF
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleServiceCmd)
 	createCmd.AddCommand(createServiceCmd)
 	getCmd.AddCommand(getServiceCmd)
 	listCmd.AddCommand(listServiceCmd)

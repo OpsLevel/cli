@@ -14,6 +14,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exampleUserCmd = &cobra.Command{
+	Use:   "user",
+	Short: "Example User",
+	Long:  `Example User`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.UserInput]())
+	},
+}
+
 var createUserCmd = &cobra.Command{
 	Use:   "user EMAIL NAME [ROLE]",
 	Short: "Create a User",
@@ -205,6 +214,7 @@ EOF
 func init() {
 	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set the welcome e-mail will be skipped from being sent")
 
+	exampleCmd.AddCommand(exampleUserCmd)
 	createCmd.AddCommand(createUserCmd)
 	updateCmd.AddCommand(updateUserCmd)
 	getCmd.AddCommand(getUserCmd)

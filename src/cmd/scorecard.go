@@ -10,6 +10,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exampleScorecardCmd = &cobra.Command{
+	Use:   "scorecard",
+	Short: "Example Scorecard",
+	Long:  `Example Scorecard`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.ScorecardInput]())
+	},
+}
+
 var createScorecardCmd = &cobra.Command{
 	Use:   "scorecard",
 	Short: "Create a scorecard",
@@ -106,6 +115,7 @@ var deleteScorecardCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleScorecardCmd)
 	createCmd.AddCommand(createScorecardCmd)
 	updateCmd.AddCommand(updateScorecardCmd)
 	getCmd.AddCommand(getScorecardCmd)
