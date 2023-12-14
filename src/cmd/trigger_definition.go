@@ -10,6 +10,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exampleTriggerDefinitionCmd = &cobra.Command{
+	Use:   "trigger-definition",
+	Short: "Example Scorecard",
+	Long:  `Example Scorecard`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.CustomActionsTriggerDefinitionCreateInput]())
+	},
+}
+
 var createTriggerDefinitionCmd = &cobra.Command{
 	Use:   "trigger-definition",
 	Short: "Create a trigger definition",
@@ -127,6 +136,7 @@ var deleteTriggerDefinitionCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleTriggerDefinitionCmd)
 	createCmd.AddCommand(createTriggerDefinitionCmd)
 	updateCmd.AddCommand(updateTriggerDefinitionCmd)
 	getCmd.AddCommand(getTriggerDefinitionCmd)

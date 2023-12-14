@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/opslevel/opslevel-go/v2023"
 
@@ -12,6 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var examplePropertyDefinitionCmd = &cobra.Command{
+	Use:   "property-definition",
+	Short: "Example Property Definition",
+	Long:  `Example Property Definition`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.PropertyDefinitionInput]())
+	},
+}
+
 var createPropertyDefinitonCmd = &cobra.Command{
 	Use:   "property-definition",
 	Short: "Create a property-definition",
@@ -19,7 +27,7 @@ var createPropertyDefinitonCmd = &cobra.Command{
 	Example: fmt.Sprintf(`
 cat << EOF | opslevel create property-definition -f -
 %s
-EOF`, getExamplePropertyDefinitionYaml()),
+EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.PropertyDefinitionInput]()
 		cobra.CheckErr(err)
@@ -47,28 +55,6 @@ var getPropertyDefinition = &cobra.Command{
 			common.PrettyPrint(result)
 		}
 	},
-}
-
-var genPropertyDefinition = &cobra.Command{
-	Use:   "property-definition",
-	Short: "Generate example yaml of a Property Definition",
-	Long:  `Generate example yaml of a Property Definition`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExamplePropertyDefinitionYaml())
-	},
-}
-
-func getExamplePropertyDefinitionYaml() string {
-	schema := `{"$schema":"https://json-schema.org/draft/2020-12/schema", "type": "boolean"}`
-	examplePropertyDefinition, err := opslevel.GenYamlFrom[opslevel.PropertyDefinitionInput](
-		opslevel.PropertyDefinitionInput{
-			Name:   "Example Property Definition",
-			Schema: opslevel.JSONString(schema),
-		})
-	if err != nil {
-		cobra.CheckErr(err)
-	}
-	return strings.TrimSpace(examplePropertyDefinition)
 }
 
 var listPropertyDefinitionsCmd = &cobra.Command{
@@ -108,8 +94,8 @@ var deletePropertyDefinitonCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(examplePropertyDefinitionCmd)
 	createCmd.AddCommand(createPropertyDefinitonCmd)
-	genCmd.AddCommand(genPropertyDefinition)
 	getCmd.AddCommand(getPropertyDefinition)
 	listCmd.AddCommand(listPropertyDefinitionsCmd)
 	deleteCmd.AddCommand(deletePropertyDefinitonCmd)

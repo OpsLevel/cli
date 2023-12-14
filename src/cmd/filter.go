@@ -10,6 +10,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exampleFilterCmd = &cobra.Command{
+	Use:   "filter",
+	Short: "Example filter",
+	Long:  `Example filter`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.FilterCreateInput]())
+	},
+}
+
 var createFilterCmd = &cobra.Command{
 	Use:   "filter",
 	Short: "Create a filter",
@@ -124,6 +133,7 @@ var deleteFilterCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleFilterCmd)
 	createCmd.AddCommand(createFilterCmd)
 	updateCmd.AddCommand(updateFilterCmd)
 	getCmd.AddCommand(getFilterCmd)

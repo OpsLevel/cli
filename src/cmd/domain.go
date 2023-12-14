@@ -12,6 +12,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var exampleDomainCmd = &cobra.Command{
+	Use:   "domain",
+	Short: "Example Domain",
+	Long:  `Example Domain`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.DomainInput]())
+	},
+}
+
 var createDomainCmd = &cobra.Command{
 	Use:   "domain",
 	Short: "Create a domain",
@@ -129,6 +138,7 @@ EOF
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleDomainCmd)
 	createCmd.AddCommand(createDomainCmd)
 	deleteCmd.AddCommand(deleteDomainCmd)
 	getCmd.AddCommand(getDomainCmd)

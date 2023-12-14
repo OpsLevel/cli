@@ -15,6 +15,15 @@ import (
 
 var resourceType string
 
+var exampleTagCmd = &cobra.Command{
+	Use:   "tag",
+	Short: "Example tag to assign to a resource",
+	Long:  `Example tag to assign to a resource`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.TagInput]())
+	},
+}
+
 var createTagCmd = &cobra.Command{
 	Use:   "tag --type=RESOURCE_TYPE [--assign] ID|ALIAS KEY VALUE",
 	Short: "Create/assign a tag",
@@ -176,6 +185,7 @@ opslevel delete tag XXX_TAG_ID_XXX
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleTagCmd)
 	createCmd.AddCommand(createTagCmd)
 	createTagCmd.Flags().StringVar(&resourceType, "type", "", "resource type")
 	createTagCmd.Flags().Bool("assign", false, "assign a tag instead of creating it")

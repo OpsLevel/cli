@@ -15,6 +15,15 @@ type CLIServiceDependencyCreateInput struct {
 	Notes  string `json:"notes,omitempty"`
 }
 
+var exampleServiceDependencyCmd = &cobra.Command{
+	Use:   "dependency",
+	Short: "Example service dependency",
+	Long:  `Example service dependency`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.ServiceDependencyCreateInput]())
+	},
+}
+
 var createServiceDependencyCmd = &cobra.Command{
 	Use:   "dependency",
 	Short: "Create a service dependency",
@@ -52,6 +61,7 @@ opslevel delete service dependency XXX # ID of the dependency entity returned by
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleServiceDependencyCmd)
 	createServiceCmd.AddCommand(createServiceDependencyCmd)
 	deleteServiceCmd.AddCommand(deleteServiceDependencyCmd)
 }
