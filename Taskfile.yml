@@ -68,7 +68,7 @@ tasks:
     dir: "{{.SRC_DIR}}"
     silent: true
     vars:
-      GO_WORK: "tmp_go.work"
+      GO_WORK: "go.work"
       TMP_GO_WORK: "tmp_go.work"
       LATEST_OPSLEVEL_GO_VERSION:
         sh: go list -u -m -versions github.com/opslevel/opslevel-go/v2023 | awk '{print $NF}'
