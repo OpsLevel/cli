@@ -1,4 +1,4 @@
 [submodule "src/submodules/opslevel-go"]
 	path = src/submodules/opslevel-go
 	url = git@github.com:OpsLevel/opslevel-go.git
-  branch = main
+	branch = main
