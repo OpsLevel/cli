@@ -7,7 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.10.0
 	github.com/go-resty/resty/v2 v2.10.0
 	github.com/gosimple/slug v1.13.1
-	github.com/itchyny/gojq v0.12.13
+	github.com/itchyny/gojq v0.12.14
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.58.0
 	github.com/opslevel/opslevel-go/v2023 v2023.12.14
@@ -94,7 +94,7 @@ require (
 	golang.org/x/crypto v0.15.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.18.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.15.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
