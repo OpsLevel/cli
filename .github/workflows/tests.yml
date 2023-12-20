@@ -25,12 +25,8 @@ jobs:
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Lint code
-        run: |-
-          task setup
-          task lint
-      - name: Test code
-        run: task test
+      - name: Run quality checks and test code
+        run: task ci
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
         with:

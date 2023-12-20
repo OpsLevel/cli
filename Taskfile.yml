@@ -7,17 +7,26 @@ env:
   SRC_DIR: "{{.TASKFILE_DIR}}/src"
 
 tasks:
+  ci:
+    desc: Workflow to run in CI
+    cmds:
+      - task: workspace
+      - task: has-latest-opslevel-go
+      - task: install-gofumpt
+      - task: install-golangci-lint
+      - task: lint
+      - task: test
+
   lint:
     desc: Formatting and linting
     dir: "{{.SRC_DIR}}"
     cmds:
-      - task: has-latest-opslevel-go
-      - gofumpt -d .
+      - test -z "$(gofumpt -d -e . | tee /dev/stderr)"
       - go vet ./...
       - golangci-lint run
 
-  lintfix:
-    desc: Fix formatting and linting
+  fix:
+    desc: Fix formatting, linting, go.mod, and update submodule
     dir: "{{.SRC_DIR}}"
     cmds:
       - task: update-opslevel-go
@@ -42,7 +51,6 @@ tasks:
     dir: "{{.SRC_DIR}}"
     cmds:
       - go test -race -coverprofile=coverage.txt -covermode=atomic -v ./... {{ .CLI_ARGS }}
-    silent: true
 
   update-opslevel-go:
     desc: Update opslevel-go version to latest release
@@ -56,9 +64,8 @@ tasks:
     cmds:
       - cmd: echo "Setting up opslevel-go workspace..."
         silent: true
-      - git submodule update --init
-      - git submodule update --remote
-      - go work init || exit 0
+      - git submodule update --init --remote
+      - go work init || true
       - go work use . submodules/opslevel-go
       - cmd: echo "opslevel-go workspace ready!"
         silent: true
