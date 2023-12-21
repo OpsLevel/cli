@@ -4,13 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
+
+var exampleFilterCmd = &cobra.Command{
+	Use:   "filter",
+	Short: "Example filter",
+	Long:  `Example filter`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.FilterCreateInput]())
+	},
+}
 
 var createFilterCmd = &cobra.Command{
 	Use:   "filter",
@@ -30,7 +37,7 @@ predicates:
     value: "rds"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readFilterInput()
+		input, err := readResourceInput[opslevel.FilterCreateInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateFilter(*input)
 		cobra.CheckErr(err)
@@ -93,7 +100,7 @@ EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readFilterInput()
+		input, err := readResourceInput[opslevel.FilterCreateInput]()
 		cobra.CheckErr(err)
 
 		// hack: in the future all ObjectUpdateInput and ObjectCreateInput
@@ -126,19 +133,10 @@ var deleteFilterCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleFilterCmd)
 	createCmd.AddCommand(createFilterCmd)
 	updateCmd.AddCommand(updateFilterCmd)
 	getCmd.AddCommand(getFilterCmd)
 	listCmd.AddCommand(listFilterCmd)
 	deleteCmd.AddCommand(deleteFilterCmd)
-}
-
-func readFilterInput() (*opslevel.FilterCreateInput, error) {
-	readInputConfig()
-	evt := &opslevel.FilterCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }

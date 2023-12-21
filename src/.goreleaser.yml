@@ -49,7 +49,7 @@ brews:
       bin.install "opslevel"
     test: |
       system "#{bin}/opslevel version"
-    tap:
+    repository:
       owner: opslevel
       name: homebrew-tap
       token: "{{ .Env.ORG_GITHUB_TOKEN }}"

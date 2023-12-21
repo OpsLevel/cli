@@ -12,11 +12,18 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
+
+var exampleServiceCmd = &cobra.Command{
+	Use:   "service",
+	Short: "Example service",
+	Long:  `Example service`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.ServiceCreateInput]())
+	},
+}
 
 var createServiceCmd = &cobra.Command{
 	Use:   "service",
@@ -34,7 +41,7 @@ owner:
   alias: "Platform"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readServiceCreateInput()
+		input, err := readResourceInput[opslevel.ServiceCreateInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateService(*input)
 		cobra.CheckErr(err)
@@ -128,7 +135,7 @@ description: "Hello World Service Updated"
 tier: "tier_3"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readServiceUpdateInput()
+		input, err := readResourceInput[opslevel.ServiceUpdateInput]()
 		cobra.CheckErr(err)
 		service, err := getClientGQL().UpdateService(*input)
 		cobra.CheckErr(err)
@@ -231,6 +238,7 @@ EOF
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleServiceCmd)
 	createCmd.AddCommand(createServiceCmd)
 	getCmd.AddCommand(getServiceCmd)
 	listCmd.AddCommand(listServiceCmd)
@@ -242,24 +250,4 @@ func init() {
 	deleteServiceCmd.AddCommand(deleteServiceTagCmd)
 
 	importCmd.AddCommand(importServicesCmd)
-}
-
-func readServiceCreateInput() (*opslevel.ServiceCreateInput, error) {
-	readInputConfig()
-	evt := &opslevel.ServiceCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
-}
-
-func readServiceUpdateInput() (*opslevel.ServiceUpdateInput, error) {
-	readInputConfig()
-	evt := &opslevel.ServiceUpdateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }

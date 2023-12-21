@@ -5,15 +5,22 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var actionType string
+
+var exampleActionCmd = &cobra.Command{
+	Use:   "action",
+	Short: "Example action",
+	Long:  `Example action`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.CustomActionsWebhookActionCreateInput]())
+	},
+}
 
 var createActionCmd = &cobra.Command{
 	Use:   "action --type=$ACTION_TYPE",
@@ -29,7 +36,7 @@ headers:
   accept: "application/vnd.pagerduty+json;version=2"
   authorization: "Token token=XXXXXXXXXXXXX"
   from: "someone@example.com"
-payload: |
+liquidTemplate: |
   {
       "incident": {
           "type": "incident",
@@ -48,7 +55,7 @@ EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		switch actionType {
 		case "webhook":
-			input, err := readWebhookActionCreateInput()
+			input, err := readResourceInput[opslevel.CustomActionsWebhookActionCreateInput]()
 			cobra.CheckErr(err)
 			result, err := getClientGQL().CreateWebhookAction(*input)
 			cobra.CheckErr(err)
@@ -113,7 +120,7 @@ EOF`,
 		key := args[0]
 		switch actionType {
 		case "webhook":
-			input, err := readWebhookActionUpdateInput()
+			input, err := readResourceInput[opslevel.CustomActionsWebhookActionUpdateInput]()
 			input.Id = *opslevel.NewID(key)
 			cobra.CheckErr(err)
 			action, err := getClientGQL().UpdateWebhookAction(*input)
@@ -141,6 +148,7 @@ var deleteActionCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleActionCmd)
 	createCmd.AddCommand(createActionCmd)
 	createActionCmd.Flags().StringVar(&actionType, "type", "webhook", "action type, default=webhook")
 	updateCmd.AddCommand(updateActionCmd)
@@ -148,24 +156,4 @@ func init() {
 	getCmd.AddCommand(getActionCmd)
 	listCmd.AddCommand(listActionCmd)
 	deleteCmd.AddCommand(deleteActionCmd)
-}
-
-func readWebhookActionCreateInput() (*opslevel.CustomActionsWebhookActionCreateInput, error) {
-	readInputConfig()
-	evt := &opslevel.CustomActionsWebhookActionCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
-}
-
-func readWebhookActionUpdateInput() (*opslevel.CustomActionsWebhookActionUpdateInput, error) {
-	readInputConfig()
-	evt := &opslevel.CustomActionsWebhookActionUpdateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }

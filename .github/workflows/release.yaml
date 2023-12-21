@@ -22,7 +22,7 @@ jobs:
       - name: Fetch All Tags
         run: git fetch --force --tags
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: "1.21"
       - name: Cache Go modules
@@ -77,7 +77,7 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5.0.0
         with:
-          args: release --rm-dist --release-notes=../.changes/${{ steps.version.outputs.RELEASE_VERSION }}.md
+          args: release --clean --release-notes=../.changes/${{ steps.version.outputs.RELEASE_VERSION }}.md
           workdir: ./src
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}

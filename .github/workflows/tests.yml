@@ -17,7 +17,7 @@ jobs:
       - name: Fetch all tags
         run: git fetch --force --tags
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: '1.21'
       - name: Install Task
@@ -25,10 +25,8 @@ jobs:
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run Tests
-        run: |-
-          task workspace
-          task test
+      - name: Run quality checks and test code
+        run: task ci
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
         with:

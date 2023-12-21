@@ -3,10 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // CLIServiceDependencyCreateInput This is used to make the user facing CLI experience better
@@ -15,6 +13,15 @@ type CLIServiceDependencyCreateInput struct {
 	Source string `json:"source"`
 	Target string `json:"target"`
 	Notes  string `json:"notes,omitempty"`
+}
+
+var exampleServiceDependencyCmd = &cobra.Command{
+	Use:   "dependency",
+	Short: "Example service dependency",
+	Long:  `Example service dependency`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.ServiceDependencyCreateInput]())
+	},
 }
 
 var createServiceDependencyCmd = &cobra.Command{
@@ -54,12 +61,13 @@ opslevel delete service dependency XXX # ID of the dependency entity returned by
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleServiceDependencyCmd)
 	createServiceCmd.AddCommand(createServiceDependencyCmd)
 	deleteServiceCmd.AddCommand(deleteServiceDependencyCmd)
 }
 
 func readCreateServiceDependencyInput() (*opslevel.ServiceDependencyCreateInput, error) {
-	in, err := readDependencyInput()
+	in, err := readResourceInput[CLIServiceDependencyCreateInput]()
 	if err != nil {
 		return nil, err
 	}
@@ -71,14 +79,4 @@ func readCreateServiceDependencyInput() (*opslevel.ServiceDependencyCreateInput,
 		Notes: in.Notes,
 	}
 	return output, nil
-}
-
-func readDependencyInput() (*CLIServiceDependencyCreateInput, error) {
-	readInputConfig()
-	evt := &CLIServiceDependencyCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }

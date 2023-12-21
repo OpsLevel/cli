@@ -5,21 +5,28 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
 )
+
+var exampleTeamCmd = &cobra.Command{
+	Use:   "team",
+	Short: "Example team",
+	Long:  `Example team`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.TeamCreateInput]())
+	},
+}
 
 var createTeamCmd = &cobra.Command{
 	Use:   "team NAME",
 	Short: "Create a team",
 	Example: `opslevel create team my-team
 
-cat << EOF | opslevel create team my-team" -f -
+cat << EOF | opslevel create team my-team -f -
 managerEmail: "manager@example.com"
 parentTeam:
   alias: "parent-team"
@@ -29,12 +36,21 @@ EOF`,
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readTeamCreateInput()
+		input, err := readResourceInput[opslevel.TeamCreateInput]()
 		input.Name = key
 		cobra.CheckErr(err)
 		team, err := getClientGQL().CreateTeam(*input)
 		cobra.CheckErr(err)
 		fmt.Println(team.Id)
+	},
+}
+
+var exampleMemberCmd = &cobra.Command{
+	Use:   "member",
+	Short: "Example member",
+	Long:  `Example member`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.TeamMembershipUserInput]())
 	},
 }
 
@@ -69,45 +85,53 @@ var createMemberCmd = &cobra.Command{
 	},
 }
 
-var (
-	contactType      string
-	createContactCmd = &cobra.Command{
-		Use:   "contact {TEAM_ID|TEAM_ALIAS} ADDRESS DISPLAYNAME",
-		Short: "Add a contact to a team",
-		Example: `opslevel create contact --type=slack my-team #general General
-opslevel create contact --type=email my-team team@example.com "Mailing List"`,
-		Args:       cobra.MinimumNArgs(2),
-		ArgAliases: []string{"TEAM_ID", "TEAM_ALIAS", "ADDRESS", "DISPLAYNAME"},
-		Run: func(cmd *cobra.Command, args []string) {
-			key := args[0]
-			address := args[1]
-			displayName := common.GetArg(args, 2, "")
+var contactType string
 
-			var team *opslevel.Team
-			var err error
-			if opslevel.IsID(key) {
-				team, err = getClientGQL().GetTeam(opslevel.ID(key))
-			} else {
-				team, err = getClientGQL().GetTeamWithAlias(key)
-			}
-			cobra.CheckErr(err)
-			common.WasFound(team.Id == "", key)
-			contactInput := opslevel.CreateContactSlack(address, &displayName)
-			switch contactType {
-			case string(opslevel.ContactTypeEmail):
-				contactInput = opslevel.CreateContactEmail(address, &displayName)
-			case string(opslevel.ContactTypeWeb):
-				contactInput = opslevel.CreateContactWeb(address, &displayName)
-			}
-			contact, err := getClientGQL().AddContact(team.TeamId.Alias, contactInput)
-			cobra.CheckErr(err)
-			if contact.Id == "" {
-				cobra.CheckErr(fmt.Errorf("unable to create contact '%+v'", contactInput))
-			}
-			fmt.Printf("create contact '%+v' on team '%s'\n", contactInput, team.Alias)
-		},
-	}
-)
+var exampleContactCmd = &cobra.Command{
+	Use:   "contact",
+	Short: "Example contact to a team",
+	Long:  `Example contact to a team`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.ContactInput]())
+	},
+}
+
+var createContactCmd = &cobra.Command{
+	Use:   "contact {TEAM_ID|TEAM_ALIAS} ADDRESS DISPLAYNAME",
+	Short: "Add a contact to a team",
+	Example: `opslevel create contact --type=slack my-team #general General
+opslevel create contact --type=email my-team team@example.com "Mailing List"`,
+	Args:       cobra.MinimumNArgs(2),
+	ArgAliases: []string{"TEAM_ID", "TEAM_ALIAS", "ADDRESS", "DISPLAYNAME"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		address := args[1]
+		displayName := common.GetArg(args, 2, "")
+
+		var team *opslevel.Team
+		var err error
+		if opslevel.IsID(key) {
+			team, err = getClientGQL().GetTeam(opslevel.ID(key))
+		} else {
+			team, err = getClientGQL().GetTeamWithAlias(key)
+		}
+		cobra.CheckErr(err)
+		common.WasFound(team.Id == "", key)
+		contactInput := opslevel.CreateContactSlack(address, &displayName)
+		switch contactType {
+		case string(opslevel.ContactTypeEmail):
+			contactInput = opslevel.CreateContactEmail(address, &displayName)
+		case string(opslevel.ContactTypeWeb):
+			contactInput = opslevel.CreateContactWeb(address, &displayName)
+		}
+		contact, err := getClientGQL().AddContact(team.TeamId.Alias, contactInput)
+		cobra.CheckErr(err)
+		if contact.Id == "" {
+			cobra.CheckErr(fmt.Errorf("unable to create contact '%+v'", contactInput))
+		}
+		fmt.Printf("create contact '%+v' on team '%s'\n", contactInput, team.Alias)
+	},
+}
 
 var createTeamTagCmd = &cobra.Command{
 	Use:        "tag",
@@ -124,7 +148,7 @@ var updateTeamCmd = &cobra.Command{
 	Use:   "team {ID|ALIAS}",
 	Short: "Update a team",
 	Example: `
-cat << EOF | opslevel update team my-team" -f -
+cat << EOF | opslevel update team my-team -f -
 managerEmail: "manager@example.com""
 parentTeam:
   alias: "parent-team-2"
@@ -135,7 +159,7 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readTeamUpdateInput()
+		input, err := readResourceInput[opslevel.TeamUpdateInput]()
 		input.Id = opslevel.ID(key)
 		cobra.CheckErr(err)
 		team, err := getClientGQL().UpdateTeam(*input)
@@ -315,39 +339,29 @@ EOF
 }
 
 func init() {
+	// Team commands
+	exampleCmd.AddCommand(exampleTeamCmd)
 	createCmd.AddCommand(createTeamCmd)
-	createCmd.AddCommand(createMemberCmd)
-	createCmd.AddCommand(createContactCmd)
-	createTeamCmd.AddCommand(createTeamTagCmd)
 	updateCmd.AddCommand(updateTeamCmd)
-	getCmd.AddCommand(getTeamCmd)
-	getTeamCmd.AddCommand(getTeamTagCmd)
-	listCmd.AddCommand(listTeamCmd)
 	deleteCmd.AddCommand(deleteTeamCmd)
-	deleteCmd.AddCommand(deleteMemberCmd)
-	deleteCmd.AddCommand(deleteContactCmd)
-	deleteTeamCmd.AddCommand(deleteTeamTagCmd)
+	getCmd.AddCommand(getTeamCmd)
+	listCmd.AddCommand(listTeamCmd)
 	importCmd.AddCommand(importTeamsCmd)
 
+	// Team Tag commands
+	createTeamCmd.AddCommand(createTeamTagCmd)
+	deleteTeamCmd.AddCommand(deleteTeamTagCmd)
+
+	// Team Membership commands
+	exampleCmd.AddCommand(exampleMemberCmd)
+	createCmd.AddCommand(createMemberCmd)
+	deleteCmd.AddCommand(deleteMemberCmd)
+	getTeamCmd.AddCommand(getTeamTagCmd)
+
+	// Team Contact commands
+	exampleCmd.AddCommand(exampleContactCmd)
+	createCmd.AddCommand(createContactCmd)
+	deleteCmd.AddCommand(deleteContactCmd)
+
 	createContactCmd.Flags().StringVarP(&contactType, "type", "t", "slack", "The contact type. One of: slack|email|web [default: slack]")
-}
-
-func readTeamCreateInput() (*opslevel.TeamCreateInput, error) {
-	readInputConfig()
-	evt := &opslevel.TeamCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
-}
-
-func readTeamUpdateInput() (*opslevel.TeamUpdateInput, error) {
-	readInputConfig()
-	evt := &opslevel.TeamUpdateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }

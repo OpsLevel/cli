@@ -4,13 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/opslevel-go/v2023"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
+
+var exampleTriggerDefinitionCmd = &cobra.Command{
+	Use:   "trigger-definition",
+	Short: "Example Scorecard",
+	Long:  `Example Scorecard`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.CustomActionsTriggerDefinitionCreateInput]())
+	},
+}
 
 var createTriggerDefinitionCmd = &cobra.Command{
 	Use:   "trigger-definition",
@@ -46,7 +53,7 @@ responseTemplate: |
   {% endif %}
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readTriggerDefinitionCreateInput()
+		input, err := readResourceInput[opslevel.CustomActionsTriggerDefinitionCreateInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateTriggerDefinition(*input)
 		cobra.CheckErr(err)
@@ -105,7 +112,7 @@ EOF`,
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readTriggerDefinitionUpdateInput()
+		input, err := readResourceInput[opslevel.CustomActionsTriggerDefinitionUpdateInput]()
 		input.Id = *opslevel.NewID(key)
 		cobra.CheckErr(err)
 		triggerDefinition, err := getClientGQL().UpdateTriggerDefinition(*input)
@@ -129,29 +136,10 @@ var deleteTriggerDefinitionCmd = &cobra.Command{
 }
 
 func init() {
+	exampleCmd.AddCommand(exampleTriggerDefinitionCmd)
 	createCmd.AddCommand(createTriggerDefinitionCmd)
 	updateCmd.AddCommand(updateTriggerDefinitionCmd)
 	getCmd.AddCommand(getTriggerDefinitionCmd)
 	listCmd.AddCommand(listTriggerDefinitionCmd)
 	deleteCmd.AddCommand(deleteTriggerDefinitionCmd)
-}
-
-func readTriggerDefinitionCreateInput() (*opslevel.CustomActionsTriggerDefinitionCreateInput, error) {
-	readInputConfig()
-	evt := &opslevel.CustomActionsTriggerDefinitionCreateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
-}
-
-func readTriggerDefinitionUpdateInput() (*opslevel.CustomActionsTriggerDefinitionUpdateInput, error) {
-	readInputConfig()
-	evt := &opslevel.CustomActionsTriggerDefinitionUpdateInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }

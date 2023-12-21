@@ -8,13 +8,20 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
+
+var exampleUserCmd = &cobra.Command{
+	Use:   "user",
+	Short: "Example User",
+	Long:  `Example User`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.UserInput]())
+	},
+}
 
 var createUserCmd = &cobra.Command{
 	Use:   "user EMAIL NAME [ROLE]",
@@ -62,7 +69,7 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readUserInput()
+		input, err := readResourceInput[opslevel.UserInput]()
 		cobra.CheckErr(err)
 		filter, err := getClientGQL().UpdateUser(key, *input)
 		cobra.CheckErr(err)
@@ -207,20 +214,11 @@ EOF
 func init() {
 	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set the welcome e-mail will be skipped from being sent")
 
+	exampleCmd.AddCommand(exampleUserCmd)
 	createCmd.AddCommand(createUserCmd)
 	updateCmd.AddCommand(updateUserCmd)
 	getCmd.AddCommand(getUserCmd)
 	listCmd.AddCommand(listUserCmd)
 	deleteCmd.AddCommand(deleteUserCmd)
 	importCmd.AddCommand(importUsersCmd)
-}
-
-func readUserInput() (*opslevel.UserInput, error) {
-	readInputConfig()
-	evt := &opslevel.UserInput{}
-	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
-	return evt, nil
 }
