@@ -38,6 +38,31 @@ EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
 	},
 }
 
+var updatePropertyDefinitonCmd = &cobra.Command{
+	Use:   "property-definition",
+	Short: "Update a property-definition",
+	Long:  `Update a property-definition`,
+	Example: fmt.Sprintf(`
+cat << EOF | opslevel update property-definition propdef3 -f -
+%s
+EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		identifier := args[0]
+		input, err := readPropertyDefinitionInput()
+		cobra.CheckErr(err)
+		result, err := getClientGQL().UpdatePropertyDefinition(identifier, *input)
+		cobra.CheckErr(err)
+
+		if isYamlOutput() {
+			common.YamlPrint(result)
+		} else {
+			common.PrettyPrint(result)
+		}
+	},
+}
+
 // The schema in PropertyDefinitionInput can be a nested map[string]any and needs to be handled separately
 func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
 	d, err := readResourceInput[map[string]any]()
@@ -58,10 +83,10 @@ func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
 		Schema: opslevel.JSON(schema),
 	}
 
-	if description, ok := data["description"].(string); !ok {
+	if description, ok := data["description"].(string); ok {
 		propDefInput.Description = description
 	}
-	if propertyDisplayStatus, ok := data["propertyDisplayStatus"].(string); !ok {
+	if propertyDisplayStatus, ok := data["propertyDisplayStatus"].(string); ok {
 		propDefInput.PropertyDisplayStatus = opslevel.PropertyDisplayStatusEnum(propertyDisplayStatus)
 	}
 
@@ -126,6 +151,7 @@ var deletePropertyDefinitonCmd = &cobra.Command{
 func init() {
 	exampleCmd.AddCommand(examplePropertyDefinitionCmd)
 	createCmd.AddCommand(createPropertyDefinitonCmd)
+	updateCmd.AddCommand(updatePropertyDefinitonCmd)
 	getCmd.AddCommand(getPropertyDefinition)
 	listCmd.AddCommand(listPropertyDefinitionsCmd)
 	deleteCmd.AddCommand(deletePropertyDefinitonCmd)
