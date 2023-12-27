@@ -42,6 +42,41 @@ var getPropertyCmd = &cobra.Command{
 	},
 }
 
+var listPropertyCmd = &cobra.Command{
+	Use:        "property",
+	Short:      "List properties on a Service",
+	Aliases:    []string{"propertys", "properties"},
+	Long:       "List properties on a Service identified by ID or Alias",
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"SERVICE_ID", "SERVICE_ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		var service *opslevel.Service
+		var err error
+		if opslevel.IsID(args[0]) {
+			service, err = getClientGQL().GetService(*opslevel.NewID(args[0]))
+		} else {
+			service, err = getClientGQL().GetServiceWithAlias(args[0])
+		}
+		cobra.CheckErr(err)
+		properties, err := service.GetProperties(getClientGQL(), nil)
+		cobra.CheckErr(err)
+
+		if isJsonOutput() {
+			common.JsonPrint(json.MarshalIndent(properties.Nodes, "", "    "))
+		} else {
+			w := common.NewTabWriter("DEFINITION_ID", "VALUE", "LEN_VALIDATION_ERRORS")
+			for _, prop := range properties.Nodes {
+				var valueOutput string
+				if prop.Value != nil {
+					valueOutput = string(*prop.Value)
+				}
+				fmt.Fprintf(w, "%s\t%s\t%d\n", string(prop.Definition.Id), valueOutput, len(prop.ValidationErrors))
+			}
+			w.Flush()
+		}
+	},
+}
+
 var assignPropertyCmd = &cobra.Command{
 	Use:   "property",
 	Short: "Assign a Property",
@@ -221,6 +256,7 @@ func init() {
 	assignCmd.AddCommand(assignPropertyCmd)
 	unassignCmd.AddCommand(unassignPropertyCmd)
 	getCmd.AddCommand(getPropertyCmd)
+	listCmd.AddCommand(listPropertyCmd)
 
 	// Property Definition Commands
 	exampleCmd.AddCommand(examplePropertyDefinitionCmd)
