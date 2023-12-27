@@ -38,6 +38,24 @@ EOF`, getYaml[opslevel.PropertyInput]()),
 	},
 }
 
+var unassignPropertyCmd = &cobra.Command{
+	Use:        "property",
+	Short:      "Unassign a Property",
+	Long:       `Unassign a Property from an Owner by Id or Alias`,
+	Example:    `opslevel unassign property owner-alias property-id`,
+	Args:       cobra.ExactArgs(2),
+	ArgAliases: []string{"OWNER_ID", "PROPERTY_ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		ownerId := args[0]
+		propertyId := args[1]
+
+		err := getClientGQL().PropertyUnassign(ownerId, propertyId)
+		cobra.CheckErr(err)
+
+		fmt.Printf("unassigned property '%s' from '%s'\n", propertyId, ownerId)
+	},
+}
+
 var examplePropertyDefinitionCmd = &cobra.Command{
 	Use:   "property-definition",
 	Short: "Example Property Definition",
@@ -179,6 +197,7 @@ func init() {
 	// Property Commands
 	exampleCmd.AddCommand(examplePropertyCmd)
 	assignCmd.AddCommand(assignPropertyCmd)
+	unassignCmd.AddCommand(unassignPropertyCmd)
 
 	// Property Definition Commands
 	exampleCmd.AddCommand(examplePropertyDefinitionCmd)

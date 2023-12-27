@@ -11,8 +11,15 @@ var assignCmd = &cobra.Command{
 	Long:  "Assign properties to resources",
 }
 
+var unassignCmd = &cobra.Command{
+	Use:   "unassign",
+	Short: "Unassign properties from resources",
+	Long:  "Unassign properties from resources",
+}
+
 func init() {
 	rootCmd.AddCommand(assignCmd)
+	rootCmd.AddCommand(unassignCmd)
 
 	assignCmd.PersistentFlags().StringVarP(&dataFile, "file", "f", "-", "File to read data from. If '.' then reads from './data.yaml'. Defaults to reading from stdin.")
 	viper.BindPFlags(assignCmd.Flags())
