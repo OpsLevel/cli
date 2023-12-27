@@ -60,7 +60,7 @@ EOF`, getYaml[opslevel.PropertyInput]()),
 		newProperty, err := getClientGQL().PropertyAssign(*input)
 		cobra.CheckErr(err)
 
-		fmt.Printf("assigned property '%s' on '%s'\n", newProperty.Definition.Id, newProperty.Owner.Id)
+		fmt.Printf("assigned property '%s' on '%s'\n", newProperty.Definition.Id, newProperty.Owner.Id())
 	},
 }
 
