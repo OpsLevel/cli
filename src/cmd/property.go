@@ -84,7 +84,7 @@ var listPropertyCmd = &cobra.Command{
 var assignPropertyCmd = &cobra.Command{
 	Use:   "property",
 	Short: "Assign a Property",
-	Long:  `Assign a Property`,
+	Long:  `Assign a Property to an Entity by Id or Alias`,
 	Example: fmt.Sprintf(`
 cat << EOF | opslevel assign property-definition -f -
 %s
@@ -102,7 +102,7 @@ EOF`, getYaml[opslevel.PropertyInput]()),
 var unassignPropertyCmd = &cobra.Command{
 	Use:        "property",
 	Short:      "Unassign a Property",
-	Long:       `Unassign a Property from an Owner by Id or Alias`,
+	Long:       `Unassign a Property from an Entity by Id or Alias`,
 	Example:    `opslevel unassign property owner-alias property-id`,
 	Args:       cobra.ExactArgs(2),
 	ArgAliases: []string{"ID", "ALIAS"},
