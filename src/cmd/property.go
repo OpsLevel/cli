@@ -126,7 +126,7 @@ var examplePropertyDefinitionCmd = &cobra.Command{
 	},
 }
 
-var createPropertyDefinitonCmd = &cobra.Command{
+var createPropertyDefinitionCmd = &cobra.Command{
 	Use:   "property-definition",
 	Short: "Create a property-definition",
 	Long:  `Create a property-definition`,
@@ -144,7 +144,7 @@ EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
 	},
 }
 
-var updatePropertyDefinitonCmd = &cobra.Command{
+var updatePropertyDefinitionCmd = &cobra.Command{
 	Use:   "property-definition",
 	Short: "Update a property-definition",
 	Long:  `Update a property-definition`,
@@ -240,7 +240,7 @@ var listPropertyDefinitionsCmd = &cobra.Command{
 	},
 }
 
-var deletePropertyDefinitonCmd = &cobra.Command{
+var deletePropertyDefinitionCmd = &cobra.Command{
 	Use:        "property-definition ID",
 	Short:      "Delete a property definitions",
 	Long:       "Delete a property definitions",
@@ -264,9 +264,9 @@ func init() {
 
 	// Property Definition Commands
 	exampleCmd.AddCommand(examplePropertyDefinitionCmd)
-	createCmd.AddCommand(createPropertyDefinitonCmd)
-	updateCmd.AddCommand(updatePropertyDefinitonCmd)
+	createCmd.AddCommand(createPropertyDefinitionCmd)
+	updateCmd.AddCommand(updatePropertyDefinitionCmd)
 	getCmd.AddCommand(getPropertyDefinitionCmd)
 	listCmd.AddCommand(listPropertyDefinitionsCmd)
-	deleteCmd.AddCommand(deletePropertyDefinitonCmd)
+	deleteCmd.AddCommand(deletePropertyDefinitionCmd)
 }
