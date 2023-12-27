@@ -33,6 +33,10 @@ var getPropertyCmd = &cobra.Command{
 
 		result, err := getClientGQL().GetProperty(ownerId, propertyId)
 		cobra.CheckErr(err)
+		if result.Definition.Id == "" && result.Owner.Id() == "" {
+			err = fmt.Errorf("property '%s' on entity '%s' not found\n", propertyId, ownerId)
+			cobra.CheckErr(err)
+		}
 
 		if isYamlOutput() {
 			common.YamlPrint(result)
