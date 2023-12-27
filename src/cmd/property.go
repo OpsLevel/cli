@@ -11,6 +11,33 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var examplePropertyCmd = &cobra.Command{
+	Use:   "property",
+	Short: "Example Property",
+	Long:  `Example Property`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getExample[opslevel.PropertyInput]())
+	},
+}
+
+var assignPropertyCmd = &cobra.Command{
+	Use:   "property",
+	Short: "Assign a Property",
+	Long:  `Assign a Property`,
+	Example: fmt.Sprintf(`
+cat << EOF | opslevel assign property-definition -f -
+%s
+EOF`, getYaml[opslevel.PropertyInput]()),
+	Run: func(cmd *cobra.Command, args []string) {
+		input, err := readResourceInput[opslevel.PropertyInput]()
+		cobra.CheckErr(err)
+		newProperty, err := getClientGQL().PropertyAssign(*input)
+		cobra.CheckErr(err)
+
+		fmt.Println(newProperty.Definition.Id)
+	},
+}
+
 var examplePropertyDefinitionCmd = &cobra.Command{
 	Use:   "property-definition",
 	Short: "Example Property Definition",
@@ -93,7 +120,7 @@ func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
 	return &propDefInput, nil
 }
 
-var getPropertyDefinition = &cobra.Command{
+var getPropertyDefinitionCmd = &cobra.Command{
 	Use:        "property-definition",
 	Short:      "Get details about a property definition",
 	Long:       `Get details about a property definition`,
@@ -149,10 +176,15 @@ var deletePropertyDefinitonCmd = &cobra.Command{
 }
 
 func init() {
+	// Property Commands
+	exampleCmd.AddCommand(examplePropertyCmd)
+	assignCmd.AddCommand(assignPropertyCmd)
+
+	// Property Definition Commands
 	exampleCmd.AddCommand(examplePropertyDefinitionCmd)
 	createCmd.AddCommand(createPropertyDefinitonCmd)
 	updateCmd.AddCommand(updatePropertyDefinitonCmd)
-	getCmd.AddCommand(getPropertyDefinition)
+	getCmd.AddCommand(getPropertyDefinitionCmd)
 	listCmd.AddCommand(listPropertyDefinitionsCmd)
 	deleteCmd.AddCommand(deletePropertyDefinitonCmd)
 }
