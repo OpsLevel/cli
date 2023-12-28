@@ -75,7 +75,7 @@ var getActionCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		action, err := getClientGQL().GetCustomAction(*opslevel.NewIdentifier(key))
+		action, err := getClientGQL().GetCustomAction(key)
 		cobra.CheckErr(err)
 		common.PrettyPrint(action)
 	},
@@ -141,7 +141,7 @@ var deleteActionCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		err := getClientGQL().DeleteWebhookAction(*opslevel.NewIdentifier(key))
+		err := getClientGQL().DeleteWebhookAction(key)
 		cobra.CheckErr(err)
 		fmt.Printf("deleted webhook action: %s\n", key)
 	},
