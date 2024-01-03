@@ -1,0 +1,21 @@
+name: CodeQL Analysis with latest Go version
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: test and analyze
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+
+      - name: CodeQL analyze with Go
+        uses: opslevel/actions/codeql-go@main
+        with:
+          go_mod_path: src
