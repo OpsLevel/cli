@@ -103,3 +103,5 @@ require (
 	nhooyr.io/websocket v1.8.10 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
+
+replace github.com/opslevel/opslevel-go/v2023 => ./submodules/opslevel-go
