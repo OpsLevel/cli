@@ -249,8 +249,11 @@ func readInfraInput() (*opslevel.InfraInput, error) {
 	cobra.CheckErr(err)
 	evt := &opslevel.InfraInput{}
 	cobra.CheckErr(yaml.Unmarshal(file, &evt))
+	log.Info().Msgf("before %s %s %+v +%v\n", evt.Schema, *evt.Owner, evt.Provider, evt.Data)
 	if err := defaults.Set(evt); err != nil {
 		return nil, err
 	}
+	log.Info().Msgf("after %s %s %+v +%v\n", evt.Schema, *evt.Owner, evt.Provider, evt.Data)
+	panic("bye")
 	return evt, nil
 }
