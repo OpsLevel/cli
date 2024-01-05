@@ -1,3 +1,0 @@
-kind: Bugfix
-body: Fix bug in Infra where unexpected data would be included in requests
-time: 2024-01-05T15:42:08.827698-05:00

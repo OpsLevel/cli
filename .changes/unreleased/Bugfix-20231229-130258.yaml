@@ -1,3 +1,0 @@
-kind: Bugfix
-body: Fix bugs where unset ID/IdentifierInput fields were not being omitted on update
-time: 2023-12-29T13:02:58.119377-05:00
