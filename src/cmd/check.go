@@ -6,7 +6,6 @@ import (
 
 	"github.com/opslevel/opslevel-go/v2023"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -466,8 +465,5 @@ func readCheckInput() (*CheckInputType, error) {
 	// Unmarshall
 	evt := &CheckInputType{}
 	viper.Unmarshal(&evt)
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
 	return evt, nil
 }
