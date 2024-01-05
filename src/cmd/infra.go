@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/creasty/defaults"
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/rs/zerolog/log"
@@ -249,8 +248,5 @@ func readInfraInput() (*opslevel.InfraInput, error) {
 	cobra.CheckErr(err)
 	evt := &opslevel.InfraInput{}
 	cobra.CheckErr(yaml.Unmarshal(file, &evt))
-	if err := defaults.Set(evt); err != nil {
-		return nil, err
-	}
 	return evt, nil
 }
