@@ -5,4 +5,4 @@ src/dist
 go.work*
 **coverage.txt
 src/*.yaml
-
+.vscode/
