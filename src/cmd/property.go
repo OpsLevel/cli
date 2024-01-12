@@ -171,7 +171,7 @@ EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
 
 // The schema in PropertyDefinitionInput can be a nested map[string]any and needs to be handled separately
 func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
-	d, err := readResourceInput[map[string]any]()
+	d, err := readResourceInput[opslevel.JSONSchema]()
 	if err != nil {
 		return nil, err
 	}
@@ -184,16 +184,17 @@ func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
 	if !ok {
 		return nil, fmt.Errorf("schema is required and must be a JSON object")
 	}
+	jsonSchema := opslevel.JSONSchema(schema)
 	propDefInput := opslevel.PropertyDefinitionInput{
-		Name:   name,
-		Schema: opslevel.JSON(schema),
+		Name:   opslevel.RefOf(name),
+		Schema: &jsonSchema,
 	}
 
 	if description, ok := data["description"].(string); ok {
-		propDefInput.Description = description
+		propDefInput.Description = opslevel.RefOf(description)
 	}
 	if propertyDisplayStatus, ok := data["propertyDisplayStatus"].(string); ok {
-		propDefInput.PropertyDisplayStatus = opslevel.PropertyDisplayStatusEnum(propertyDisplayStatus)
+		propDefInput.PropertyDisplayStatus = opslevel.RefOf(opslevel.PropertyDisplayStatusEnum(propertyDisplayStatus))
 	}
 
 	return &propDefInput, nil

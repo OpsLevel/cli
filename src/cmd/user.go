@@ -46,9 +46,9 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
 		skipEmail, err := cmd.Flags().GetBool("skip-welcome-email")
 
 		resource, err := getClientGQL().InviteUser(email, opslevel.UserInput{
-			Name:             name,
-			Role:             role,
-			SkipWelcomeEmail: skipEmail,
+			Name:             opslevel.RefOf(name),
+			Role:             opslevel.RefOf(role),
+			SkipWelcomeEmail: opslevel.RefOf(skipEmail),
 		})
 		cobra.CheckErr(err)
 		fmt.Println(resource.Id)
@@ -179,8 +179,8 @@ EOF
 				userRole = opslevel.UserRole(role)
 			}
 			input := opslevel.UserInput{
-				Name: name,
-				Role: userRole,
+				Name: opslevel.RefOf(name),
+				Role: opslevel.RefOf(userRole),
 			}
 			user, err := getClientGQL().InviteUser(email, input)
 			if err != nil {
@@ -196,8 +196,8 @@ EOF
 					continue
 				}
 				newMembership := opslevel.TeamMembershipUserInput{
-					User: opslevel.NewUserIdentifier(email),
-					Role: string(user.Role),
+					User: opslevel.RefOf(opslevel.NewUserIdentifier(email)),
+					Role: opslevel.RefOf(string(user.Role)),
 				}
 				_, err = getClientGQL().AddMemberships(&t.TeamId, newMembership)
 				if err != nil {

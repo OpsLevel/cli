@@ -154,7 +154,7 @@ var deleteServiceCmd = &cobra.Command{
 		var err error
 		if opslevel.IsID(key) {
 			err = getClientGQL().DeleteService(opslevel.ServiceDeleteInput{
-				Id: opslevel.ID(key),
+				Id: opslevel.NewID(key),
 			})
 			cobra.CheckErr(err)
 		} else {
@@ -203,27 +203,27 @@ EOF
 			name := reader.Text("Name")
 			input := opslevel.ServiceCreateInput{
 				Name:        name,
-				Description: reader.Text("Description"),
-				Product:     reader.Text("Product"),
-				Language:    reader.Text("Language"),
-				Framework:   reader.Text("Framework"),
+				Description: opslevel.RefOf(reader.Text("Description")),
+				Product:     opslevel.RefOf(reader.Text("Product")),
+				Language:    opslevel.RefOf(reader.Text("Language")),
+				Framework:   opslevel.RefOf(reader.Text("Framework")),
 			}
 			tier := reader.Text("Tier")
 			if tier != "" {
 				if item, ok := opslevel.Cache.Tiers[tier]; ok {
-					input.Tier = item.Alias
+					input.TierAlias = &item.Alias
 				}
 			}
 			lifecycle := reader.Text("Lifecycle")
 			if lifecycle != "" {
 				if item, ok := opslevel.Cache.Lifecycles[lifecycle]; ok {
-					input.Lifecycle = item.Alias
+					input.LifecycleAlias = &item.Alias
 				}
 			}
 			owner := reader.Text("Owner")
 			if owner != "" {
 				if item, ok := opslevel.Cache.Teams[owner]; ok {
-					input.Owner = opslevel.NewIdentifier(item.Alias)
+					input.OwnerInput = opslevel.NewIdentifier(item.Alias)
 				}
 			}
 			service, err := getClientGQL().CreateService(input)

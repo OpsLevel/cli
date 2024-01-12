@@ -51,10 +51,10 @@ opslevel create tag --type=Infra my-infra-alias foo bar
 			input := opslevel.TagAssignInput{Tags: []opslevel.TagInput{tagInput}}
 
 			if opslevel.IsID(resource) {
-				input.Id = opslevel.ID(resource)
+				input.Id = opslevel.NewID(resource)
 			} else {
-				input.Alias = resource
-				input.Type = opslevel.TaggableResource(resourceType)
+				input.Alias = opslevel.RefOf(resource)
+				input.Type = opslevel.RefOf(opslevel.TaggableResource(resourceType))
 			}
 
 			result, err := getClientGQL().AssignTag(input)
@@ -66,10 +66,10 @@ opslevel create tag --type=Infra my-infra-alias foo bar
 				Value: value,
 			}
 			if opslevel.IsID(resource) {
-				input.Id = opslevel.ID(resource)
+				input.Id = opslevel.NewID(resource)
 			} else {
-				input.Alias = resource
-				input.Type = opslevel.TaggableResource(resourceType)
+				input.Alias = opslevel.RefOf(resource)
+				input.Type = opslevel.RefOf(opslevel.TaggableResource(resourceType))
 			}
 
 			result, err := getClientGQL().CreateTag(input)
@@ -156,8 +156,8 @@ opslevel update tag XXX_TAG_ID_XXX foo baz
 
 		input := opslevel.TagUpdateInput{
 			Id:    opslevel.ID(tag),
-			Key:   key,
-			Value: value,
+			Key:   opslevel.RefOf(key),
+			Value: opslevel.RefOf(value),
 		}
 
 		result, err := getClientGQL().UpdateTag(input)
