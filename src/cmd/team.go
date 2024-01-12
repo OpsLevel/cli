@@ -75,9 +75,10 @@ var createMemberCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		common.WasFound(team.Id == "", key)
 
+		userIdentifierInput := opslevel.NewUserIdentifier(email)
 		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
-			User: opslevel.NewUserIdentifier(email),
-			Role: role,
+			User: &userIdentifierInput,
+			Role: opslevel.RefOf(role),
 		}
 		_, addErr := getClientGQL().AddMemberships(&team.TeamId, teamMembershipUserInput)
 		cobra.CheckErr(addErr)
@@ -160,7 +161,7 @@ EOF
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		input, err := readResourceInput[opslevel.TeamUpdateInput]()
-		input.Id = opslevel.ID(key)
+		input.Id = opslevel.NewID(key)
 		cobra.CheckErr(err)
 		team, err := getClientGQL().UpdateTeam(*input)
 		cobra.CheckErr(err)
@@ -267,8 +268,9 @@ var deleteMemberCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		common.WasFound(team.Id == "", key)
 
+		userIdentifierInput := opslevel.NewUserIdentifier(email)
 		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
-			User: opslevel.NewUserIdentifier(email),
+			User: &userIdentifierInput,
 		}
 		_, removeErr := getClientGQL().RemoveMemberships(&team.TeamId, teamMembershipUserInput)
 		cobra.CheckErr(removeErr)
@@ -320,9 +322,9 @@ EOF
 		for reader.Rows() {
 			name := reader.Text("Name")
 			input := opslevel.TeamCreateInput{
-				Name:             name,
-				ManagerEmail:     reader.Text("Manager"),
-				Responsibilities: reader.Text("Responsibilities"),
+				Name: name,
+				// ManagerEmail:     reader.Text("Manager"),
+				Responsibilities: opslevel.RefOf(reader.Text("Responsibilities")),
 			}
 			parentTeam := reader.Text("ParentTeam")
 			if parentTeam != "" {

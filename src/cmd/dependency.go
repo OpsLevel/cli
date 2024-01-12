@@ -72,11 +72,11 @@ func readCreateServiceDependencyInput() (*opslevel.ServiceDependencyCreateInput,
 		return nil, err
 	}
 	output := &opslevel.ServiceDependencyCreateInput{
-		Key: opslevel.ServiceDependencyKey{
-			Service:   *opslevel.NewIdentifier(in.Source),
-			DependsOn: *opslevel.NewIdentifier(in.Target),
+		DependencyKey: opslevel.ServiceDependencyKey{
+			SourceIdentifier:      opslevel.NewIdentifier(in.Source),
+			DestinationIdentifier: opslevel.NewIdentifier(in.Target),
 		},
-		Notes: in.Notes,
+		Notes: opslevel.RefOf(in.Notes),
 	}
 	return output, nil
 }

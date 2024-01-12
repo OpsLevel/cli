@@ -337,9 +337,6 @@ func exportTeams(c *opslevel.Client, config *os.File, shell *os.File) {
 		teamBody.WriteString(fmt.Sprintf("\n  aliases = [\"%s\"]", aliases))
 		teamBody.WriteString(fmt.Sprintf("\n  name = \"%s\"", team.Name))
 
-		if len(team.Group.Alias) > 0 {
-			teamBody.WriteString(fmt.Sprintf("\n  group = \"%s\"", team.Group.Alias))
-		}
 		membersOutput := getMembershipsAsTerraformConfig(team.Memberships.Nodes)
 		teamBody.WriteString(membersOutput)
 		if len(team.ParentTeam.Alias) > 0 {
