@@ -108,7 +108,7 @@ EOF`,
 		// by adding in the first argument.
 		updateInput := &opslevel.FilterUpdateInput{
 			Id:         *opslevel.NewID(args[0]),
-			Name:       opslevel.RefOf(input.Name),
+			Name:       &input.Name,
 			Predicates: input.Predicates,
 			Connective: input.Connective,
 		}

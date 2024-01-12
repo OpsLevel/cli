@@ -322,8 +322,7 @@ EOF
 		for reader.Rows() {
 			name := reader.Text("Name")
 			input := opslevel.TeamCreateInput{
-				Name: name,
-				// ManagerEmail:     reader.Text("Manager"),
+				Name:             name,
 				Responsibilities: opslevel.RefOf(reader.Text("Responsibilities")),
 			}
 			parentTeam := reader.Text("ParentTeam")

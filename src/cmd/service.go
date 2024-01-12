@@ -211,13 +211,13 @@ EOF
 			tier := reader.Text("Tier")
 			if tier != "" {
 				if item, ok := opslevel.Cache.Tiers[tier]; ok {
-					input.TierAlias = opslevel.RefOf(item.Alias)
+					input.TierAlias = &item.Alias
 				}
 			}
 			lifecycle := reader.Text("Lifecycle")
 			if lifecycle != "" {
 				if item, ok := opslevel.Cache.Lifecycles[lifecycle]; ok {
-					input.LifecycleAlias = opslevel.RefOf(item.Alias)
+					input.LifecycleAlias = &item.Alias
 				}
 			}
 			owner := reader.Text("Owner")
