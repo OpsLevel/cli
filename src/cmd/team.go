@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/opslevel/opslevel-go/v2023"
@@ -77,7 +76,7 @@ var createMemberCmd = &cobra.Command{
 
 		userIdentifierInput := opslevel.NewUserIdentifier(email)
 		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
-			User: &userIdentifierInput,
+			User: userIdentifierInput,
 			Role: opslevel.RefOf(role),
 		}
 		_, addErr := getClientGQL().AddMemberships(&team.TeamId, teamMembershipUserInput)
@@ -131,17 +130,6 @@ opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 			cobra.CheckErr(fmt.Errorf("unable to create contact '%+v'", contactInput))
 		}
 		fmt.Printf("create contact '%+v' on team '%s'\n", contactInput, team.Alias)
-	},
-}
-
-var createTeamTagCmd = &cobra.Command{
-	Use:        "tag",
-	Short:      "Create a team tag",
-	Long:       `Create a team tag`,
-	Deprecated: `Please use \nopslevel create tag <args>`,
-	Run: func(cmd *cobra.Command, args []string) {
-		err := errors.New("This command is deprecated! Please use \nopslevel create tag <args>")
-		cobra.CheckErr(err)
 	},
 }
 
@@ -216,17 +204,6 @@ opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))'
 	},
 }
 
-var getTeamTagCmd = &cobra.Command{
-	Use:        "tag",
-	Short:      "Get a team's tag",
-	Long:       `Get a team's tag`,
-	Deprecated: `Please use \nopslevel get tag <args>`,
-	Run: func(cmd *cobra.Command, args []string) {
-		err := errors.New("This command is deprecated! Please use \nopslevel get tag <args>")
-		cobra.CheckErr(err)
-	},
-}
-
 var deleteTeamCmd = &cobra.Command{
 	Use:   "team {ID|ALIAS}",
 	Short: "Delete a team",
@@ -237,13 +214,8 @@ opslevel delete team my-team
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		if opslevel.IsID(key) {
-			err := getClientGQL().DeleteTeam(opslevel.ID(key))
-			cobra.CheckErr(err)
-		} else {
-			err := getClientGQL().DeleteTeamWithAlias(key)
-			cobra.CheckErr(err)
-		}
+		err := getClientGQL().DeleteTeam(key)
+		cobra.CheckErr(err)
 		fmt.Printf("team '%s' deleted\n", key)
 	},
 }
@@ -270,7 +242,7 @@ var deleteMemberCmd = &cobra.Command{
 
 		userIdentifierInput := opslevel.NewUserIdentifier(email)
 		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
-			User: &userIdentifierInput,
+			User: userIdentifierInput,
 		}
 		_, removeErr := getClientGQL().RemoveMemberships(&team.TeamId, teamMembershipUserInput)
 		cobra.CheckErr(removeErr)
@@ -289,17 +261,6 @@ var deleteContactCmd = &cobra.Command{
 		err := getClientGQL().RemoveContact(opslevel.ID(key))
 		cobra.CheckErr(err)
 		fmt.Printf("contact '%s' removed\n", key)
-	},
-}
-
-var deleteTeamTagCmd = &cobra.Command{
-	Use:        "tag",
-	Short:      "Delete a team's tag",
-	Long:       `Delete a team's tag`,
-	Deprecated: `Please use \nopslevel delete tag <args>`,
-	Run: func(cmd *cobra.Command, args []string) {
-		err := errors.New("This command is deprecated! Please use \nopslevel delete tag <args>")
-		cobra.CheckErr(err)
 	},
 }
 
@@ -349,15 +310,10 @@ func init() {
 	listCmd.AddCommand(listTeamCmd)
 	importCmd.AddCommand(importTeamsCmd)
 
-	// Team Tag commands
-	createTeamCmd.AddCommand(createTeamTagCmd)
-	deleteTeamCmd.AddCommand(deleteTeamTagCmd)
-
 	// Team Membership commands
 	exampleCmd.AddCommand(exampleMemberCmd)
 	createCmd.AddCommand(createMemberCmd)
 	deleteCmd.AddCommand(deleteMemberCmd)
-	getTeamCmd.AddCommand(getTeamTagCmd)
 
 	// Team Contact commands
 	exampleCmd.AddCommand(exampleContactCmd)

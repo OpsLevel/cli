@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"encoding/json"
+
 	"github.com/opslevel/opslevel-go/v2023"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 var exampleIsJson, exampleIsYaml bool
@@ -22,11 +25,29 @@ func getExample[T any]() string {
 }
 
 func getJson[T any]() string {
-	return opslevel.JsonOf[T](opslevel.NewExampleOf[T]())
+	var (
+		out []byte
+		err error
+	)
+	t := opslevel.NewExampleOf[T]()
+	out, err = json.Marshal(t)
+	if err != nil {
+		panic("unexpected error getting example json")
+	}
+	return string(out)
 }
 
 func getYaml[T any]() string {
-	return opslevel.YamlOf[T](opslevel.NewExampleOf[T]())
+	var (
+		out []byte
+		err error
+	)
+	t := opslevel.NewExampleOf[T]()
+	out, err = yaml.Marshal(t)
+	if err != nil {
+		panic("unexpected error getting example yaml")
+	}
+	return string(out)
 }
 
 func init() {
