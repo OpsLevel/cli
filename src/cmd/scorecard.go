@@ -110,7 +110,7 @@ var deleteScorecardCmd = &cobra.Command{
 		key := args[0]
 		deletedScorecardId, err := getClientGQL().DeleteScorecard(key)
 		cobra.CheckErr(err)
-		fmt.Printf("deleted scorecard: %s\n", deletedScorecardId)
+		fmt.Printf("deleted scorecard: %s\n", *deletedScorecardId)
 	},
 }
 

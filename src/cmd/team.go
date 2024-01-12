@@ -77,7 +77,7 @@ var createMemberCmd = &cobra.Command{
 
 		userIdentifierInput := opslevel.NewUserIdentifier(email)
 		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
-			User: &userIdentifierInput,
+			User: userIdentifierInput,
 			Role: opslevel.RefOf(role),
 		}
 		_, addErr := getClientGQL().AddMemberships(&team.TeamId, teamMembershipUserInput)
@@ -237,13 +237,8 @@ opslevel delete team my-team
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		if opslevel.IsID(key) {
-			err := getClientGQL().DeleteTeam(opslevel.ID(key))
-			cobra.CheckErr(err)
-		} else {
-			err := getClientGQL().DeleteTeamWithAlias(key)
-			cobra.CheckErr(err)
-		}
+		err := getClientGQL().DeleteTeam(key)
+		cobra.CheckErr(err)
 		fmt.Printf("team '%s' deleted\n", key)
 	},
 }
@@ -270,7 +265,7 @@ var deleteMemberCmd = &cobra.Command{
 
 		userIdentifierInput := opslevel.NewUserIdentifier(email)
 		teamMembershipUserInput := opslevel.TeamMembershipUserInput{
-			User: &userIdentifierInput,
+			User: userIdentifierInput,
 		}
 		_, removeErr := getClientGQL().RemoveMemberships(&team.TeamId, teamMembershipUserInput)
 		cobra.CheckErr(removeErr)

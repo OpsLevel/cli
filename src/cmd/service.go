@@ -151,16 +151,7 @@ var deleteServiceCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		var err error
-		if opslevel.IsID(key) {
-			err = getClientGQL().DeleteService(opslevel.ServiceDeleteInput{
-				Id: opslevel.NewID(key),
-			})
-			cobra.CheckErr(err)
-		} else {
-			err = getClientGQL().DeleteServiceWithAlias(key)
-			cobra.CheckErr(err)
-		}
+		err := getClientGQL().DeleteService(key)
 		cobra.CheckErr(err)
 		fmt.Printf("deleted '%s' service\n", key)
 	},
