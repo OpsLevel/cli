@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/opslevel/opslevel-go/v2023"
+	"github.com/opslevel/opslevel-go/v2024"
 
 	"github.com/creasty/defaults"
 	git "github.com/go-git/go-git/v5"
