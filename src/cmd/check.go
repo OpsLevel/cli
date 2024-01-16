@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/opslevel/opslevel-go/v2023"
+	"github.com/opslevel/opslevel-go/v2024"
 
 	"github.com/opslevel/cli/common"
 	"github.com/rs/zerolog/log"

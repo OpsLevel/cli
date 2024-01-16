@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/opslevel/opslevel-go/v2023"
+	"github.com/opslevel/opslevel-go/v2024"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"

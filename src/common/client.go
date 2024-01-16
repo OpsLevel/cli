@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/opslevel/opslevel-go/v2023"
+	"github.com/opslevel/opslevel-go/v2024"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

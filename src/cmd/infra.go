@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2023"
+	"github.com/opslevel/opslevel-go/v2024"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
