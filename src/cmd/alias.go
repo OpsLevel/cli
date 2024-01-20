@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/opslevel/opslevel-go/v2024"
@@ -55,7 +56,7 @@ opslevel delete alias -t infrastructure-resource my-infra-alias`,
 	Run: func(cmd *cobra.Command, args []string) {
 		alias := args[0]
 		aliasType := cmd.Flags().Lookup("type").Value.String()
-		if !Contains(opslevel.AllAliasOwnerTypeEnum, aliasType) {
+		if !slices.Contains(opslevel.AllAliasOwnerTypeEnum, aliasType) {
 			log.Error().Msgf("invalid alias type '%s'", aliasType)
 			os.Exit(1)
 		}

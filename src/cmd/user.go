@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 
@@ -38,7 +39,7 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
 		role := opslevel.UserRoleUser
 		if len(args) > 2 {
 			desiredRole := strings.ToLower(args[2])
-			if Contains(opslevel.AllUserRole, desiredRole) {
+			if slices.Contains(opslevel.AllUserRole, desiredRole) {
 				role = opslevel.UserRole(desiredRole)
 			}
 		}
@@ -139,16 +140,6 @@ var deleteUserCmd = &cobra.Command{
 	},
 }
 
-// TODO: move this to opslevel_common
-func Contains[T comparable](s []T, e T) bool {
-	for _, v := range s {
-		if v == e {
-			return true
-		}
-	}
-	return false
-}
-
 var importUsersCmd = &cobra.Command{
 	Use:     "user",
 	Aliases: []string{"users"},
@@ -175,7 +166,7 @@ EOF
 				continue
 			}
 			userRole := opslevel.UserRoleUser
-			if Contains(opslevel.AllUserRole, role) {
+			if slices.Contains(opslevel.AllUserRole, role) {
 				userRole = opslevel.UserRole(role)
 			}
 			input := opslevel.UserInput{

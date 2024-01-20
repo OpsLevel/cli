@@ -31,7 +31,7 @@ var createSystemCmd = &cobra.Command{
 		cat << EOF | opslevel create system -f -
 		name: "My System"
 		description: "Hello World System"
-		owner: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
+		ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
 		parent:
 			alias: "alias of domain"
 		note: "Additional system details"
@@ -97,7 +97,6 @@ var listSystemCmd = &cobra.Command{
 	},
 }
 
-// TODO: bug in API prevents use of alias in this function.  Adding full functionality for now.
 var updateSystemCmd = &cobra.Command{
 	Use:     "system ID|ALIAS",
 	Aliases: []string{"sys"},
@@ -107,7 +106,7 @@ var updateSystemCmd = &cobra.Command{
 		cat << EOF | opslevel update system my-system-alias-or-id -f -
 		name: "My Updated System"
 		description: "Hello Updated System"
-		owner: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
+		ownerId: "Z2lkOi8vb3BzbGV2ZWwvVGVhbS83NjY"
 		parent:
 			alias: "my_domain"
 		note: "Additional system details for my updated system"
