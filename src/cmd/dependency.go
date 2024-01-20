@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/opslevel/cli/common"
 
 	"github.com/opslevel/opslevel-go/v2024"
 	"github.com/spf13/cobra"
@@ -16,17 +17,19 @@ type CLIServiceDependencyCreateInput struct {
 }
 
 var exampleServiceDependencyCmd = &cobra.Command{
-	Use:   "dependency",
-	Short: "Example service dependency",
-	Long:  `Example service dependency`,
+	Use:     "dependency",
+	Aliases: common.GetAliases("Dependency"),
+	Short:   "Example service dependency",
+	Long:    `Example service dependency`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.ServiceDependencyCreateInput]())
 	},
 }
 
 var createServiceDependencyCmd = &cobra.Command{
-	Use:   "dependency",
-	Short: "Create a service dependency",
+	Use:     "dependency",
+	Aliases: common.GetAliases("Dependency"),
+	Short:   "Create a service dependency",
 	Example: `
 cat << EOF | opslevel create service dependency -f -
 source: my-service-alias # "source" and "target" fields support ID or Alias
@@ -45,8 +48,9 @@ EOF
 }
 
 var deleteServiceDependencyCmd = &cobra.Command{
-	Use:   "dependency ID",
-	Short: "Delete a service dependency",
+	Use:     "dependency ID",
+	Aliases: common.GetAliases("Dependency"),
+	Short:   "Delete a service dependency",
 	Example: `
 opslevel delete service dependency XXX # ID of the dependency entity returned by the create command
 `,

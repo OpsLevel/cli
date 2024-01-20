@@ -16,6 +16,7 @@ import (
 
 var getCheckCmd = &cobra.Command{
 	Use:        "check ID",
+	Aliases:    common.GetAliases("Check"),
 	Short:      "Get details about a rubic check",
 	Long:       `Get details about a rubic check`,
 	Args:       cobra.ExactArgs(1),
@@ -33,7 +34,7 @@ var getCheckCmd = &cobra.Command{
 
 var listCheckCmd = &cobra.Command{
 	Use:     "check",
-	Aliases: []string{"checks"},
+	Aliases: common.GetAliases("Check"),
 	Short:   "Lists the rubric checks",
 	Long:    `Lists the rubric checks`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -53,9 +54,10 @@ var listCheckCmd = &cobra.Command{
 }
 
 var checkCreateCmd = &cobra.Command{
-	Use:   "check",
-	Short: "Create a rubric check",
-	Long:  `Create a rubric check`,
+	Use:     "check",
+	Aliases: common.GetAliases("Check"),
+	Short:   "Create a rubric check",
+	Long:    `Create a rubric check`,
 	Example: `
 cat << EOF | opslevel create check -f -
 Version: "1"
@@ -90,9 +92,10 @@ EOF`,
 }
 
 var checkUpdateCmd = &cobra.Command{
-	Use:   "check",
-	Short: "Update a rubric check",
-	Long:  `Update a rubric check`,
+	Use:     "check",
+	Aliases: common.GetAliases("Check"),
+	Short:   "Update a rubric check",
+	Long:    `Update a rubric check`,
 	Example: `
 cat << EOF | opslevel update check $CHECK_ID -f -
 Version: "1"
@@ -125,6 +128,7 @@ EOF`,
 
 var deleteCheckCmd = &cobra.Command{
 	Use:        "check ID",
+	Aliases:    common.GetAliases("Check"),
 	Short:      "Delete a rubric check",
 	Long:       `Delete a rubric check`,
 	Args:       cobra.ExactArgs(1),

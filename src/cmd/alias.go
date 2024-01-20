@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/opslevel/cli/common"
 	"os"
 	"strings"
 
@@ -11,9 +12,10 @@ import (
 )
 
 var exampleAliasCmd = &cobra.Command{
-	Use:   "alias",
-	Short: "Example alias",
-	Long:  `Example alias`,
+	Use:     "alias",
+	Aliases: common.GetAliases("Alias"),
+	Short:   "Example alias",
+	Long:    `Example alias`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.AliasCreateInput]())
 	},
@@ -21,6 +23,7 @@ var exampleAliasCmd = &cobra.Command{
 
 var createAliasCommand = &cobra.Command{
 	Use:     "alias ID ALIAS",
+	Aliases: common.GetAliases("Alias"),
 	Short:   "Create an alias",
 	Long:    "Create an alias",
 	Args:    cobra.MinimumNArgs(2),
@@ -42,10 +45,11 @@ var createAliasCommand = &cobra.Command{
 }
 
 var deleteAliasCommand = &cobra.Command{
-	Use:   "alias ALIAS",
-	Short: "Delete an alias",
-	Long:  "Delete an alias",
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "alias ALIAS",
+	Aliases: common.GetAliases("Alias"),
+	Short:   "Delete an alias",
+	Long:    "Delete an alias",
+	Args:    cobra.MinimumNArgs(1),
 	Example: `
 # Delete alias on a service
 opslevel delete alias my-service-alias

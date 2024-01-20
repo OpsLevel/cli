@@ -14,18 +14,20 @@ import (
 var actionType string
 
 var exampleActionCmd = &cobra.Command{
-	Use:   "action",
-	Short: "Example action",
-	Long:  `Example action`,
+	Use:     "action",
+	Aliases: common.GetAliases("Action"),
+	Short:   "Example action",
+	Long:    `Example action`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.CustomActionsWebhookActionCreateInput]())
 	},
 }
 
 var createActionCmd = &cobra.Command{
-	Use:   "action --type=$ACTION_TYPE",
-	Short: "Create an action",
-	Long:  "Create an action",
+	Use:     "action --type=$ACTION_TYPE",
+	Aliases: common.GetAliases("Action"),
+	Short:   "Create an action",
+	Long:    "Create an action",
 	Example: `
 cat << EOF | opslevel create action --type=webhook -f -
 name: "Page The On Call"
@@ -69,6 +71,7 @@ EOF`,
 
 var getActionCmd = &cobra.Command{
 	Use:        "action ID|ALIAS",
+	Aliases:    common.GetAliases("Action"),
 	Short:      "Get details about an action",
 	Long:       "Get details about an action",
 	Args:       cobra.ExactArgs(1),
@@ -83,7 +86,7 @@ var getActionCmd = &cobra.Command{
 
 var listActionCmd = &cobra.Command{
 	Use:     "action",
-	Aliases: []string{"actions"},
+	Aliases: common.GetAliases("Action"),
 	Short:   "List actions",
 	Long:    "List actions",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -103,9 +106,10 @@ var listActionCmd = &cobra.Command{
 }
 
 var updateActionCmd = &cobra.Command{
-	Use:   "action ID",
-	Short: "Update an action",
-	Long:  "Update an action",
+	Use:     "action ID",
+	Aliases: common.GetAliases("Action"),
+	Short:   "Update an action",
+	Long:    "Update an action",
 	Example: `
 cat << EOF | opslevel update action --type=webhook $ACTION_ID -f -
 description: "Pages the oncall and creates an incident"
@@ -135,6 +139,7 @@ EOF`,
 
 var deleteActionCmd = &cobra.Command{
 	Use:        "action ID|ALIAS",
+	Aliases:    common.GetAliases("Action"),
 	Short:      "Delete an action",
 	Long:       "Delete an action",
 	Args:       cobra.ExactArgs(1),

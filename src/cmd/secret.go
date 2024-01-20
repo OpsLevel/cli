@@ -14,18 +14,20 @@ import (
 var secretAlias string
 
 var exampleSecretCmd = &cobra.Command{
-	Use:   "secret",
-	Short: "Example Secret",
-	Long:  `Example Secret`,
+	Use:     "secret",
+	Aliases: common.GetAliases("Secret"),
+	Short:   "Example Secret",
+	Long:    `Example Secret`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.SecretInput]())
 	},
 }
 
 var createSecretCmd = &cobra.Command{
-	Use:   "secret",
-	Short: "Create a team-owned secret",
-	Long:  `Create a team-owned secret`,
+	Use:     "secret",
+	Aliases: common.GetAliases("Secret"),
+	Short:   "Create a team-owned secret",
+	Long:    `Create a team-owned secret`,
 	Example: `
 cat << EOF | opslevel create secret --alias=my-secret-alias -f -
 owner:
@@ -44,6 +46,7 @@ EOF`,
 
 var getSecretCmd = &cobra.Command{
 	Use:        "secret",
+	Aliases:    common.GetAliases("Secret"),
 	Short:      "Get details about a secret",
 	Long:       `Get details about a secret`,
 	Args:       cobra.ExactArgs(1),
@@ -64,7 +67,7 @@ var getSecretCmd = &cobra.Command{
 
 var listSecretsCmd = &cobra.Command{
 	Use:     "secrets",
-	Aliases: []string{"secrets"},
+	Aliases: common.GetAliases("Secret"),
 	Short:   "List secrets",
 	Long:    `List secrets`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -85,9 +88,10 @@ var listSecretsCmd = &cobra.Command{
 }
 
 var updateSecretCmd = &cobra.Command{
-	Use:   "secret",
-	Short: "Update an OpsLevel secret",
-	Long:  `Update an OpsLevel secret`,
+	Use:     "secret",
+	Aliases: common.GetAliases("Secret"),
+	Short:   "Update an OpsLevel secret",
+	Long:    `Update an OpsLevel secret`,
 	Example: `
 cat << EOF | opslevel update secret XXX_secret_id_XXX -f -
 owner:
@@ -108,6 +112,7 @@ EOF`,
 
 var deleteSecretCmd = &cobra.Command{
 	Use:        "secret ID|ALIAS",
+	Aliases:    common.GetAliases("Secret"),
 	Short:      "Delete a secret",
 	Long:       `Delete a secret from OpsLevel`,
 	Args:       cobra.ExactArgs(1),

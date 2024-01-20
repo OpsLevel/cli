@@ -13,18 +13,20 @@ import (
 )
 
 var exampleDomainCmd = &cobra.Command{
-	Use:   "domain",
-	Short: "Example Domain",
-	Long:  `Example Domain`,
+	Use:     "domain",
+	Aliases: common.GetAliases("Domain"),
+	Short:   "Example Domain",
+	Long:    `Example Domain`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.DomainInput]())
 	},
 }
 
 var createDomainCmd = &cobra.Command{
-	Use:   "domain",
-	Short: "Create a domain",
-	Long:  `Create a domain`,
+	Use:     "domain",
+	Aliases: common.GetAliases("Domain"),
+	Short:   "Create a domain",
+	Long:    `Create a domain`,
 	Example: `
 
 cat << EOF | opslevel create domain -f -
@@ -44,9 +46,10 @@ EOF
 }
 
 var deleteDomainCmd = &cobra.Command{
-	Use:   "domain ID|ALIAS",
-	Short: "Delete a domain",
-	Long:  `Delete a domain`,
+	Use:     "domain ID|ALIAS",
+	Aliases: common.GetAliases("Domain"),
+	Short:   "Delete a domain",
+	Long:    `Delete a domain`,
 	Example: `
 opslevel delete domain my_domain
 `,
@@ -61,9 +64,10 @@ opslevel delete domain my_domain
 }
 
 var getDomainCmd = &cobra.Command{
-	Use:   "domain ID|ALIAS",
-	Short: "Get details about a domain",
-	Long:  `Get details about a domain`,
+	Use:     "domain ID|ALIAS",
+	Aliases: common.GetAliases("Domain"),
+	Short:   "Get details about a domain",
+	Long:    `Get details about a domain`,
 	Example: `
 opslevel get domain my_domain
 `,
@@ -84,7 +88,7 @@ opslevel get domain my_domain
 
 var listDomainCmd = &cobra.Command{
 	Use:     "domain",
-	Aliases: []string{"domains"},
+	Aliases: common.GetAliases("Domain"),
 	Short:   "Lists the domains",
 	Long:    `Lists the domains`,
 	Example: `
@@ -114,8 +118,9 @@ opslevel list domain
 }
 
 var updateDomainCmd = &cobra.Command{
-	Use:   "domain ID|ALIAS",
-	Short: "Update a domain",
+	Use:     "domain ID|ALIAS",
+	Aliases: common.GetAliases("Domain"),
+	Short:   "Update a domain",
 	Long: `Update a domain
 
 cat << EOF | opslevel update domain my_domain -f -

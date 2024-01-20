@@ -8,9 +8,10 @@ import (
 var listOutputType string
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all resources in OpsLevel",
-	Long:  "List all resources in OpsLevel",
+	Use:     "list",
+	Aliases: []string{"ls"},
+	Short:   "List all resources in OpsLevel",
+	Long:    "List all resources in OpsLevel",
 }
 
 func init() {

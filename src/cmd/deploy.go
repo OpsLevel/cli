@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"github.com/opslevel/cli/common"
 	"os"
 	"time"
 
@@ -48,9 +49,10 @@ type DeployEvent struct {
 }
 
 var deployCreateCmd = &cobra.Command{
-	Use:   "deploy",
-	Short: "Create deployment events",
-	Long:  "Create deployment events",
+	Use:     "deploy",
+	Aliases: common.GetAliases("Deploy"),
+	Short:   "Create deployment events",
+	Long:    "Create deployment events",
 	Run: func(cmd *cobra.Command, args []string) {
 		if integrationUrl == "" {
 			log.Error().Msg("Please provide '--integration-url' to send the deployment information to")

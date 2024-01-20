@@ -11,18 +11,20 @@ import (
 )
 
 var exampleFilterCmd = &cobra.Command{
-	Use:   "filter",
-	Short: "Example filter",
-	Long:  `Example filter`,
+	Use:     "filter",
+	Aliases: common.GetAliases("Filter"),
+	Short:   "Example filter",
+	Long:    `Example filter`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.FilterCreateInput]())
 	},
 }
 
 var createFilterCmd = &cobra.Command{
-	Use:   "filter",
-	Short: "Create a filter",
-	Long:  `Create a filter`,
+	Use:     "filter",
+	Aliases: common.GetAliases("Filter"),
+	Short:   "Create a filter",
+	Long:    `Create a filter`,
 	Example: `
 cat << EOF | opslevel create filter -f -
 name: "Tier 1 apps using RDS"
@@ -47,6 +49,7 @@ EOF`,
 
 var getFilterCmd = &cobra.Command{
 	Use:        "filter ID",
+	Aliases:    common.GetAliases("Filter"),
 	Short:      "Get details about a filter",
 	Long:       `Get details about a filter`,
 	Args:       cobra.ExactArgs(1),
@@ -61,7 +64,7 @@ var getFilterCmd = &cobra.Command{
 
 var listFilterCmd = &cobra.Command{
 	Use:     "filter",
-	Aliases: []string{"filters"},
+	Aliases: common.GetAliases("Filter"),
 	Short:   "Lists filters",
 	Long:    `Lists filters`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -81,9 +84,10 @@ var listFilterCmd = &cobra.Command{
 }
 
 var updateFilterCmd = &cobra.Command{
-	Use:   "filter ID",
-	Short: "Update a filter",
-	Long:  `Update a filter`,
+	Use:     "filter ID",
+	Aliases: common.GetAliases("Filter"),
+	Short:   "Update a filter",
+	Long:    `Update a filter`,
 	Example: `
 cat << EOF | opslevel update filter Z2lkOi8vb3BzbGV2ZWwvRmlsdGVyLzIzNTk -f -
 name: "Tier 2 apps using RDS"
@@ -120,6 +124,7 @@ EOF`,
 
 var deleteFilterCmd = &cobra.Command{
 	Use:        "filter ID",
+	Aliases:    common.GetAliases("Filter"),
 	Short:      "Delete a filter",
 	Long:       `Delete a filter`,
 	Args:       cobra.ExactArgs(1),
