@@ -16,17 +16,19 @@ import (
 )
 
 var exampleServiceCmd = &cobra.Command{
-	Use:   "service",
-	Short: "Example service",
-	Long:  `Example service`,
+	Use:     "service",
+	Aliases: common.GetAliases("Service"),
+	Short:   "Example service",
+	Long:    `Example service`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.ServiceCreateInput]())
 	},
 }
 
 var createServiceCmd = &cobra.Command{
-	Use:   "service",
-	Short: "Create a service",
+	Use:     "service",
+	Aliases: common.GetAliases("Service"),
+	Short:   "Create a service",
 	Long: `Create a service
 
 cat << EOF | opslevel create service -f -
@@ -50,6 +52,7 @@ EOF`,
 
 var getServiceCmd = &cobra.Command{
 	Use:        "service ID|ALIAS",
+	Aliases:    common.GetAliases("Service"),
 	Short:      "Get details about a service",
 	Long:       `Get details about a service`,
 	Args:       cobra.ExactArgs(1),
@@ -77,7 +80,7 @@ var getServiceCmd = &cobra.Command{
 
 var listServiceCmd = &cobra.Command{
 	Use:     "service",
-	Aliases: []string{"services"},
+	Aliases: common.GetAliases("Service"),
 	Short:   "Lists services",
 	Long:    `Lists services`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -104,8 +107,9 @@ var listServiceCmd = &cobra.Command{
 }
 
 var updateServiceCmd = &cobra.Command{
-	Use:   "service",
-	Short: "Update a service",
+	Use:     "service",
+	Aliases: common.GetAliases("Service"),
+	Short:   "Update a service",
 	Long: `Update a service
 
 cat << EOF | opslevel update service -f -
@@ -124,6 +128,7 @@ EOF`,
 
 var deleteServiceCmd = &cobra.Command{
 	Use:        "service ID|ALIAS",
+	Aliases:    common.GetAliases("Service"),
 	Short:      "Delete a service",
 	Long:       `Delete a service`,
 	Args:       cobra.ExactArgs(1),
@@ -138,7 +143,7 @@ var deleteServiceCmd = &cobra.Command{
 
 var importServicesCmd = &cobra.Command{
 	Use:     "service",
-	Aliases: []string{"services"},
+	Aliases: common.GetAliases("Service"),
 	Short:   "Imports services from a CSV",
 	Long: `Imports a list of services from a CSV file with the column headers:
 Name,Description,Product,Language,Framework,Tier,Lifecycle,Owner

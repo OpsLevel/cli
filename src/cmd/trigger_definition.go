@@ -11,18 +11,20 @@ import (
 )
 
 var exampleTriggerDefinitionCmd = &cobra.Command{
-	Use:   "trigger-definition",
-	Short: "Example Scorecard",
-	Long:  `Example Scorecard`,
+	Use:     "trigger-definition",
+	Aliases: common.GetAliases("TriggerDefinition"),
+	Short:   "Example Scorecard",
+	Long:    `Example Scorecard`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.CustomActionsTriggerDefinitionCreateInput]())
 	},
 }
 
 var createTriggerDefinitionCmd = &cobra.Command{
-	Use:   "trigger-definition",
-	Short: "Create a trigger definition",
-	Long:  "Create a trigger definition",
+	Use:     "trigger-definition",
+	Aliases: common.GetAliases("TriggerDefinition"),
+	Short:   "Create a trigger definition",
+	Long:    "Create a trigger definition",
 	Example: `
 cat << EOF | opslevel create trigger-definition -f -
 name: "Page The On Call"
@@ -63,6 +65,7 @@ EOF`,
 
 var getTriggerDefinitionCmd = &cobra.Command{
 	Use:        "trigger-definition ID|ALIAS",
+	Aliases:    common.GetAliases("TriggerDefinition"),
 	Short:      "Get details about a trigger definition",
 	Long:       "Get details about a trigger definition",
 	Args:       cobra.ExactArgs(1),
@@ -77,7 +80,7 @@ var getTriggerDefinitionCmd = &cobra.Command{
 
 var listTriggerDefinitionCmd = &cobra.Command{
 	Use:     "trigger-definition",
-	Aliases: []string{"trigger-definitions"},
+	Aliases: common.GetAliases("TriggerDefinition"),
 	Short:   "List trigger definitions",
 	Long:    "List trigger definitions",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -97,9 +100,10 @@ var listTriggerDefinitionCmd = &cobra.Command{
 }
 
 var updateTriggerDefinitionCmd = &cobra.Command{
-	Use:   "trigger-definition ID",
-	Short: "Update a trigger definition",
-	Long:  "Update a trigger definition",
+	Use:     "trigger-definition ID",
+	Aliases: common.GetAliases("TriggerDefinition"),
+	Short:   "Update a trigger definition",
+	Long:    "Update a trigger definition",
 	Example: `
 cat << EOF | opslevel update trigger-definition $TRIGGER_ID -f -
 description: "Pages the On Call via PagerDuty"
@@ -123,6 +127,7 @@ EOF`,
 
 var deleteTriggerDefinitionCmd = &cobra.Command{
 	Use:        "trigger-definition ID|ALIAS",
+	Aliases:    common.GetAliases("TriggerDefinition"),
 	Short:      "Delete a trigger definition",
 	Long:       "Delete a trigger definition",
 	Args:       cobra.ExactArgs(1),

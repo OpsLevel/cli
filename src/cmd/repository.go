@@ -12,6 +12,7 @@ import (
 
 var getRepositoryCmd = &cobra.Command{
 	Use:        "repository ID|ALIAS",
+	Aliases:    common.GetAliases("Repository"),
 	Short:      "Get details about a repository",
 	Long:       `Get details about a repository`,
 	Args:       cobra.ExactArgs(1),
@@ -34,7 +35,7 @@ var getRepositoryCmd = &cobra.Command{
 
 var listRepositoryCmd = &cobra.Command{
 	Use:     "repository",
-	Aliases: []string{"repositories"},
+	Aliases: common.GetAliases("Repository"),
 	Short:   "Lists repositories",
 	Long:    `Lists repositories`,
 	Run: func(cmd *cobra.Command, args []string) {
