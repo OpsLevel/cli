@@ -1,0 +1,4 @@
+kind: Feature
+body: Add support for 'ls'/'rm' to list/delete and add useful aliases for resources
+  like 'sys' for system and 'pd' for property-definition
+time: 2024-01-22T12:52:52.758863-05:00

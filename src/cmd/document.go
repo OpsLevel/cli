@@ -13,8 +13,9 @@ import (
 )
 
 var createDocumentCmd = &cobra.Command{
-	Use:   "document",
-	Short: "Upload Swagger API documents via a file",
+	Use:     "document",
+	Aliases: []string{"doc"},
+	Short:   "Upload Swagger API documents via a file",
 	Long: `Upload Swagger API documents via a file:
 
 opslevel create document my-service -i xxxxx -f swagger.json

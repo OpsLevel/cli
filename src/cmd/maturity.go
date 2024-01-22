@@ -14,8 +14,9 @@ import (
 )
 
 var listServiceMaturityCmd = &cobra.Command{
-	Use:   "maturity",
-	Short: "Lists all services maturity data (category and level)",
+	Use:     "maturity",
+	Aliases: []string{"maturities"},
+	Short:   "Lists all services maturity data (category and level)",
 	Long: `Lists all services maturity data (category and level)
 
 There are multiple output formats that are useful

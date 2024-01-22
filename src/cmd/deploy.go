@@ -8,7 +8,7 @@ import (
 	"github.com/opslevel/opslevel-go/v2024"
 
 	"github.com/creasty/defaults"
-	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

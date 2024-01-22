@@ -56,6 +56,7 @@ EOF`,
 
 var getInfraSchemaCmd = &cobra.Command{
 	Use:        "infra-schema ALIAS",
+	Aliases:    []string{"infraschema"},
 	Short:      "Get infrastructure schemas",
 	Long:       `Get infrastructure schemas`,
 	Args:       cobra.ExactArgs(1),
@@ -108,9 +109,10 @@ var getInfraCmd = &cobra.Command{
 }
 
 var listInfraSchemasCmd = &cobra.Command{
-	Use:   "infra-schemas",
-	Short: "List infrastructure schemas",
-	Long:  `List infrastructure schemas`,
+	Use:     "infra-schema",
+	Aliases: []string{"infra-schemas", "infraschema", "infraschemas"},
+	Short:   "List infrastructure schemas",
+	Long:    `List infrastructure schemas`,
 	Example: `
 mkdir -p ~/.opslevel/schemas/
 for DATA in $(opslevel list infra-schemas -o json | jq -r '.[] | @base64');
@@ -145,9 +147,10 @@ done`,
 }
 
 var listInfraCmd = &cobra.Command{
-	Use:   "infra",
-	Short: "List infrastructure resources",
-	Long:  `List infrastructure resources`,
+	Use:     "infra",
+	Aliases: []string{"infras"},
+	Short:   "List infrastructure resources",
+	Long:    `List infrastructure resources`,
 	Example: `
 # list all my unique network CIDRs
 opslevel list infra -o json | jq 'map(select(.type == "Network") | .data | fromjson | .ipv4_cidr) | unique'
