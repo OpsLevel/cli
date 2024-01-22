@@ -17,7 +17,7 @@ import (
 
 var exampleServiceCmd = &cobra.Command{
 	Use:     "service",
-	Aliases: common.GetAliases("Service"),
+	Aliases: []string{"svc"},
 	Short:   "Example service",
 	Long:    `Example service`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -27,7 +27,7 @@ var exampleServiceCmd = &cobra.Command{
 
 var createServiceCmd = &cobra.Command{
 	Use:     "service",
-	Aliases: common.GetAliases("Service"),
+	Aliases: []string{"svc"},
 	Short:   "Create a service",
 	Long: `Create a service
 
@@ -52,7 +52,7 @@ EOF`,
 
 var getServiceCmd = &cobra.Command{
 	Use:        "service ID|ALIAS",
-	Aliases:    common.GetAliases("Service"),
+	Aliases:    []string{"svc"},
 	Short:      "Get details about a service",
 	Long:       `Get details about a service`,
 	Args:       cobra.ExactArgs(1),
@@ -80,7 +80,7 @@ var getServiceCmd = &cobra.Command{
 
 var listServiceCmd = &cobra.Command{
 	Use:     "service",
-	Aliases: common.GetAliases("Service"),
+	Aliases: []string{"services", "svc", "svcs"},
 	Short:   "Lists services",
 	Long:    `Lists services`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -108,7 +108,7 @@ var listServiceCmd = &cobra.Command{
 
 var updateServiceCmd = &cobra.Command{
 	Use:     "service",
-	Aliases: common.GetAliases("Service"),
+	Aliases: []string{"svc"},
 	Short:   "Update a service",
 	Long: `Update a service
 
@@ -128,7 +128,7 @@ EOF`,
 
 var deleteServiceCmd = &cobra.Command{
 	Use:        "service ID|ALIAS",
-	Aliases:    common.GetAliases("Service"),
+	Aliases:    []string{"svc"},
 	Short:      "Delete a service",
 	Long:       `Delete a service`,
 	Args:       cobra.ExactArgs(1),
@@ -143,7 +143,7 @@ var deleteServiceCmd = &cobra.Command{
 
 var importServicesCmd = &cobra.Command{
 	Use:     "service",
-	Aliases: common.GetAliases("Service"),
+	Aliases: []string{"services", "svc", "svcs"},
 	Short:   "Imports services from a CSV",
 	Long: `Imports a list of services from a CSV file with the column headers:
 Name,Description,Product,Language,Framework,Tier,Lifecycle,Owner

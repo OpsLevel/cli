@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/opslevel/cli/common"
 	"os"
 	"strings"
 
@@ -14,9 +13,8 @@ import (
 )
 
 var createDocumentCmd = &cobra.Command{
-	Use:     "document",
-	Aliases: common.GetAliases("Document"),
-	Short:   "Upload Swagger API documents via a file",
+	Use:   "document",
+	Short: "Upload Swagger API documents via a file",
 	Long: `Upload Swagger API documents via a file:
 
 opslevel create document my-service -i xxxxx -f swagger.json

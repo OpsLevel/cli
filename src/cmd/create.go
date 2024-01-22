@@ -6,10 +6,9 @@ import (
 )
 
 var createCmd = &cobra.Command{
-	Use:     "create",
-	Aliases: []string{"new"},
-	Short:   "Create resources or events from a file or stdin",
-	Long:    "Create resources or events from a file or stdin",
+	Use:   "create",
+	Short: "Create resources or events from a file or stdin",
+	Long:  "Create resources or events from a file or stdin",
 }
 
 func init() {

@@ -12,19 +12,17 @@ import (
 )
 
 var exampleTeamCmd = &cobra.Command{
-	Use:     "team",
-	Aliases: common.GetAliases("Team"),
-	Short:   "Example team",
-	Long:    `Example team`,
+	Use:   "team",
+	Short: "Example team",
+	Long:  `Example team`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.TeamCreateInput]())
 	},
 }
 
 var createTeamCmd = &cobra.Command{
-	Use:     "team NAME",
-	Aliases: common.GetAliases("Team"),
-	Short:   "Create a team",
+	Use:   "team NAME",
+	Short: "Create a team",
 	Example: `opslevel create team my-team
 
 cat << EOF | opslevel create team my-team -f -
@@ -136,9 +134,8 @@ opslevel create contact --type=email my-team team@example.com "Mailing List"`,
 }
 
 var updateTeamCmd = &cobra.Command{
-	Use:     "team {ID|ALIAS}",
-	Aliases: common.GetAliases("Team"),
-	Short:   "Update a team",
+	Use:   "team {ID|ALIAS}",
+	Short: "Update a team",
 	Example: `
 cat << EOF | opslevel update team my-team -f -
 managerEmail: "manager@example.com""
@@ -162,7 +159,6 @@ EOF
 
 var getTeamCmd = &cobra.Command{
 	Use:        "team {ID|ALIAS}",
-	Aliases:    common.GetAliases("Team"),
 	Short:      "Get details about a team",
 	Example:    `opslevel get team my-team | jq '.Members.Nodes | map(.Email)'`,
 	Args:       cobra.ExactArgs(1),
@@ -186,7 +182,7 @@ func GetTeam(key string) (*opslevel.Team, error) {
 
 var listTeamCmd = &cobra.Command{
 	Use:     "team",
-	Aliases: common.GetAliases("Team"),
+	Aliases: []string{"teams"},
 	Short:   "Lists the teams",
 	Example: `
 opslevel list team
@@ -209,9 +205,8 @@ opslevel list team -o json | jq 'map((.Members.Nodes | map(.Email)))'
 }
 
 var deleteTeamCmd = &cobra.Command{
-	Use:     "team {ID|ALIAS}",
-	Aliases: common.GetAliases("Team"),
-	Short:   "Delete a team",
+	Use:   "team {ID|ALIAS}",
+	Short: "Delete a team",
 	Example: `
 opslevel delete team my-team
 `,
@@ -271,7 +266,7 @@ var deleteContactCmd = &cobra.Command{
 
 var importTeamsCmd = &cobra.Command{
 	Use:     "team",
-	Aliases: common.GetAliases("Team"),
+	Aliases: []string{"teams"},
 	Short:   "Imports teams from a CSV",
 	Long: `Imports a list of teams from a CSV file with the column headers:
 Name,Manager,Responsibilities,ParentTeam`,

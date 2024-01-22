@@ -6,10 +6,9 @@ import (
 )
 
 var updateCmd = &cobra.Command{
-	Use:     "update",
-	Aliases: []string{"edit"},
-	Short:   "Update resources or events from a file or stdin",
-	Long:    "Update resources or events from a file or stdin",
+	Use:   "update",
+	Short: "Update resources or events from a file or stdin",
+	Long:  "Update resources or events from a file or stdin",
 }
 
 func init() {

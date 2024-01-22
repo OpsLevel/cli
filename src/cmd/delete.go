@@ -6,7 +6,7 @@ import (
 
 var deleteCmd = &cobra.Command{
 	Use:     "delete",
-	Aliases: []string{"del", "rm"},
+	Aliases: []string{"rm"},
 	Short:   "Delete or remove data in OpsLevel",
 	Long:    "Delete or remove data in OpsLevel",
 }

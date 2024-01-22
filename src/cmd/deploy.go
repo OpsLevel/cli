@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"encoding/json"
-	"github.com/opslevel/cli/common"
 	"os"
 	"time"
 
 	"github.com/opslevel/opslevel-go/v2024"
 
 	"github.com/creasty/defaults"
-	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,10 +48,9 @@ type DeployEvent struct {
 }
 
 var deployCreateCmd = &cobra.Command{
-	Use:     "deploy",
-	Aliases: common.GetAliases("Deploy"),
-	Short:   "Create deployment events",
-	Long:    "Create deployment events",
+	Use:   "deploy",
+	Short: "Create deployment events",
+	Long:  "Create deployment events",
 	Run: func(cmd *cobra.Command, args []string) {
 		if integrationUrl == "" {
 			log.Error().Msg("Please provide '--integration-url' to send the deployment information to")

@@ -13,7 +13,7 @@ import (
 
 var examplePropertyCmd = &cobra.Command{
 	Use:     "property",
-	Aliases: common.GetAliases("Property"),
+	Aliases: []string{"prop"},
 	Short:   "Example Property",
 	Long:    `Example Property`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -23,7 +23,7 @@ var examplePropertyCmd = &cobra.Command{
 
 var getPropertyCmd = &cobra.Command{
 	Use:        "property",
-	Aliases:    common.GetAliases("Property"),
+	Aliases:    []string{"prop"},
 	Short:      "Get details about an assigned property",
 	Long:       `Get details about an assigned property`,
 	Example:    `opslevel get property owner-alias property-id`,
@@ -51,7 +51,7 @@ var getPropertyCmd = &cobra.Command{
 var listPropertyCmd = &cobra.Command{
 	Use:        "property",
 	Short:      "List properties on a Service",
-	Aliases:    common.GetAliases("Property"),
+	Aliases:    []string{"properties", "prop", "props"},
 	Long:       "List properties on a Service identified by ID or Alias",
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"SERVICE_ID", "SERVICE_ALIAS"},
@@ -85,7 +85,7 @@ var listPropertyCmd = &cobra.Command{
 
 var assignPropertyCmd = &cobra.Command{
 	Use:     "property",
-	Aliases: common.GetAliases("Property"),
+	Aliases: []string{"prop"},
 	Short:   "Assign a Property",
 	Long:    `Assign a Property to an Entity by Id or Alias`,
 	Example: fmt.Sprintf(`
@@ -104,7 +104,7 @@ EOF`, getYaml[opslevel.PropertyInput]()),
 
 var unassignPropertyCmd = &cobra.Command{
 	Use:        "property",
-	Aliases:    common.GetAliases("Property"),
+	Aliases:    []string{"prop"},
 	Short:      "Unassign a Property",
 	Long:       `Unassign a Property from an Entity by Id or Alias`,
 	Example:    `opslevel unassign property owner-alias property-id`,
@@ -123,7 +123,7 @@ var unassignPropertyCmd = &cobra.Command{
 
 var examplePropertyDefinitionCmd = &cobra.Command{
 	Use:     "property-definition",
-	Aliases: common.GetAliases("PropertyDefinition"),
+	Aliases: []string{"propertydefinition", "pd"},
 	Short:   "Example Property Definition",
 	Long:    `Example Property Definition`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -133,7 +133,7 @@ var examplePropertyDefinitionCmd = &cobra.Command{
 
 var createPropertyDefinitionCmd = &cobra.Command{
 	Use:     "property-definition",
-	Aliases: common.GetAliases("PropertyDefinition"),
+	Aliases: []string{"propertydefinition", "pd"},
 	Short:   "Create a property-definition",
 	Long:    `Create a property-definition`,
 	Example: fmt.Sprintf(`
@@ -152,7 +152,7 @@ EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
 
 var updatePropertyDefinitionCmd = &cobra.Command{
 	Use:     "property-definition",
-	Aliases: common.GetAliases("PropertyDefinition"),
+	Aliases: []string{"propertydefinition", "pd"},
 	Short:   "Update a property-definition",
 	Long:    `Update a property-definition`,
 	Example: fmt.Sprintf(`
@@ -209,7 +209,7 @@ func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
 
 var getPropertyDefinitionCmd = &cobra.Command{
 	Use:        "property-definition",
-	Aliases:    common.GetAliases("PropertyDefinition"),
+	Aliases:    []string{"propertydefinition", "pd"},
 	Short:      "Get details about a property definition",
 	Long:       `Get details about a property definition`,
 	Args:       cobra.ExactArgs(1),
@@ -229,8 +229,8 @@ var getPropertyDefinitionCmd = &cobra.Command{
 
 var listPropertyDefinitionsCmd = &cobra.Command{
 	Use:     "property-definition",
+	Aliases: []string{"property-definitions", "propertydefinition", "propertydefinitions", "pd", "pds"},
 	Short:   "List property definitions",
-	Aliases: []string{"property-definitions"},
 	Long:    "List property definitions",
 	Run: func(cmd *cobra.Command, args []string) {
 		resp, err := getClientGQL().ListPropertyDefinitions(nil)
@@ -251,6 +251,7 @@ var listPropertyDefinitionsCmd = &cobra.Command{
 
 var deletePropertyDefinitionCmd = &cobra.Command{
 	Use:        "property-definition ID",
+	Aliases:    []string{"propertydefinition", "pd"},
 	Short:      "Delete a property definitions",
 	Long:       "Delete a property definitions",
 	Args:       cobra.ExactArgs(1),

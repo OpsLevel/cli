@@ -14,7 +14,7 @@ import (
 
 var exampleSystemCmd = &cobra.Command{
 	Use:     "system",
-	Aliases: common.GetAliases("System"),
+	Aliases: []string{"sys"},
 	Short:   "Example system",
 	Long:    `Example system`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -24,7 +24,7 @@ var exampleSystemCmd = &cobra.Command{
 
 var createSystemCmd = &cobra.Command{
 	Use:     "system",
-	Aliases: common.GetAliases("System"),
+	Aliases: []string{"sys"},
 	Short:   "Create a system",
 	Long:    `Create a system`,
 	Example: `
@@ -48,7 +48,7 @@ var createSystemCmd = &cobra.Command{
 
 var getSystemCmd = &cobra.Command{
 	Use:        "system ID|ALIAS",
-	Aliases:    common.GetAliases("System"),
+	Aliases:    []string{"sys"},
 	Short:      "Get details about a system",
 	Long:       `Get details about a system`,
 	Args:       cobra.ExactArgs(1),
@@ -71,7 +71,7 @@ var getSystemCmd = &cobra.Command{
 
 var listSystemCmd = &cobra.Command{
 	Use:     "system",
-	Aliases: common.GetAliases("System"),
+	Aliases: []string{"systems", "sys"},
 	Short:   "Lists the systems",
 	Long:    `Lists the systems`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -100,7 +100,7 @@ var listSystemCmd = &cobra.Command{
 // TODO: bug in API prevents use of alias in this function.  Adding full functionality for now.
 var updateSystemCmd = &cobra.Command{
 	Use:     "system ID|ALIAS",
-	Aliases: common.GetAliases("System"),
+	Aliases: []string{"sys"},
 	Short:   "Update an OpsLevel system",
 	Long:    "Update an OpsLevel system",
 	Example: `
@@ -127,7 +127,7 @@ var updateSystemCmd = &cobra.Command{
 
 var deleteSystemCmd = &cobra.Command{
 	Use:     "system ID|ALIAS",
-	Aliases: common.GetAliases("System"),
+	Aliases: []string{"sys"},
 	Short:   "Delete a system",
 	Long:    "Delete a system from OpsLevel",
 	Example: `

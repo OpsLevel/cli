@@ -15,20 +15,18 @@ import (
 )
 
 var exampleUserCmd = &cobra.Command{
-	Use:     "user",
-	Aliases: common.GetAliases("User"),
-	Short:   "Example User",
-	Long:    `Example User`,
+	Use:   "user",
+	Short: "Example User",
+	Long:  `Example User`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.UserInput]())
 	},
 }
 
 var createUserCmd = &cobra.Command{
-	Use:     "user EMAIL NAME [ROLE]",
-	Aliases: common.GetAliases("User"),
-	Short:   "Create a User",
-	Long:    "Create a User and optionally define the role (options `User`|`Admin`).",
+	Use:   "user EMAIL NAME [ROLE]",
+	Short: "Create a User",
+	Long:  "Create a User and optionally define the role (options `User`|`Admin`).",
 	Example: `
 opslevel create user "john@example.com" "John Doe"
 opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
@@ -58,10 +56,9 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
 }
 
 var updateUserCmd = &cobra.Command{
-	Use:     "user {ID|EMAIL}",
-	Aliases: common.GetAliases("User"),
-	Short:   "Update a user",
-	Long:    `Update a group`,
+	Use:   "user {ID|EMAIL}",
+	Short: "Update a user",
+	Long:  `Update a group`,
 	Example: `
 cat << EOF | opslevel update user "john@example.com" -f -
 name: John Foobar Doe
@@ -82,7 +79,6 @@ EOF
 
 var getUserCmd = &cobra.Command{
 	Use:        "user {ID|EMAIL}",
-	Aliases:    common.GetAliases("User"),
 	Short:      "Get details about a filter",
 	Example:    `opslevel get user john@example.com`,
 	Args:       cobra.ExactArgs(1),
@@ -96,7 +92,7 @@ var getUserCmd = &cobra.Command{
 
 var listUserCmd = &cobra.Command{
 	Use:     "user",
-	Aliases: common.GetAliases("User"),
+	Aliases: []string{"users"},
 	Short:   "Lists the users",
 	Example: `
 opslevel list user
@@ -130,7 +126,6 @@ opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entr
 
 var deleteUserCmd = &cobra.Command{
 	Use:     "user {ID|EMAIL}",
-	Aliases: common.GetAliases("User"),
 	Short:   "Delete a User",
 	Example: `opslevel delete user john@example.com`,
 	Args:    cobra.ExactArgs(1),
@@ -156,7 +151,7 @@ func Contains[T comparable](s []T, e T) bool {
 
 var importUsersCmd = &cobra.Command{
 	Use:     "user",
-	Aliases: common.GetAliases("User"),
+	Aliases: []string{"users"},
 	Short:   "Imports users from a CSV",
 	Long: `Imports a list of users from a CSV file with the column headers:
 Name,Email,Role,Team`,

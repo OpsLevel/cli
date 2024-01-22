@@ -12,7 +12,7 @@ import (
 
 var getIntegrationCmd = &cobra.Command{
 	Use:        "integration ID",
-	Aliases:    common.GetAliases("Integration"),
+	Aliases:    []string{"int"},
 	Short:      "Get details about a integration",
 	Long:       `Get details about a integration`,
 	Args:       cobra.ExactArgs(1),
@@ -27,7 +27,7 @@ var getIntegrationCmd = &cobra.Command{
 
 var listIntegrationCmd = &cobra.Command{
 	Use:     "integration",
-	Aliases: common.GetAliases("Integration"),
+	Aliases: []string{"integrations", "int", "ints"},
 	Short:   "Lists integrations",
 	Long:    `Lists integrations`,
 	Run: func(cmd *cobra.Command, args []string) {

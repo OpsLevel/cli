@@ -13,7 +13,7 @@ import (
 
 var lifecycleCmd = &cobra.Command{
 	Use:     "lifecycle",
-	Aliases: common.GetAliases("Lifecycle"),
+	Aliases: []string{"lifecycles"},
 	Short:   "Lists lifecycles",
 	Long:    `Lists lifecycles`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -33,7 +33,7 @@ var lifecycleCmd = &cobra.Command{
 
 var tierCmd = &cobra.Command{
 	Use:     "tier",
-	Aliases: common.GetAliases("Tier"),
+	Aliases: []string{"tiers"},
 	Short:   "Lists tiers",
 	Long:    `Lists tiers`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -53,7 +53,7 @@ var tierCmd = &cobra.Command{
 
 var toolsCmd = &cobra.Command{
 	Use:     "tool",
-	Aliases: common.GetAliases("Tool"),
+	Aliases: []string{"tools"},
 	Short:   "Lists the valid alias for tools",
 	Long:    `Lists the valid alias for tools`,
 	Run: func(cmd *cobra.Command, args []string) {

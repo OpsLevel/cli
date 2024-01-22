@@ -12,7 +12,7 @@ import (
 
 var exampleScorecardCmd = &cobra.Command{
 	Use:     "scorecard",
-	Aliases: common.GetAliases("Scorecard"),
+	Aliases: []string{"sc"},
 	Short:   "Example Scorecard",
 	Long:    `Example Scorecard`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -22,7 +22,7 @@ var exampleScorecardCmd = &cobra.Command{
 
 var createScorecardCmd = &cobra.Command{
 	Use:     "scorecard",
-	Aliases: common.GetAliases("Scorecard"),
+	Aliases: []string{"sc"},
 	Short:   "Create a scorecard",
 	Long:    "Create a scorecard",
 	Example: `
@@ -43,7 +43,7 @@ EOF`,
 
 var getScorecardCmd = &cobra.Command{
 	Use:        "scorecard ID|ALIAS",
-	Aliases:    common.GetAliases("Scorecard"),
+	Aliases:    []string{"sc"},
 	Short:      "Get details about a scorecard",
 	Long:       "Get details about a scorecard",
 	Args:       cobra.ExactArgs(1),
@@ -58,7 +58,7 @@ var getScorecardCmd = &cobra.Command{
 
 var listScorecardCmd = &cobra.Command{
 	Use:     "scorecard",
-	Aliases: common.GetAliases("Scorecard"),
+	Aliases: []string{"scorecards", "sc", "scs"},
 	Short:   "List scorecards",
 	Long:    "List scorecards",
 	Example: `
@@ -82,7 +82,7 @@ opslevel list scorecards -o json | jq 'map( {(.Name): (.ServiceCount)} )'
 
 var updateScorecardCmd = &cobra.Command{
 	Use:     "scorecard ID|ALIAS",
-	Aliases: common.GetAliases("Scorecard"),
+	Aliases: []string{"sc"},
 	Short:   "Update a scorecard",
 	Long:    "Update a scorecard",
 	Example: `
@@ -106,7 +106,7 @@ EOF`,
 
 var deleteScorecardCmd = &cobra.Command{
 	Use:        "scorecard ID|ALIAS",
-	Aliases:    common.GetAliases("Scorecard"),
+	Aliases:    []string{"sc"},
 	Short:      "Delete a scorecard",
 	Long:       "Delete a scorecard",
 	Args:       cobra.ExactArgs(1),

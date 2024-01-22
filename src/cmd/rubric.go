@@ -12,7 +12,7 @@ import (
 
 var exampleCategoryCmd = &cobra.Command{
 	Use:     "category",
-	Aliases: common.GetAliases("Category"),
+	Aliases: []string{"cat"},
 	Short:   "Example rubric category",
 	Long:    `Example rubric category`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -22,7 +22,7 @@ var exampleCategoryCmd = &cobra.Command{
 
 var createCategoryCmd = &cobra.Command{
 	Use:        "category NAME",
-	Aliases:    common.GetAliases("Category"),
+	Aliases:    []string{"cat"},
 	Short:      "Create a rubric category",
 	Long:       `Create a rubric category`,
 	Args:       cobra.ExactArgs(1),
@@ -38,7 +38,7 @@ var createCategoryCmd = &cobra.Command{
 
 var getCategoryCmd = &cobra.Command{
 	Use:        "category ID",
-	Aliases:    common.GetAliases("Category"),
+	Aliases:    []string{"cat"},
 	Short:      "Get details about a rubic category",
 	Long:       `Get details about a rubic category`,
 	Args:       cobra.ExactArgs(1),
@@ -53,7 +53,7 @@ var getCategoryCmd = &cobra.Command{
 
 var listCategoryCmd = &cobra.Command{
 	Use:     "category",
-	Aliases: common.GetAliases("Category"),
+	Aliases: []string{"categories", "cat", "cats"},
 	Short:   "Lists rubric categories",
 	Long:    `Lists rubric categories`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -74,7 +74,7 @@ var listCategoryCmd = &cobra.Command{
 
 var deleteCategoryCmd = &cobra.Command{
 	Use:        "category ID",
-	Aliases:    common.GetAliases("Category"),
+	Aliases:    []string{"cat"},
 	Short:      "Delete a rubric category",
 	Long:       `Delete a rubric category`,
 	Args:       cobra.ExactArgs(1),
