@@ -9,7 +9,6 @@ import (
 	"github.com/opslevel/cli/common"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // Commands
@@ -439,12 +438,8 @@ func marshalCheck(check opslevel.Check) *CheckInputType {
 
 var CheckConfigCurrentVersion = "1"
 
-type ConfigVersion struct {
-	Version string
-}
-
 type CheckInputType struct {
-	Version string
+	Version string `yaml:"Version"`
 	Kind    opslevel.CheckType
 	Spec    map[string]interface{}
 }
@@ -455,15 +450,14 @@ func (self *CheckInputType) IsUpdateInput() bool {
 }
 
 func readCheckInput() (*CheckInputType, error) {
-	readInputConfig()
-	// Validate Version
-	v := &ConfigVersion{}
-	viper.Unmarshal(&v)
-	if v.Version != CheckConfigCurrentVersion {
-		return nil, fmt.Errorf("Supported config version is '%s' but found '%s' | Please update config file", CheckConfigCurrentVersion, v.Version)
+	input, err := readResourceInput[CheckInputType]()
+	fmt.Println(input)
+	if err != nil {
+		return nil, err
 	}
-	// Unmarshall
-	evt := &CheckInputType{}
-	viper.Unmarshal(&evt)
-	return evt, nil
+	if input.Version != CheckConfigCurrentVersion {
+		return nil, fmt.Errorf("supported config version is '%s' but found '%s' | please update config file",
+			CheckConfigCurrentVersion, input.Version)
+	}
+	return input, nil
 }

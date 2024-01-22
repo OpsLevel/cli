@@ -12,15 +12,15 @@ import (
 
 var dataFile string
 
+// TODO: deploy.go is still relying on this because it uses viper to bind config
+// we need to stop using viper in such a way and just rely on readResourceInput
 func readInputConfig() {
 	viper.SetConfigType("yaml")
 	switch dataFile {
 	case ".":
-		// TODO: does this block ever actually ever run?
 		viper.SetConfigFile("./data.yaml")
 	case "-":
 		if isStdInFromTerminal() {
-			// TODO: this can take up to half a second to output which interrupts the user's experience
 			log.Info().Msg("Reading input directly from command line... Press CTRL+D to stop typing")
 		}
 		viper.ReadConfig(os.Stdin)
