@@ -12,7 +12,7 @@ import (
 
 var exampleTriggerDefinitionCmd = &cobra.Command{
 	Use:     "trigger-definition",
-	Aliases: []string{"triggerdefinition", "td"},
+	Aliases: []string{"triggerdefinition", "trigdef", "td"},
 	Short:   "Example Scorecard",
 	Long:    `Example Scorecard`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -65,7 +65,7 @@ EOF`,
 
 var getTriggerDefinitionCmd = &cobra.Command{
 	Use:        "trigger-definition ID|ALIAS",
-	Aliases:    []string{"triggerdefinition", "td"},
+	Aliases:    []string{"triggerdefinition", "trigdef", "td"},
 	Short:      "Get details about a trigger definition",
 	Long:       "Get details about a trigger definition",
 	Args:       cobra.ExactArgs(1),
@@ -80,7 +80,7 @@ var getTriggerDefinitionCmd = &cobra.Command{
 
 var listTriggerDefinitionCmd = &cobra.Command{
 	Use:     "trigger-definition",
-	Aliases: []string{"trigger-definitions", "triggerdefinition", "triggerdefinitions", "td", "tds"},
+	Aliases: []string{"trigger-definitions", "triggerdefinition", "triggerdefinitions", "trigdef", "trigdefs", "td", "tds"},
 	Short:   "List trigger definitions",
 	Long:    "List trigger definitions",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -101,7 +101,7 @@ var listTriggerDefinitionCmd = &cobra.Command{
 
 var updateTriggerDefinitionCmd = &cobra.Command{
 	Use:     "trigger-definition ID",
-	Aliases: []string{"triggerdefinition", "td"},
+	Aliases: []string{"triggerdefinition", "trigdef", "td"},
 	Short:   "Update a trigger definition",
 	Long:    "Update a trigger definition",
 	Example: `
@@ -127,7 +127,7 @@ EOF`,
 
 var deleteTriggerDefinitionCmd = &cobra.Command{
 	Use:        "trigger-definition ID|ALIAS",
-	Aliases:    []string{"triggerdefinition", "td"},
+	Aliases:    []string{"triggerdefinition", "trigdef", "td"},
 	Short:      "Delete a trigger definition",
 	Long:       "Delete a trigger definition",
 	Args:       cobra.ExactArgs(1),

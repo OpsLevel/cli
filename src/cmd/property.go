@@ -123,7 +123,7 @@ var unassignPropertyCmd = &cobra.Command{
 
 var examplePropertyDefinitionCmd = &cobra.Command{
 	Use:     "property-definition",
-	Aliases: []string{"propertydefinition", "pd"},
+	Aliases: []string{"propertydefinition", "propdef", "pd"},
 	Short:   "Example Property Definition",
 	Long:    `Example Property Definition`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -133,7 +133,7 @@ var examplePropertyDefinitionCmd = &cobra.Command{
 
 var createPropertyDefinitionCmd = &cobra.Command{
 	Use:     "property-definition",
-	Aliases: []string{"propertydefinition", "pd"},
+	Aliases: []string{"propertydefinition", "propdef", "pd"},
 	Short:   "Create a property-definition",
 	Long:    `Create a property-definition`,
 	Example: fmt.Sprintf(`
@@ -152,7 +152,7 @@ EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
 
 var updatePropertyDefinitionCmd = &cobra.Command{
 	Use:     "property-definition",
-	Aliases: []string{"propertydefinition", "pd"},
+	Aliases: []string{"propertydefinition", "propdef", "pd"},
 	Short:   "Update a property-definition",
 	Long:    `Update a property-definition`,
 	Example: fmt.Sprintf(`
@@ -209,7 +209,7 @@ func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
 
 var getPropertyDefinitionCmd = &cobra.Command{
 	Use:        "property-definition",
-	Aliases:    []string{"propertydefinition", "pd"},
+	Aliases:    []string{"propertydefinition", "propdef", "pd"},
 	Short:      "Get details about a property definition",
 	Long:       `Get details about a property definition`,
 	Args:       cobra.ExactArgs(1),
@@ -229,7 +229,7 @@ var getPropertyDefinitionCmd = &cobra.Command{
 
 var listPropertyDefinitionsCmd = &cobra.Command{
 	Use:     "property-definition",
-	Aliases: []string{"property-definitions", "propertydefinition", "propertydefinitions", "pd", "pds"},
+	Aliases: []string{"property-definitions", "propertydefinition", "propertydefinitions", "propdef", "propdefs", "pd", "pds"},
 	Short:   "List property definitions",
 	Long:    "List property definitions",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -251,7 +251,7 @@ var listPropertyDefinitionsCmd = &cobra.Command{
 
 var deletePropertyDefinitionCmd = &cobra.Command{
 	Use:        "property-definition ID",
-	Aliases:    []string{"propertydefinition", "pd"},
+	Aliases:    []string{"propertydefinition", "propdef", "pd"},
 	Short:      "Delete a property definitions",
 	Long:       "Delete a property definitions",
 	Args:       cobra.ExactArgs(1),
