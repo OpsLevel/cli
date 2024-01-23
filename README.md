@@ -21,7 +21,7 @@
 
 ### Prerequisite
 
-- [jq](https://stedolan.github.io/jq/download/)
+- [jq version 1.7](https://stedolan.github.io/jq/download/)
 - [OpsLevel API Token](https://app.opslevel.com/api_tokens)
   - Generate token by clicking `Create API Token` and providing a description
   - Export the API Token for cli access:
