@@ -28,9 +28,10 @@ type GoInfo struct {
 }
 
 var (
-	version = "development"
-	commit  = "none"
-	build   Build
+	shortVersionFlag bool
+	version          = "development"
+	commit           = "none"
+	build            Build
 )
 
 func initBuild() {
@@ -75,9 +76,14 @@ var versionCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+	versionCmd.PersistentFlags().BoolVar(&shortVersionFlag, "short", false, "Print only version number")
 }
 
 func runVersion(cmd *cobra.Command, args []string) error {
+	if shortVersionFlag {
+		fmt.Printf("%s-%s\n", version, commit)
+		return nil
+	}
 	initBuild()
 	versionInfo, err := json.MarshalIndent(build, "", "    ")
 	if err != nil {
