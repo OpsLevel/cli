@@ -39,8 +39,8 @@ var createCategoryCmd = &cobra.Command{
 var getCategoryCmd = &cobra.Command{
 	Use:        "category ID",
 	Aliases:    []string{"cat"},
-	Short:      "Get details about a rubic category",
-	Long:       `Get details about a rubic category`,
+	Short:      "Get details about a rubric category",
+	Long:       `Get details about a rubric category`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -113,8 +113,8 @@ var createLevelCmd = &cobra.Command{
 
 var getLevelCmd = &cobra.Command{
 	Use:        "level ID",
-	Short:      "Get details about a rubic level",
-	Long:       `Get details about a rubic level`,
+	Short:      "Get details about a rubric level",
+	Long:       `Get details about a rubric level`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {

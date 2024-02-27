@@ -1,18 +1,18 @@
 <p align="center">
-    <a href="https://github.com/OpsLevel/cli/blob/main/LICENSE" alt="License">
-        <img src="https://img.shields.io/github/license/OpsLevel/cli.svg" /></a>
-    <a href="https://goreportcard.com/report/github.com/OpsLevel/cli" alt="Go Report Card">
-        <img src="https://goreportcard.com/badge/github.com/OpsLevel/cli" /></a>
-    <a href="https://GitHub.com/OpsLevel/cli/releases/" alt="Release">
-        <img src="https://img.shields.io/github/v/release/OpsLevel/cli" /></a>  
-    <a href="https://masterminds.github.io/stability/experimental.html" alt="Stability: Experimental">
-        <img src="https://masterminds.github.io/stability/experimental.svg" /></a>  
-    <a href="https://github.com/OpsLevel/cli/graphs/contributors" alt="Contributors">
-        <img src="https://img.shields.io/github/contributors/OpsLevel/cli" /></a>
-    <a href="https://github.com/OpsLevel/cli/pulse" alt="Activity">
-        <img src="https://img.shields.io/github/commit-activity/m/OpsLevel/cli" /></a>
-    <a href="https://github.com/OpsLevel/cli/releases" alt="Downloads">
-        <img src="https://img.shields.io/github/downloads/OpsLevel/cli/total" /></a>
+    <a href="https://github.com/OpsLevel/cli/blob/main/LICENSE">
+        <img src="https://img.shields.io/github/license/OpsLevel/cli.svg" alt="License" /></a>
+    <a href="https://goreportcard.com/report/github.com/OpsLevel/cli">
+        <img src="https://goreportcard.com/badge/github.com/OpsLevel/cli" alt="Go Report Card" /></a>
+    <a href="https://GitHub.com/OpsLevel/cli/releases/">
+        <img src="https://img.shields.io/github/v/release/OpsLevel/cli" alt="Release" /></a>
+    <a href="https://masterminds.github.io/stability/experimental.html">
+        <img src="https://masterminds.github.io/stability/experimental.svg" alt="Stability: Experimental" /></a>
+    <a href="https://github.com/OpsLevel/cli/graphs/contributors">
+        <img src="https://img.shields.io/github/contributors/OpsLevel/cli" alt="Contributors" /></a>
+    <a href="https://github.com/OpsLevel/cli/pulse">
+        <img src="https://img.shields.io/github/commit-activity/m/OpsLevel/cli" alt="Activity" /></a>
+    <a href="https://github.com/OpsLevel/cli/releases">
+        <img src="https://img.shields.io/github/downloads/OpsLevel/cli/total" alt="Downloads" /></a>
 </p>
 
 [![Overall](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fapp.opslevel.com%2Fapi%2Fservice_level%2FEaWapOq9VQj5FvymQEgCPNJcbF-TOibHn89Arw7d_OY)](https://app.opslevel.com/services/opslevel_cli/maturity-report)
@@ -99,7 +99,7 @@ Chaos           Z2lkOi8vb3BzbGV2ZWwvQ2F0ZWdvcnkvOTY8
 ### Enable shell autocompletion
 
 We have the ability to generate autocompletion scripts for the shell's `bash`, `zsh`, `fish` and `powershell`.  To generate 
-the completion script for MacOS zsh:
+the completion script for macOS zsh:
 
 ```sh
 opslevel completion zsh > /usr/local/share/zsh/site-functions/_opslevel

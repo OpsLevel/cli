@@ -118,7 +118,7 @@ func getIntegrationTerraformName(integration opslevel.IntegrationId) string {
 	return makeTerraformSlug(fmt.Sprintf("%s_%s", integration.Type, integration.Name))
 }
 
-// Given a field that could be a multiline string - this will return it with the correct formating
+// Given a field that could be a multiline string - this will return it with the correct formatting
 func buildMultilineStringArg(fieldName string, fieldContents string) string {
 	if len(fieldContents) > 0 {
 		if len(strings.Split(fieldContents, "\n")) > 1 {
@@ -203,7 +203,7 @@ func flattenAliases(aliases []string) string {
 }
 
 func flattenTags(tags []opslevel.Tag) string {
-	tagStrings := []string{}
+	tagStrings := make([]string, len(tags))
 	for _, tag := range tags {
 		tagStrings = append(tagStrings, fmt.Sprintf("%s:%s", tag.Key, tag.Value))
 	}
@@ -525,7 +525,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	servicePropertyCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_service_property.tf", directory), false)
 	tagDefinedCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_tag_defined.tf", directory), false)
 	toolUsageCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_tool_usage.tf", directory), false)
-	hasDocumenationCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_has_documentation.tf", directory), false)
+	hasDocumentationCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_has_documentation.tf", directory), false)
 	gitBranchProtectionCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_git_branch_protection.tf", directory), false)
 	serviceDependencyCheckFile := newFile(fmt.Sprintf("%s/opslevel_checks_service_dependency.tf", directory), false)
 
@@ -542,7 +542,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 	defer servicePropertyCheckFile.Close()
 	defer tagDefinedCheckFile.Close()
 	defer toolUsageCheckFile.Close()
-	defer hasDocumenationCheckFile.Close()
+	defer hasDocumentationCheckFile.Close()
 	defer gitBranchProtectionCheckFile.Close()
 	defer serviceDependencyCheckFile.Close()
 
@@ -619,7 +619,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			checkExtras = templateConfig(toolUsageCheckConfig, casted.ToolCategory, flattenPredicate("tool_name_predicate", casted.ToolNamePredicate), flattenPredicate("environment_predicate", casted.EnvironmentPredicate))
 		case opslevel.CheckTypeHasDocumentation:
 			casted := check.HasDocumentationCheckFragment
-			activeFile = hasDocumenationCheckFile
+			activeFile = hasDocumentationCheckFile
 			checkTypeTerraformName = "has_documentation"
 			checkExtras = templateConfig(hasDocumentationCheckConfig, casted.DocumentType, casted.DocumentSubtype)
 		case opslevel.CheckTypeGitBranchProtection:

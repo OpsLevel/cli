@@ -1,10 +1,9 @@
 # Contributing
 
 1. [About this document](#about-this-document)
-3. [Getting the code](#getting-the-code)
-4. [Setting up an environment](#setting-up-an-environment)
-5. [Local development](#local-development)
-7. [Submitting a Pull Request](#submitting-a-pull-request)
+1. [Getting the code](#getting-the-code)
+1. [Local development](#local-development)
+1. [Submitting a Pull Request](#submitting-a-pull-request)
 
 ## About this document
 
@@ -54,10 +53,10 @@ If you are a member of the `OpsLevel` GitHub organization, you will have push ac
 
 First make sure you have working [golang development environment](https://learn.gopherguides.com/courses/preparing-your-environment-for-go-development) setup.
 
-You will also need an [OpsLevel API Token](https://app.opslevel.com/api_tokens) from your account to successfully make API calls against.  Once you have the API token its best to put it in your terminal's environment
+You will also need an [OpsLevel API Token](https://app.opslevel.com/api_tokens) from your account to successfully make API calls against.  Once you have the API token it is best to put it in your terminal's environment
 
 ```sh
-export OPSLEVEL_API_TOKEN=XXXXXXXXX
+ export OPSLEVEL_API_TOKEN=XXXXXXXXX
 ```
 
 ### Local Development Testing
@@ -97,9 +96,9 @@ Follow the prompts to create your change entry - remember this is what will show
 
 ## Submitting a Pull Request
 
-OpsLevel provides a CI environment to test changes through Github Actions. For example, if you submit a pull request to the repo, GitHub will trigger automated code checks and tests upon approval from an OpsLevel maintainer.
+OpsLevel provides a CI environment to test changes through GitHub Actions. For example, if you submit a pull request to the repo, GitHub will trigger automated code checks and tests upon approval from an OpsLevel maintainer.
 
 A maintainer will review your PR. They may suggest code revision for style or clarity, or request that you add unit or integration test(s). These are good things! We believe that, with a little bit of help, anyone can contribute high-quality code.
-- First time contributors should note code checks + unit tests require a maintainer to approve.
+- First time contributors should be aware that code checks + unit tests require a maintainer to approve.
 
 Once all tests are passing and your PR has been approved, a maintainer will merge your changes into the active development branch. And that's it!  It will be available in the next release that is cut. Happy developing :tada:

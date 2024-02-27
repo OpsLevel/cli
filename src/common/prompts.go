@@ -160,7 +160,7 @@ func PromptForIntegration(client *opslevel.Client) (*opslevel.Integration, error
 		{{ "Type:" | faint }}	{{ .Type }}`,
 	}
 
-	filteredList := []opslevel.Integration{}
+	filteredList := make([]opslevel.Integration, 0)
 	for _, val := range list {
 		if val.Type == "generic" {
 			filteredList = append(filteredList, val)

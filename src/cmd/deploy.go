@@ -34,7 +34,7 @@ type Commit struct {
 	AuthoringDate  *time.Time `json:"authoring_date,omitempty" yaml:"authoring-date"`
 }
 
-// DeployRequest represents a structured request to the OpsLevel deploys webhook endpoint
+// DeployEvent represents a structured request to the OpsLevel deploys webhook endpoint
 type DeployEvent struct {
 	Service      string    `validate:"required" json:"service"`
 	Deployer     Deployer  `validate:"required" json:"deployer"`

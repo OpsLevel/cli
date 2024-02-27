@@ -102,7 +102,7 @@ opslevel get tag --type=Service my-service-alias foo
 		tags, err := result.GetTags(client, nil)
 		cobra.CheckErr(err)
 
-		output := []opslevel.Tag{}
+		output := make([]opslevel.Tag, 0)
 		for _, tag := range tags.Nodes {
 			if tagKey == tag.Key {
 				output = append(output, tag)

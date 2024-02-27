@@ -1,3 +1,3 @@
 #! /bin/sh
 
-go build -o $(which opslevel)
+go build -o "$(which opslevel)"
