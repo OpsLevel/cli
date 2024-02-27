@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/itchyny/gojq"
 	"github.com/opslevel/opslevel-go/v2024"
