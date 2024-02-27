@@ -45,6 +45,7 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
 		}
 
 		skipEmail, err := cmd.Flags().GetBool("skip-welcome-email")
+		cobra.CheckErr(err)
 
 		resource, err := getClientGQL().InviteUser(email, opslevel.UserInput{
 			Name:             opslevel.RefOf(name),
