@@ -11,7 +11,6 @@ import (
 
 	"github.com/itchyny/gojq"
 	"github.com/opslevel/opslevel-go/v2024"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -105,6 +104,7 @@ query ($id: ID!){
 		handleErr("error getting paginate flag", err)
 
 		aggregate, err := flags.GetString("aggregate")
+		cobra.CheckErr(err)
 		jq, err := gojq.Parse(aggregate)
 		handleErr("error parsing pagination flag value", err)
 		aggregation, err := gojq.Compile(jq)
@@ -113,6 +113,7 @@ query ($id: ID!){
 		queryValue, err := flags.GetString("query")
 		handleErr("error getting query flag value", err)
 		queryParsed, err := convert(queryValue)
+		cobra.CheckErr(err)
 		query, ok := queryParsed.(string)
 		if !ok {
 			handleErr("error parsing query flag value", fmt.Errorf("'%#v' is not a string", queryParsed))
@@ -170,10 +171,8 @@ func init() {
 }
 
 func handleErr(msg string, err error) {
-	if err != nil {
-		log.Error().Err(err).Msg(msg)
-		os.Exit(1)
-	}
+	wrappedErr := fmt.Errorf("%s | %w", msg, err)
+	cobra.CheckErr(wrappedErr)
 }
 
 func convert(v string) (interface{}, error) {

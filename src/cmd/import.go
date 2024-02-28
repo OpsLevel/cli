@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -23,7 +23,7 @@ func init() {
 
 func readImportFilepathAsCSV() (*common.CSVReader, error) {
 	if importFilepath == "" {
-		return nil, errors.New("empty filepath specified")
+		return nil, fmt.Errorf("empty filepath specified")
 	}
 	if importFilepath == "-" {
 		return common.ReadCSVFile("/dev/stdin")

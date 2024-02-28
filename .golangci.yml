@@ -1,9 +1,16 @@
 run:
   timeout: 2m
-linters:
-  disable:
-      # 1st -> remove staticcheck and fix lint issues
-    - staticcheck
-      # 2nd -> remove errcheck and ineffassign
-    - errcheck
-    - ineffassign
+linters-settings:
+  errcheck:
+    exclude-functions:
+      - (*encoding/csv.Writer).Write
+      - (*github.com/spf13/cobra.Command).MarkFlagRequired
+      - (*github.com/spf13/pflag.PFlagSet).GetString
+      - (*os.File).WriteString
+      - github.com/spf13/viper.BindEnv
+      - github.com/spf13/viper.BindPFlags
+      - github.com/spf13/viper.ReadConfig
+      - github.com/spf13/viper.ReadInConfig
+      - github.com/spf13/viper.Unmarshal
+  staticcheck:
+    checks: ["all", "-SA5001"]

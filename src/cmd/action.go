@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/opslevel/opslevel-go/v2024"
@@ -61,7 +60,7 @@ EOF`,
 			cobra.CheckErr(err)
 			fmt.Printf("created webhook action: %s\n", result.Id)
 		default:
-			err := errors.New("unknown action type: " + actionType)
+			err := fmt.Errorf("unknown action type: '%s'", actionType)
 			cobra.CheckErr(err)
 		}
 	},
@@ -127,7 +126,7 @@ EOF`,
 			cobra.CheckErr(err)
 			common.JsonPrint(json.MarshalIndent(action, "", "    "))
 		default:
-			err := errors.New("unknown action type: " + actionType)
+			err := fmt.Errorf("unknown action type: '%s'", actionType)
 			cobra.CheckErr(err)
 		}
 	},
