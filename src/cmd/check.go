@@ -15,8 +15,8 @@ import (
 
 var getCheckCmd = &cobra.Command{
 	Use:        "check ID",
-	Short:      "Get details about a rubic check",
-	Long:       `Get details about a rubic check`,
+	Short:      "Get details about a rubric check",
+	Long:       `Get details about a rubric check`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -214,11 +214,11 @@ func updateCheck(input CheckInputType, usePrompts bool) (*opslevel.Check, error)
 
 // Resolving foreign keys
 
-func (self *CheckInputType) resolveCategoryAliases(client *opslevel.Client, usePrompt bool) error {
-	if item, ok := self.Spec["category"]; ok {
-		delete(self.Spec, "category")
+func (checkInputType *CheckInputType) resolveCategoryAliases(client *opslevel.Client, usePrompt bool) error {
+	if item, ok := checkInputType.Spec["category"]; ok {
+		delete(checkInputType.Spec, "category")
 		if value, ok := opslevel.Cache.TryGetCategory(item.(string)); ok {
-			self.Spec["categoryId"] = value.Id
+			checkInputType.Spec["categoryId"] = value.Id
 			return nil
 		} else {
 			fmt.Printf("%s is not a valid category, please select a valid category\n", item.(string))
@@ -229,9 +229,9 @@ func (self *CheckInputType) resolveCategoryAliases(client *opslevel.Client, useP
 		if promptErr != nil {
 			return promptErr
 		}
-		self.Spec["categoryId"] = category.Id
+		checkInputType.Spec["categoryId"] = category.Id
 	} else {
-		if self.IsUpdateInput() {
+		if checkInputType.IsUpdateInput() {
 			return nil
 		}
 
@@ -240,11 +240,11 @@ func (self *CheckInputType) resolveCategoryAliases(client *opslevel.Client, useP
 	return nil
 }
 
-func (self *CheckInputType) resolveLevelAliases(client *opslevel.Client, usePrompt bool) error {
-	if item, ok := self.Spec["level"]; ok {
-		delete(self.Spec, "level")
+func (checkInputType *CheckInputType) resolveLevelAliases(client *opslevel.Client, usePrompt bool) error {
+	if item, ok := checkInputType.Spec["level"]; ok {
+		delete(checkInputType.Spec, "level")
 		if value, ok := opslevel.Cache.TryGetLevel(item.(string)); ok {
-			self.Spec["levelId"] = value.Id
+			checkInputType.Spec["levelId"] = value.Id
 			return nil
 		} else {
 			fmt.Printf("%s is not a valid level, please select a valid level\n", item.(string))
@@ -255,9 +255,9 @@ func (self *CheckInputType) resolveLevelAliases(client *opslevel.Client, useProm
 		if promptErr != nil {
 			return promptErr
 		}
-		self.Spec["levelId"] = level.Id
+		checkInputType.Spec["levelId"] = level.Id
 	} else {
-		if self.IsUpdateInput() {
+		if checkInputType.IsUpdateInput() {
 			return nil
 		}
 
@@ -266,11 +266,11 @@ func (self *CheckInputType) resolveLevelAliases(client *opslevel.Client, useProm
 	return nil
 }
 
-func (self *CheckInputType) resolveTeamAliases(client *opslevel.Client, usePrompt bool) error {
-	if item, ok := self.Spec["owner"]; ok {
-		delete(self.Spec, "owner")
+func (checkInputType *CheckInputType) resolveTeamAliases(client *opslevel.Client, usePrompt bool) error {
+	if item, ok := checkInputType.Spec["owner"]; ok {
+		delete(checkInputType.Spec, "owner")
 		if value, ok := opslevel.Cache.TryGetTeam(item.(string)); ok {
-			self.Spec["ownerId"] = value.Id
+			checkInputType.Spec["ownerId"] = value.Id
 			return nil
 		} else {
 			fmt.Printf("%s is not a valid team, please select a valid team\n", item.(string))
@@ -282,7 +282,7 @@ func (self *CheckInputType) resolveTeamAliases(client *opslevel.Client, usePromp
 			return promptErr
 		}
 		if team.Id != "" {
-			self.Spec["ownerId"] = team.Id
+			checkInputType.Spec["ownerId"] = team.Id
 		}
 	} else {
 		log.Warn().Msg("no value supplied for field 'owner'")
@@ -290,11 +290,11 @@ func (self *CheckInputType) resolveTeamAliases(client *opslevel.Client, usePromp
 	return nil
 }
 
-func (self *CheckInputType) resolveFilterAliases(client *opslevel.Client, usePrompt bool) error {
-	if item, ok := self.Spec["filter"]; ok {
-		delete(self.Spec, "filter")
+func (checkInputType *CheckInputType) resolveFilterAliases(client *opslevel.Client, usePrompt bool) error {
+	if item, ok := checkInputType.Spec["filter"]; ok {
+		delete(checkInputType.Spec, "filter")
 		if value, ok := opslevel.Cache.TryGetFilter(item.(string)); ok {
-			self.Spec["filterId"] = value.Id
+			checkInputType.Spec["filterId"] = value.Id
 			return nil
 		} else {
 			fmt.Printf("%s is not a valid filter, please select a valid filter\n", item.(string))
@@ -306,7 +306,7 @@ func (self *CheckInputType) resolveFilterAliases(client *opslevel.Client, usePro
 			return promptErr
 		}
 		if filter.Id != "" {
-			self.Spec["filterId"] = filter.Id
+			checkInputType.Spec["filterId"] = filter.Id
 		}
 	} else {
 		log.Warn().Msg("no value supplied for field 'filter'")
@@ -314,11 +314,11 @@ func (self *CheckInputType) resolveFilterAliases(client *opslevel.Client, usePro
 	return nil
 }
 
-func (self *CheckInputType) resolveIntegrationAliases(client *opslevel.Client, usePrompt bool) error {
-	if item, ok := self.Spec["integration"]; ok {
-		delete(self.Spec, "integration")
+func (checkInputType *CheckInputType) resolveIntegrationAliases(client *opslevel.Client, usePrompt bool) error {
+	if item, ok := checkInputType.Spec["integration"]; ok {
+		delete(checkInputType.Spec, "integration")
 		if value, ok := opslevel.Cache.TryGetIntegration(item.(string)); ok {
-			self.Spec["integrationId"] = value.Id
+			checkInputType.Spec["integrationId"] = value.Id
 			return nil
 		} else {
 			fmt.Printf("%s is not a valid integration, please select a valid integration\n", item.(string))
@@ -329,9 +329,9 @@ func (self *CheckInputType) resolveIntegrationAliases(client *opslevel.Client, u
 		if promptErr != nil {
 			return promptErr
 		}
-		self.Spec["integrationId"] = integration.Id
+		checkInputType.Spec["integrationId"] = integration.Id
 	} else {
-		if self.IsUpdateInput() {
+		if checkInputType.IsUpdateInput() {
 			return nil
 		}
 
@@ -444,8 +444,8 @@ type CheckInputType struct {
 	Spec    map[string]interface{}
 }
 
-func (self *CheckInputType) IsUpdateInput() bool {
-	_, ok := self.Spec["id"]
+func (checkInputType *CheckInputType) IsUpdateInput() bool {
+	_, ok := checkInputType.Spec["id"]
 	return ok
 }
 

@@ -8,7 +8,7 @@ import (
 )
 
 // CLIServiceDependencyCreateInput This is used to make the user facing CLI experience better
-// than a straight passthrough to the API types which are overly verbose
+// than a straight pass through to the API types which are overly verbose
 type CLIServiceDependencyCreateInput struct {
 	Source string `json:"source"`
 	Target string `json:"target"`

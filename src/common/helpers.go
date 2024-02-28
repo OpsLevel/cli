@@ -17,7 +17,7 @@ func GetArg(args []string, index int, defaultValue string) string {
 
 func WasFound(condition bool, key string) {
 	if condition {
-		cobra.CheckErr(fmt.Errorf("Not found - '%s'", key))
+		cobra.CheckErr(fmt.Errorf("not found - '%s'", key))
 	}
 }
 
@@ -36,13 +36,13 @@ func YamlPrint(object interface{}) {
 }
 
 func MinInt(values ...int) int {
-	min := values[0]
+	minValue := values[0]
 
 	for _, val := range values {
-		if val < min {
-			min = val
+		if val < minValue {
+			minValue = val
 		}
 	}
 
-	return min
+	return minValue
 }

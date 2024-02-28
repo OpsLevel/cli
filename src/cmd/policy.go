@@ -83,11 +83,11 @@ func toASTValue[T astMarshallable](input T) (ast.Value, error) {
 }
 
 func getKeyFromMapByMaxValue(m map[string]float64) string {
-	max := float64(0)
+	maxValue := float64(0)
 	var output string
 	for k, v := range m {
-		if v > max {
-			max = v
+		if v > maxValue {
+			maxValue = v
 			output = k
 		}
 	}

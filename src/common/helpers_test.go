@@ -3,7 +3,7 @@ package common_test
 import (
 	"testing"
 
-	common "github.com/opslevel/cli/common"
+	"github.com/opslevel/cli/common"
 
 	"github.com/rocktavious/autopilot"
 )

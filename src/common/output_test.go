@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	common "github.com/opslevel/cli/common"
+	"github.com/opslevel/cli/common"
 	"github.com/rocktavious/autopilot"
 )
 
@@ -26,7 +26,7 @@ func captureOutput() string {
 
 func TestPrettyPrint(t *testing.T) {
 	// Arrange
-	trimmedTestString := strings.TrimRight(captureOutput(), "\n") // captureOuput adds an extra newline
+	trimmedTestString := strings.TrimRight(captureOutput(), "\n") // captureOutput adds an extra newline
 	// Act
 	// Assert
 	autopilot.Equals(t, "\"< > & alan was here & < >\"", trimmedTestString)
