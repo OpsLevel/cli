@@ -13,6 +13,7 @@ import (
 
 	"github.com/itchyny/gojq"
 	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -103,33 +104,33 @@ query ($id: ID!){
 
 		cobra.CheckErr(err)
 		paginate, err := flags.GetBool("paginate")
-		cobra.CheckErr(errors.Wrap(err, "error getting paginate flag"))
+		handleErr("error getting paginate flag", err)
 
 		aggregate, err := flags.GetString("aggregate")
 		cobra.CheckErr(err)
 		jq, err := gojq.Parse(aggregate)
-		cobra.CheckErr(errors.Wrap(err, "error parsing pagination flag value"))
+		handleErr("error parsing pagination flag value", err)
 		aggregation, err := gojq.Compile(jq)
 
-		cobra.CheckErr(errors.Wrap(err, "error compiling pagination flag value"))
+		handleErr("error compiling pagination flag value", err)
 		queryValue, err := flags.GetString("query")
-		cobra.CheckErr(errors.Wrap(err, "error getting query flag value"))
+		handleErr("error getting query flag value", err)
 		queryParsed, err := convert(queryValue)
 		cobra.CheckErr(err)
 		query, ok := queryParsed.(string)
 		if !ok {
-			cobra.CheckErr(errors.Wrap(fmt.Errorf("'%#v' is not a string", queryParsed), "error parsing query flag value"))
+			handleErr("error parsing query flag value", fmt.Errorf("'%#v' is not a string", queryParsed))
 		}
 		operationName, err := flags.GetString("operationName")
 		cobra.CheckErr(err)
 		fields, err := flags.GetStringArray("field")
-		cobra.CheckErr(errors.Wrap(err, "error getting field flag value"))
+		handleErr("error getting field flag value", err)
 
 		variables := map[string]interface{}{}
 		for _, field := range fields {
 			matches := keyValueExp.FindStringSubmatch(field)
 			value, err := convert(matches[2])
-			cobra.CheckErr(errors.Wrap(err, fmt.Sprintf("error parsing variable '%s'", field)))
+			handleErr(fmt.Sprintf("error parsing variable '%s'", field), err)
 			variables[matches[1]] = value
 		}
 
@@ -139,12 +140,12 @@ query ($id: ID!){
 		hasNextPage := true
 		for hasNextPage {
 			data, err := client.ExecRaw(query, variables, opslevel.WithName(operationName))
-			cobra.CheckErr(errors.Wrap(err, "error making graphql api call"))
+			handleErr("error making graphql api call", err)
 			output = append(output, handleAggregate(data, aggregation)...)
 
 			if paginate {
 				hasNextPage, err = strconv.ParseBool(string(hasNextPageExp.FindSubmatch(data)[1]))
-				cobra.CheckErr(errors.Wrap(err, "error parsing bool for has next page"))
+				handleErr("error parsing bool for has next page", err)
 				// don't try to parse endCursor unless we know there's another page
 				if hasNextPage {
 					variables["endCursor"] = string(endCursorExp.FindSubmatch(data)[1])
@@ -155,7 +156,7 @@ query ($id: ID!){
 		}
 
 		json, err := json.Marshal(output)
-		cobra.CheckErr(errors.Wrap(err, "error marshaling output to json"))
+		handleErr("error marshaling output to json", err)
 
 		fmt.Println(string(json))
 	},
@@ -170,6 +171,13 @@ func init() {
 	graphqlCmd.Flags().StringP("query", "q", "", "The query or mutation body to use")
 	graphqlCmd.Flags().StringP("operationName", "o", "", "The query or mutation 'operation name' to use")
 	graphqlCmd.Flags().StringArrayP("field", "f", nil, "Add a variable in `key=value` format")
+}
+
+func handleErr(msg string, err error) {
+	if err != nil {
+		log.Error().Err(err).Msg(msg)
+		os.Exit(1)
+	}
 }
 
 func convert(v string) (interface{}, error) {
@@ -208,7 +216,7 @@ func convert(v string) (interface{}, error) {
 func handleAggregate(data []byte, aggregation *gojq.Code) []interface{} {
 	var parsed map[string]interface{}
 	err := json.Unmarshal(data, &parsed)
-	cobra.CheckErr(errors.Wrap(err, "error parsing graphql response to json"))
+	handleErr("error parsing graphql response to json", err)
 	iter := aggregation.Run(parsed)
 	var output []interface{}
 	for {
@@ -217,7 +225,7 @@ func handleAggregate(data []byte, aggregation *gojq.Code) []interface{} {
 			break
 		}
 		if err, ok := value.(error); ok {
-			cobra.CheckErr(errors.Wrap(err, "error running aggregation function"))
+			handleErr("error running aggregation function", err)
 		}
 		output = append(output, value)
 	}
