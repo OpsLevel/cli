@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -203,7 +202,7 @@ func init() {
 
 func validateResourceTypeArg() error {
 	if resourceType == "" {
-		return errors.New("must specify a taggable resource type using --type=RESOURCE_TYPE")
+		return fmt.Errorf("must specify a taggable resource type using --type=RESOURCE_TYPE")
 	}
 
 	// if ProperCase, continue
@@ -222,7 +221,7 @@ func validateResourceTypeArg() error {
 		lowercaseMap[strings.ToLower(s)] = s
 	}
 	if lowercaseMap[lowercaseInput] == "" {
-		return errors.New("not a taggable resource type: " + resourceType)
+		return fmt.Errorf("not a taggable resource type: '%s'", resourceType)
 	}
 	resourceType = lowercaseMap[lowercaseInput]
 

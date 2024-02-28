@@ -9,11 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/itchyny/gojq"
 	"github.com/opslevel/opslevel-go/v2024"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -174,10 +171,8 @@ func init() {
 }
 
 func handleErr(msg string, err error) {
-	if err != nil {
-		log.Error().Err(err).Msg(msg)
-		os.Exit(1)
-	}
+	wrappedErr := fmt.Errorf("%s | %w", msg, err)
+	cobra.CheckErr(wrappedErr)
 }
 
 func convert(v string) (interface{}, error) {
