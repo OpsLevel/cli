@@ -22,7 +22,7 @@ tasks:
     dir: "{{.SRC_DIR}}"
     cmds:
       - test -z "$(gofumpt -d -e . | tee /dev/stderr)"
-      - golangci-lint run
+      - ./golangci-lint run
       - nilaway -test=false --include-pkgs='github.com/opslevel/opslevel-go,github.com/opslevel/cli' --exclude-errors-in-files='cmd/terraform.go' ./...
 
   fix:
