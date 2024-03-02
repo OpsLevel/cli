@@ -37,7 +37,7 @@ func YamlPrint(object interface{}) {
 
 func MinInt(values ...int) int {
 	if len(values) < 1 {
-		panic("MinInt: unexpectedly received no values")
+		panic("MinInt: unexpected received no values")
 	}
 
 	minValue := values[0]
