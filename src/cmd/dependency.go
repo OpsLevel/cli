@@ -71,6 +71,9 @@ func readCreateServiceDependencyInput() (*opslevel.ServiceDependencyCreateInput,
 	if err != nil {
 		return nil, err
 	}
+	if in == nil {
+		return nil, fmt.Errorf("readResourceInput: unexpected nil input")
+	}
 	output := &opslevel.ServiceDependencyCreateInput{
 		DependencyKey: opslevel.ServiceDependencyKey{
 			SourceIdentifier:      opslevel.NewIdentifier(in.Source),

@@ -58,6 +58,9 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 			filteredList = append(filteredList, val)
 		}
 	}
+	if len(filteredList) < 1 {
+		return nil, fmt.Errorf("unexpected length 0 list of levels")
+	}
 	sort.Slice(filteredList, func(i, j int) bool { return filteredList[i].Index < filteredList[j].Index })
 
 	prompt := promptui.Select{

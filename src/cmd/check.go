@@ -451,9 +451,11 @@ func (checkInputType *CheckInputType) IsUpdateInput() bool {
 
 func readCheckInput() (*CheckInputType, error) {
 	input, err := readResourceInput[CheckInputType]()
-	fmt.Println(input)
 	if err != nil {
 		return nil, err
+	}
+	if input == nil {
+		return nil, fmt.Errorf("readCheckInput: unexpected nil input")
 	}
 	if input.Version != CheckConfigCurrentVersion {
 		return nil, fmt.Errorf("supported config version is '%s' but found '%s' | please update config file",
