@@ -1,6 +1,13 @@
 run:
   timeout: 2m
 linters-settings:
+  custom:
+    nilaway:
+      path: ./bin/nilaway.so
+      description: self-built nilaway plugin
+      original-url: github.com/moogacs/nilaway-plugin
+      settings:
+        - include-pkgs: "github.com/opslevel/opslevel-go,github.com/opslevel/cli"
   errcheck:
     exclude-functions:
       - (*encoding/csv.Writer).Write
@@ -14,3 +21,9 @@ linters-settings:
       - github.com/spf13/viper.Unmarshal
   staticcheck:
     checks: ["all", "-SA5001"]
+
+issues:
+  exclude-rules:
+    - linters:
+        - nilaway
+      path: "cmd/terraform.go"
