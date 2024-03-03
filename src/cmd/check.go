@@ -455,7 +455,7 @@ func readCheckInput() (*CheckInputType, error) {
 		return nil, err
 	}
 	if input == nil {
-		return nil, fmt.Errorf("readCheckInput: unexpected nil input")
+		return nil, fmt.Errorf("unexpected nil input")
 	}
 	if input.Version != CheckConfigCurrentVersion {
 		return nil, fmt.Errorf("supported config version is '%s' but found '%s' | please update config file",

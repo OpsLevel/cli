@@ -183,7 +183,7 @@ func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
 		return nil, err
 	}
 	if d == nil {
-		return nil, fmt.Errorf("readResourceInput: unexpected got a null value")
+		return nil, fmt.Errorf("unexpected nil input")
 	}
 	data := *d
 	name, ok := data["name"].(string)

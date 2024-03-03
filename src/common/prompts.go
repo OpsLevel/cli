@@ -59,7 +59,7 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 		}
 	}
 	if len(filteredList) < 1 {
-		return nil, fmt.Errorf("unexpected length 0 list of levels")
+		return nil, fmt.Errorf("expected more than one filtered level in list")
 	}
 	sort.Slice(filteredList, func(i, j int) bool { return filteredList[i].Index < filteredList[j].Index })
 
