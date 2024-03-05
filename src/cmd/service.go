@@ -42,7 +42,7 @@ owner:
   alias: "Platform"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.ServiceCreateInput]()
+		input, err := ReadResourceInput[opslevel.ServiceCreateInput](nil)
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateService(*input)
 		cobra.CheckErr(err)
@@ -118,7 +118,7 @@ description: "Hello World Service Updated"
 tier: "tier_3"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.ServiceUpdateInput]()
+		input, err := ReadResourceInput[opslevel.ServiceUpdateInput](nil)
 		cobra.CheckErr(err)
 		service, err := getClientGQL().UpdateService(*input)
 		cobra.CheckErr(err)

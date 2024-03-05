@@ -71,7 +71,7 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readResourceInput[opslevel.UserInput]()
+		input, err := ReadResourceInput[opslevel.UserInput](nil)
 		cobra.CheckErr(err)
 		filter, err := getClientGQL().UpdateUser(key, *input)
 		cobra.CheckErr(err)

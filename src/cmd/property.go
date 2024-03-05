@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-
 	"github.com/opslevel/opslevel-go/v2024"
 
 	"github.com/opslevel/cli/common"
@@ -70,13 +70,13 @@ var listPropertyCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(properties.Nodes, "", "    "))
 		} else {
-			w := common.NewTabWriter("DEFINITION_ID", "VALUE", "LEN_VALIDATION_ERRORS")
+			w := common.NewTabWriter("DEFINITION_ID", "VALUE", "LEN_VALIDATION_ERRORS", "LOCKED")
 			for _, prop := range properties.Nodes {
 				var valueOutput string
 				if prop.Value != nil {
 					valueOutput = string(*prop.Value)
 				}
-				fmt.Fprintf(w, "%s\t%s\t%d\n", string(prop.Definition.Id), valueOutput, len(prop.ValidationErrors))
+				fmt.Fprintf(w, "%s\t%s\t%d\t%t\n", string(prop.Definition.Id), valueOutput, len(prop.ValidationErrors), prop.Locked)
 			}
 			w.Flush()
 		}
@@ -93,7 +93,7 @@ cat << EOF | opslevel assign property -f -
 %s
 EOF`, getYaml[opslevel.PropertyInput]()),
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.PropertyInput]()
+		input, err := ReadResourceInput[opslevel.PropertyInput](nil)
 		cobra.CheckErr(err)
 		newProperty, err := getClientGQL().PropertyAssign(*input)
 		cobra.CheckErr(err)
@@ -139,13 +139,12 @@ var createPropertyDefinitionCmd = &cobra.Command{
 	Example: fmt.Sprintf(`
 cat << EOF | opslevel create property-definition -f -
 %s
-EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
+EOF`, getExample[opslevel.PropertyDefinitionInput]()),
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readPropertyDefinitionInput()
 		cobra.CheckErr(err)
 		newPropertyDefinition, err := getClientGQL().CreatePropertyDefinition(*input)
 		cobra.CheckErr(err)
-
 		fmt.Println(newPropertyDefinition.Id)
 	},
 }
@@ -176,25 +175,38 @@ EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
 	},
 }
 
-// The schema in PropertyDefinitionInput can be a nested map[string]any and needs to be handled separately
 func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
-	d, err := readResourceInput[opslevel.JSONSchema]()
+	input, err := readInput()
 	if err != nil {
 		return nil, err
+	}
+
+	// case 1: schema is a YAML object, can easily convert types
+	if def, err := ReadResource[opslevel.PropertyDefinitionInput](input); err == nil {
+		return def, nil
+	}
+
+	// case 2: schema is a string
+	d, err := ReadResource[map[string]any](input)
+	if err != nil {
+		return nil, fmt.Errorf("cannot parse input as a map: %w", err)
 	}
 	data := *d
 	name, ok := data["name"].(string)
 	if !ok {
-		return nil, fmt.Errorf("name is required and must be a string")
+		return nil, errors.New("name is required and must be a string")
 	}
-	schema, ok := data["schema"].(map[string]any)
+	schema, ok := data["schema"].(string)
 	if !ok {
-		return nil, fmt.Errorf("schema is required and must be a JSON object")
+		return nil, errors.New("schema is required and must be either a YAML object or a string containing a JSON object")
 	}
-	jsonSchema := opslevel.JSONSchema(schema)
+	jsonSchema, err := opslevel.NewJSONSchema(schema)
+	if err != nil {
+		return nil, fmt.Errorf("cannot parse schema as a JSON object: %w", err)
+	}
 	propDefInput := opslevel.PropertyDefinitionInput{
 		Name:   opslevel.RefOf(name),
-		Schema: &jsonSchema,
+		Schema: jsonSchema,
 	}
 
 	if description, ok := data["description"].(string); ok {
