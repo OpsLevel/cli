@@ -116,7 +116,10 @@ func init() {
 }
 
 func readCreateConfigAsDeployEvent() (*DeployEvent, error) {
-	readInputConfig()
+	err := readInputConfig()
+	if err != nil {
+		return nil, err
+	}
 	evt := &DeployEvent{}
 	viper.Unmarshal(&evt)
 	if err := defaults.Set(evt); err != nil {

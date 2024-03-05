@@ -18,8 +18,11 @@ type CSVReader struct {
 
 func (s *CSVReader) Rows() bool {
 	record, err := s.reader.Read()
+	if err != nil {
+		return false
+	}
 	s.Row = record
-	return err == nil
+	return true
 }
 
 func (s *CSVReader) Text(header string) string {

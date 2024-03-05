@@ -22,8 +22,7 @@ tasks:
     dir: "{{.SRC_DIR}}"
     cmds:
       - test -z "$(gofumpt -d -e . | tee /dev/stderr)"
-      - go vet ./...
-      - golangci-lint run
+      - ./golangci-lint run
 
   fix:
     desc: Fix formatting, linting, go.mod, and update submodule
