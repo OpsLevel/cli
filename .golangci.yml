@@ -2,12 +2,18 @@ run:
   timeout: 2m
 linters-settings:
   custom:
+    nilaway_config:
+      path: ./bin/nilaway_config.so
+      description: self-built nilaway plugin
+      original-url: github.com/nilaway_config-plugin
+      settings:
+        pretty-print: false
+
     nilaway:
       path: ./bin/nilaway.so
       description: self-built nilaway plugin
-      original-url: github.com/moogacs/nilaway-plugin
-      settings:
-        - include-pkgs: "github.com/opslevel/opslevel-go,github.com/opslevel/cli"
+      original-url: github.com/nilaway-plugin
+
   errcheck:
     exclude-functions:
       - (*encoding/csv.Writer).Write
@@ -22,8 +28,8 @@ linters-settings:
   staticcheck:
     checks: ["all", "-SA5001"]
 
-issues:
-  exclude-rules:
-    - linters:
-        - nilaway
-      path: "cmd/terraform.go"
+#issues:
+#  exclude-rules:
+#    - linters:
+#        - nilaway
+#      path: "cmd/terraform.go"
