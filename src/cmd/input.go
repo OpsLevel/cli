@@ -13,7 +13,7 @@ import (
 var dataFile string
 
 // TODO: deploy.go is still relying on this because it uses viper to bind config
-// we need to stop using viper in such a way and just rely on readResourceInput
+// we need to stop using viper in such a way and just rely on ReadResourceInput
 func readInputConfig() {
 	viper.SetConfigType("yaml")
 	switch dataFile {
@@ -30,32 +30,46 @@ func readInputConfig() {
 	viper.ReadInConfig()
 }
 
-func readResourceInput[T any]() (*T, error) {
+func readInput() ([]byte, error) {
 	var err error
-	var resource T
-	var yamlData []byte
+	var input []byte
 
 	switch dataFile {
 	case ".":
-		yamlData, err = os.ReadFile("./data.yaml")
+		input, err = os.ReadFile("./data.yaml")
 	case "-":
 		if isStdInFromTerminal() {
 			log.Info().Msg("Reading input directly from command line... Press CTRL+D to stop typing")
 		}
 		buf := bytes.Buffer{}
 		_, err = buf.ReadFrom(os.Stdin)
-		yamlData = buf.Bytes()
+		input = buf.Bytes()
 	default:
-		yamlData, err = os.ReadFile(dataFile)
+		input, err = os.ReadFile(dataFile)
 	}
 	if err != nil {
-		return nil, err
+		return input, err
 	}
+	return input, nil
+}
 
-	if err := yaml.Unmarshal(yamlData, &resource); err != nil {
+func ReadResource[T any](input []byte) (*T, error) {
+	var resource T
+	if err := yaml.Unmarshal(input, &resource); err != nil {
 		return nil, err
 	}
 	return &resource, nil
+}
+
+func ReadResourceInput[T any](input []byte) (*T, error) {
+	var err error
+	if input == nil {
+		input, err = readInput()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return ReadResource[T](input)
 }
 
 func isStdInFromTerminal() bool {
