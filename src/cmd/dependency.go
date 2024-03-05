@@ -67,7 +67,7 @@ func init() {
 }
 
 func readCreateServiceDependencyInput() (*opslevel.ServiceDependencyCreateInput, error) {
-	in, err := readResourceInput[CLIServiceDependencyCreateInput]()
+	in, err := ReadResourceInput[CLIServiceDependencyCreateInput](nil)
 	if err != nil {
 		return nil, err
 	}

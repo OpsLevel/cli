@@ -35,7 +35,7 @@ EOF`,
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readResourceInput[opslevel.TeamCreateInput]()
+		input, err := ReadResourceInput[opslevel.TeamCreateInput](nil)
 		input.Name = key
 		cobra.CheckErr(err)
 		team, err := getClientGQL().CreateTeam(*input)
@@ -148,7 +148,7 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readResourceInput[opslevel.TeamUpdateInput]()
+		input, err := ReadResourceInput[opslevel.TeamUpdateInput](nil)
 		input.Id = opslevel.NewID(key)
 		cobra.CheckErr(err)
 		team, err := getClientGQL().UpdateTeam(*input)

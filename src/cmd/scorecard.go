@@ -33,7 +33,7 @@ ownerId: "XXX_team_id_XXX"
 affectsOverallServiceLevels: false
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.ScorecardInput]()
+		input, err := ReadResourceInput[opslevel.ScorecardInput](nil)
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateScorecard(*input)
 		cobra.CheckErr(err)
@@ -96,7 +96,7 @@ EOF`,
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readResourceInput[opslevel.ScorecardInput]()
+		input, err := ReadResourceInput[opslevel.ScorecardInput](nil)
 		cobra.CheckErr(err)
 		scorecard, err := getClientGQL().UpdateScorecard(key, *input)
 		cobra.CheckErr(err)

@@ -35,7 +35,7 @@ note: "Additional details"
 EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.DomainInput]()
+		input, err := ReadResourceInput[opslevel.DomainInput](nil)
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateDomain(*input)
 		cobra.CheckErr(err)
@@ -129,7 +129,7 @@ EOF
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := readResourceInput[opslevel.DomainInput]()
+		input, err := ReadResourceInput[opslevel.DomainInput](nil)
 		cobra.CheckErr(err)
 		domain, err := getClientGQL().UpdateDomain(key, *input)
 		cobra.CheckErr(err)

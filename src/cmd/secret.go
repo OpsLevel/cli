@@ -33,7 +33,7 @@ owner:
 value: "my-really-secure-secret-shhhh"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.SecretInput]()
+		input, err := ReadResourceInput[opslevel.SecretInput](nil)
 		cobra.CheckErr(err)
 		newSecret, err := getClientGQL().CreateSecret(secretAlias, *input)
 		cobra.CheckErr(err)
@@ -98,7 +98,7 @@ EOF`,
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		secretId := args[0]
-		input, err := readResourceInput[opslevel.SecretInput]()
+		input, err := ReadResourceInput[opslevel.SecretInput](nil)
 		cobra.CheckErr(err)
 		secret, err := getClientGQL().UpdateSecret(secretId, *input)
 		cobra.CheckErr(err)
