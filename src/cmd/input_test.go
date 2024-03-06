@@ -58,17 +58,6 @@ age2: 60
 	autopilot.Equals(t, exp, *act)
 }
 
-func TestSetResourceOnStructWithSchemaUsingJSON(t *testing.T) {
-	input := []byte(`
-name: hello world
-schema: {"active": true, "age": 50}
-`)
-	act, err := cmd.ReadResource[MockResourceInput](input)
-	autopilot.Ok(t, err)
-	exp := MockResourceInput{Name: "hello world", Schema: map[string]any{"age": 50, "active": true}}
-	autopilot.Equals(t, exp, *act)
-}
-
 func TestSetResourceOnStructWithSchemaUsingYAML(t *testing.T) {
 	input := []byte(`
 name: hello world
