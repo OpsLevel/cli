@@ -36,7 +36,7 @@ schema:
     name:
       type: string
     age:
-      type: int
+      type: number
 `
 
 var examplePropertyDefinitionInputFileJSON = `
@@ -55,7 +55,7 @@ schema: |
               "type": "string"
           },
           "age": {
-              "type": "int"
+              "type": "number"
           }
       }
   }

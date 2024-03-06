@@ -16,7 +16,7 @@ var expSchemaMap = &opslevel.JSONSchema{
 			"type": "string",
 		},
 		"age": map[string]any{
-			"type": "int",
+			"type": "number",
 		},
 	},
 }
@@ -35,7 +35,7 @@ schema: |
               "type": "string"
           },
           "age": {
-              "type": "int"
+              "type": "number"
           }
       }
   }
@@ -60,7 +60,7 @@ schema:
     name:
       type: string
     age:
-      type: int
+      type: number
 `)
 	act, err := cmd.ReadPropertyDefinitionInput(input)
 	autopilot.Ok(t, err)
