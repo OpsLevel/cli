@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 
@@ -108,13 +107,13 @@ func ReadResourceHandleJSONFields[T any](input []byte) (*T, error) {
 	if _, ok := toMap["schema"]; ok {
 		err := handleJSONSchema(toMap)
 		if err != nil {
-			return nil, errors.New("error from handleJSONSchema")
+			return nil, fmt.Errorf("error from handleJSONSchema: %w", err)
 		}
 	}
 	if _, ok := toMap["value"]; ok {
 		err := handleJSONString(toMap)
 		if err != nil {
-			return nil, errors.New("error from handleJSONString")
+			return nil, fmt.Errorf("error from handleJSONString: %w", err)
 		}
 	}
 
