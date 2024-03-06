@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/opslevel/opslevel-go/v2024"
 
@@ -15,18 +16,63 @@ var examplePropertyCmd = &cobra.Command{
 	Use:     "property",
 	Aliases: []string{"prop"},
 	Short:   "Example Property",
-	Long:    `Example Property`,
+	Long:    "Example Property",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.PropertyInput]())
 	},
+}
+
+var examplePropertyDefinitionInputFileYAML = `
+name: Name and age property using YAML
+description: Tracks name and age
+propertyDisplayStatus: visible
+allowedInConfigFiles: true
+schema:
+  type: object
+  required:
+    - name
+  properties:
+    name:
+      type: string
+    age:
+      type: number
+`
+
+var examplePropertyDefinitionInputFileJSON = `
+name: Name and age property using JSON
+description: Tracks name and age
+propertyDisplayStatus: hidden
+allowedInConfigFiles: false
+schema: |
+  {
+      "type": "object",
+      "required": [
+          "name"
+      ],
+      "properties": {
+          "name": {
+              "type": "string"
+          },
+          "age": {
+              "type": "number"
+          }
+      }
+  }
+`
+
+func propertyDefinitionExample() string {
+	if !isYamlOutput() {
+		return examplePropertyDefinitionInputFileJSON
+	}
+	return examplePropertyDefinitionInputFileYAML
 }
 
 var getPropertyCmd = &cobra.Command{
 	Use:        "property",
 	Aliases:    []string{"prop"},
 	Short:      "Get details about an assigned property",
-	Long:       `Get details about an assigned property`,
-	Example:    `opslevel get property owner-alias property-id`,
+	Long:       "Get details about an assigned property",
+	Example:    "opslevel get property owner-alias property-id",
 	Args:       cobra.ExactArgs(2),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -70,13 +116,15 @@ var listPropertyCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(properties.Nodes, "", "    "))
 		} else {
-			w := common.NewTabWriter("DEFINITION_ID", "VALUE", "LEN_VALIDATION_ERRORS")
-			for _, prop := range properties.Nodes {
+			w := common.NewTabWriter("DEF_ID", "ALIASES", "VALUE", "VALIDATION_ERRS", "LOCKED")
+			for _, p := range properties.Nodes {
 				var valueOutput string
-				if prop.Value != nil {
-					valueOutput = string(*prop.Value)
+				if p.Value != nil {
+					valueOutput = string(*p.Value)
 				}
-				fmt.Fprintf(w, "%s\t%s\t%d\n", string(prop.Definition.Id), valueOutput, len(prop.ValidationErrors))
+				format := "%s\t%s\t%s\t%d\t%t\n"
+				aliases := strings.Join(p.Definition.Aliases, ",")
+				fmt.Fprintf(w, format, string(p.Definition.Id), aliases, valueOutput, len(p.ValidationErrors), p.Locked)
 			}
 			w.Flush()
 		}
@@ -87,7 +135,7 @@ var assignPropertyCmd = &cobra.Command{
 	Use:     "property",
 	Aliases: []string{"prop"},
 	Short:   "Assign a Property",
-	Long:    `Assign a Property to an Entity by Id or Alias`,
+	Long:    "Assign a Property to an Entity by Id or Alias",
 	Example: fmt.Sprintf(`
 cat << EOF | opslevel assign property -f -
 %s
@@ -106,8 +154,8 @@ var unassignPropertyCmd = &cobra.Command{
 	Use:        "property",
 	Aliases:    []string{"prop"},
 	Short:      "Unassign a Property",
-	Long:       `Unassign a Property from an Entity by Id or Alias`,
-	Example:    `opslevel unassign property owner-alias property-id`,
+	Long:       "Unassign a Property from an Entity by Id or Alias",
+	Example:    "opslevel unassign property owner-alias property-id",
 	Args:       cobra.ExactArgs(2),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -125,7 +173,7 @@ var examplePropertyDefinitionCmd = &cobra.Command{
 	Use:     "property-definition",
 	Aliases: []string{"propertydefinition", "propdef", "pd"},
 	Short:   "Example Property Definition",
-	Long:    `Example Property Definition`,
+	Long:    "Example Property Definition",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample[opslevel.PropertyDefinitionInput]())
 	},
@@ -135,17 +183,16 @@ var createPropertyDefinitionCmd = &cobra.Command{
 	Use:     "property-definition",
 	Aliases: []string{"propertydefinition", "propdef", "pd"},
 	Short:   "Create a property-definition",
-	Long:    `Create a property-definition`,
+	Long:    "Create a property-definition",
 	Example: fmt.Sprintf(`
 cat << EOF | opslevel create property-definition -f -
 %s
-EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
+EOF`, propertyDefinitionExample()),
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readPropertyDefinitionInput()
+		input, err := ReadPropertyDefinitionInput(nil)
 		cobra.CheckErr(err)
 		newPropertyDefinition, err := getClientGQL().CreatePropertyDefinition(*input)
 		cobra.CheckErr(err)
-
 		fmt.Println(newPropertyDefinition.Id)
 	},
 }
@@ -154,16 +201,16 @@ var updatePropertyDefinitionCmd = &cobra.Command{
 	Use:     "property-definition",
 	Aliases: []string{"propertydefinition", "propdef", "pd"},
 	Short:   "Update a property-definition",
-	Long:    `Update a property-definition`,
+	Long:    "Update a property-definition",
 	Example: fmt.Sprintf(`
-cat << EOF | opslevel update property-definition propdef3 -f -
+cat << EOF | opslevel create property-definition -f -
 %s
-EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
+EOF`, propertyDefinitionExample()),
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		identifier := args[0]
-		input, err := readPropertyDefinitionInput()
+		input, err := ReadPropertyDefinitionInput(nil)
 		cobra.CheckErr(err)
 		result, err := getClientGQL().UpdatePropertyDefinition(identifier, *input)
 		cobra.CheckErr(err)
@@ -176,42 +223,33 @@ EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
 	},
 }
 
-// The schema in PropertyDefinitionInput can be a nested map[string]any and needs to be handled separately
-func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
-	d, err := ReadResourceInput[opslevel.JSONSchema](nil)
-	if err != nil {
-		return nil, err
+func ReadPropertyAssignInput(input []byte) (*opslevel.PropertyInput, error) {
+	var err error
+	if input == nil {
+		input, err = readInput()
+		if err != nil {
+			return nil, fmt.Errorf("error reading from input: %w", err)
+		}
 	}
-	data := *d
-	name, ok := data["name"].(string)
-	if !ok {
-		return nil, fmt.Errorf("name is required and must be a string")
-	}
-	schema, ok := data["schema"].(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("schema is required and must be a JSON object")
-	}
-	jsonSchema := opslevel.JSONSchema(schema)
-	propDefInput := opslevel.PropertyDefinitionInput{
-		Name:   opslevel.RefOf(name),
-		Schema: &jsonSchema,
-	}
+	return ReadResourceHandleJSONFields[opslevel.PropertyInput](input)
+}
 
-	if description, ok := data["description"].(string); ok {
-		propDefInput.Description = opslevel.RefOf(description)
+func ReadPropertyDefinitionInput(input []byte) (*opslevel.PropertyDefinitionInput, error) {
+	var err error
+	if input == nil {
+		input, err = readInput()
+		if err != nil {
+			return nil, fmt.Errorf("error reading from input: %w", err)
+		}
 	}
-	if propertyDisplayStatus, ok := data["propertyDisplayStatus"].(string); ok {
-		propDefInput.PropertyDisplayStatus = opslevel.RefOf(opslevel.PropertyDisplayStatusEnum(propertyDisplayStatus))
-	}
-
-	return &propDefInput, nil
+	return ReadResourceHandleJSONFields[opslevel.PropertyDefinitionInput](input)
 }
 
 var getPropertyDefinitionCmd = &cobra.Command{
 	Use:        "property-definition",
 	Aliases:    []string{"propertydefinition", "propdef", "pd"},
 	Short:      "Get details about a property definition",
-	Long:       `Get details about a property definition`,
+	Long:       "Get details about a property definition",
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -240,9 +278,10 @@ var listPropertyDefinitionsCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {
-			w := common.NewTabWriter("ALIASES", "ID", "NAME", "SCHEMA")
-			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Aliases, item.Id, item.Name, item.Schema.ToJSON())
+			w := common.NewTabWriter("ALIASES", "ID", "NAME", "SCHEMA", "DISPLAY_STATUS", "ALLOWED_IN_CONFIG_FILES")
+			for _, d := range list {
+				format := "%s\t%s\t%s\t%s\t%s\t%t\n"
+				fmt.Fprintf(w, format, d.Aliases, d.Id, d.Name, d.Schema.ToJSON(), d.PropertyDisplayStatus, d.AllowedInConfigFiles)
 			}
 			w.Flush()
 		}

@@ -1,0 +1,3 @@
+kind: Bugfix
+body: Fix errors when using JSON schemas on property definitions
+time: 2024-03-06T10:24:01.193583-05:00
