@@ -2,11 +2,7 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"os"
-
-	"github.com/mitchellh/mapstructure"
-	"github.com/opslevel/opslevel-go/v2024"
 
 	"github.com/rs/zerolog/log"
 
@@ -63,66 +59,6 @@ func ReadResource[T any](input []byte) (*T, error) {
 		return nil, err
 	}
 	return &resource, nil
-}
-
-func handleJSONSchema(m map[string]any) error {
-	// since a YAML object is map[string]any which is compatible with JSONSchema so nothing needs to be done.
-	// if schema is a string, the JSON inside the string needs to be parsed. supports multiline.
-	if _, ok := m["schema"].(string); !ok {
-		return nil
-	}
-	jsonSchema, err := opslevel.NewJSONSchema(m["schema"].(string))
-	if err != nil {
-		return err
-	}
-	m["schema"] = jsonSchema
-	return nil
-}
-
-func handleJSONString(m map[string]any) error {
-	// TODO: multiline JSON is not supported as a value input because handling whitespace and escape characters is nontrivial
-	jsonString, err := opslevel.NewJSONInput(m["value"])
-	if err != nil {
-		return err
-	}
-	m["value"] = jsonString
-	return nil
-}
-
-func ReadResourceHandleJSONFields[T any](input []byte) (*T, error) {
-	var err error
-	if input == nil {
-		input, err = readInput()
-		if err != nil {
-			return nil, fmt.Errorf("error reading from input: %w", err)
-		}
-	}
-
-	m, err := ReadResource[map[string]any](input)
-	if err != nil {
-		return nil, fmt.Errorf("error creating map from input: %w", err)
-	}
-	toMap := *m
-
-	if _, ok := toMap["schema"]; ok {
-		err := handleJSONSchema(toMap)
-		if err != nil {
-			return nil, fmt.Errorf("error from handleJSONSchema: %w", err)
-		}
-	}
-	if _, ok := toMap["value"]; ok {
-		err := handleJSONString(toMap)
-		if err != nil {
-			return nil, fmt.Errorf("error from handleJSONString: %w", err)
-		}
-	}
-
-	var finalInput T
-	err = mapstructure.Decode(toMap, &finalInput)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding map as type %T: %w", finalInput, err)
-	}
-	return &finalInput, nil
 }
 
 func ReadResourceInput[T any](input []byte) (*T, error) {
