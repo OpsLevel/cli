@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"strings"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/opslevel/opslevel-go/v2024"
 
 	"github.com/opslevel/cli/common"
@@ -142,7 +143,7 @@ cat << EOF | opslevel assign property -f -
 %s
 EOF`, getYaml[opslevel.PropertyInput]()),
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := ReadResourceInput[opslevel.PropertyInput](nil)
+		input, err := ReadPropertyInput(nil)
 		cobra.CheckErr(err)
 		newProperty, err := getClientGQL().PropertyAssign(*input)
 		cobra.CheckErr(err)
@@ -224,6 +225,39 @@ EOF`, propertyDefinitionExample()),
 	},
 }
 
+func ReadPropertyInput(input []byte) (*opslevel.PropertyInput, error) {
+	var err error
+	if input == nil {
+		input, err = readInput()
+		if err != nil {
+			return nil, fmt.Errorf("error reading from input: %w", err)
+		}
+	}
+
+	m, err := ReadResource[map[string]any](input)
+	if err != nil {
+		return nil, fmt.Errorf("error creating map from input: %w", err)
+	}
+	toMap := *m
+
+	// convert value field into a JSONString
+	if _, ok := toMap["value"]; !ok {
+		return nil, errors.New("required field 'value' not found")
+	}
+	jsonString, err := opslevel.NewJSONInput(toMap["value"])
+	if err != nil {
+		return nil, fmt.Errorf("error creating JSONString from 'value' field: %w", err)
+	}
+	toMap["value"] = jsonString
+
+	var finalInput opslevel.PropertyInput
+	err = mapstructure.Decode(toMap, &finalInput)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding map as type %T: %w", finalInput, err)
+	}
+	return &finalInput, nil
+}
+
 func ReadPropertyDefinitionInput(input []byte) (*opslevel.PropertyDefinitionInput, error) {
 	var err error
 	if input == nil {
@@ -233,30 +267,30 @@ func ReadPropertyDefinitionInput(input []byte) (*opslevel.PropertyDefinitionInpu
 		}
 	}
 
-	// create map
 	m, err := ReadResource[map[string]any](input)
 	if err != nil {
 		return nil, fmt.Errorf("error creating map from input: %w", err)
 	}
 	toMap := *m
 
-	// necessary step - create JSONSchema object from the json/yaml string in the schema field and re-insert into map
-	// prevents unnecessary extra escape characters
+	// convert schema field into a JSONSchema if it is a string containing JSON rather than a YAML object (map[string]any)
+	if _, ok := toMap["schema"]; !ok {
+		return nil, errors.New("required field 'schema' not found")
+	}
 	if schemaString, ok := toMap["schema"].(string); ok {
 		schemaObject, err := opslevel.NewJSONSchema(schemaString)
 		if err != nil {
-			return nil, fmt.Errorf("error creating JSONSchema from schema string field: %w", err)
+			return nil, fmt.Errorf("error creating JSONSchema from 'schema' field: %w", err)
 		}
 		toMap["schema"] = schemaObject
 	}
 
-	// convert map into the input object
-	var definition opslevel.PropertyDefinitionInput
-	err = mapstructure.Decode(toMap, &definition)
+	var finalInput opslevel.PropertyDefinitionInput
+	err = mapstructure.Decode(toMap, &finalInput)
 	if err != nil {
-		return nil, fmt.Errorf("error decoding map into PropertyDefinitionInput: %w", err)
+		return nil, fmt.Errorf("error decoding map as type %T: %w", finalInput, err)
 	}
-	return &definition, nil
+	return &finalInput, nil
 }
 
 var getPropertyDefinitionCmd = &cobra.Command{
