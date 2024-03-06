@@ -66,7 +66,31 @@ func ReadResource[T any](input []byte) (*T, error) {
 	return &resource, nil
 }
 
-func ReadResourceHandleJSONSchema[T any](input []byte) (*T, error) {
+func handleJSONSchema(m map[string]any) error {
+	// since a YAML object is map[string]any which is compatible with JSONSchema so nothing needs to be done.
+	// if schema is a string, the JSON inside the string needs to be parsed. supports multiline.
+	if _, ok := m["schema"].(string); !ok {
+		return nil
+	}
+	jsonSchema, err := opslevel.NewJSONSchema(m["schema"].(string))
+	if err != nil {
+		return err
+	}
+	m["schema"] = jsonSchema
+	return nil
+}
+
+func handleJSONString(m map[string]any) error {
+	// TODO: multiline JSON is not supported as a value input because handling whitespace and escape characters is nontrivial
+	jsonString, err := opslevel.NewJSONInput(m["value"])
+	if err != nil {
+		return err
+	}
+	m["value"] = jsonString
+	return nil
+}
+
+func ReadResourceHandleJSONFields[T any](input []byte) (*T, error) {
 	var err error
 	if input == nil {
 		input, err = readInput()
@@ -81,17 +105,17 @@ func ReadResourceHandleJSONSchema[T any](input []byte) (*T, error) {
 	}
 	toMap := *m
 
-	if _, ok := toMap["schema"]; !ok {
-		return nil, errors.New("required field 'schema' not found")
-	}
-
-	// if this is a string, the user should have provided JSON so parse the key value pairs
-	if schemaString, ok := toMap["schema"].(string); ok {
-		jsonSchema, err := opslevel.NewJSONSchema(schemaString)
+	if _, ok := toMap["schema"]; ok {
+		err := handleJSONSchema(toMap)
 		if err != nil {
-			return nil, fmt.Errorf("error creating JSONSchema from field 'schema': %w", err)
+			return nil, errors.New("error from handleJSONSchema")
 		}
-		toMap["schema"] = jsonSchema
+	}
+	if _, ok := toMap["value"]; ok {
+		err := handleJSONString(toMap)
+		if err != nil {
+			return nil, errors.New("error from handleJSONString")
+		}
 	}
 
 	var finalInput T
