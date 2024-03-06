@@ -38,7 +38,7 @@ var createSystemCmd = &cobra.Command{
 		EOF
 		`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := ReadResourceInput[opslevel.SystemInput](nil)
+		input, err := ReadResourceInput[opslevel.SystemInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateSystem(*input)
 		cobra.CheckErr(err)
@@ -116,7 +116,7 @@ var updateSystemCmd = &cobra.Command{
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := ReadResourceInput[opslevel.SystemInput](nil)
+		input, err := ReadResourceInput[opslevel.SystemInput]()
 		cobra.CheckErr(err)
 		system, err := getClientGQL().UpdateSystem(key, *input)
 		cobra.CheckErr(err)

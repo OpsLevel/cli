@@ -54,7 +54,7 @@ EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		switch actionType {
 		case "webhook":
-			input, err := ReadResourceInput[opslevel.CustomActionsWebhookActionCreateInput](nil)
+			input, err := ReadResourceInput[opslevel.CustomActionsWebhookActionCreateInput]()
 			cobra.CheckErr(err)
 			result, err := getClientGQL().CreateWebhookAction(*input)
 			cobra.CheckErr(err)
@@ -119,7 +119,7 @@ EOF`,
 		key := args[0]
 		switch actionType {
 		case "webhook":
-			input, err := ReadResourceInput[opslevel.CustomActionsWebhookActionUpdateInput](nil)
+			input, err := ReadResourceInput[opslevel.CustomActionsWebhookActionUpdateInput]()
 			input.Id = *opslevel.NewID(key)
 			cobra.CheckErr(err)
 			action, err := getClientGQL().UpdateWebhookAction(*input)

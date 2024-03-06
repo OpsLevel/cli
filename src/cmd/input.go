@@ -61,15 +61,16 @@ func ReadResource[T any](input []byte) (*T, error) {
 	return &resource, nil
 }
 
-func ReadResourceInput[T any](input []byte) (*T, error) {
-	var err error
-	if input == nil {
-		input, err = readInput()
-		if err != nil {
-			return nil, err
-		}
+func ReadResourceInput[T any](mockInputs ...[]byte) (*T, error) {
+	if len(mockInputs) > 0 {
+		return ReadResource[T](mockInputs[0])
 	}
-	return ReadResource[T](input)
+
+	newInput, err := readInput()
+	if err != nil {
+		return nil, err
+	}
+	return ReadResource[T](newInput)
 }
 
 func isStdInFromTerminal() bool {

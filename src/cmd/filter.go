@@ -37,7 +37,7 @@ predicates:
     value: "rds"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := ReadResourceInput[opslevel.FilterCreateInput](nil)
+		input, err := ReadResourceInput[opslevel.FilterCreateInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateFilter(*input)
 		cobra.CheckErr(err)
@@ -100,7 +100,7 @@ EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := ReadResourceInput[opslevel.FilterCreateInput](nil)
+		input, err := ReadResourceInput[opslevel.FilterCreateInput]()
 		cobra.CheckErr(err)
 
 		// hack: in the future all ObjectUpdateInput and ObjectCreateInput

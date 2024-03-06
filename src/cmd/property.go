@@ -93,7 +93,7 @@ cat << EOF | opslevel assign property -f -
 %s
 EOF`, getYaml[opslevel.PropertyInput]()),
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := ReadResourceInput[opslevel.PropertyInput](nil)
+		input, err := ReadResourceInput[opslevel.PropertyInput]()
 		cobra.CheckErr(err)
 		newProperty, err := getClientGQL().PropertyAssign(*input)
 		cobra.CheckErr(err)
@@ -178,7 +178,7 @@ EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
 
 // The schema in PropertyDefinitionInput can be a nested map[string]any and needs to be handled separately
 func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
-	d, err := ReadResourceInput[opslevel.JSONSchema](nil)
+	d, err := ReadResourceInput[opslevel.JSONSchema]()
 	if err != nil {
 		return nil, err
 	}

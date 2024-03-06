@@ -63,7 +63,7 @@ name: hello world
 age: 50
 age2: 60
 `)
-	act, err := cmd.ReadResourceInput[MockResourceInput](input)
+	act, err := cmd.ReadResourceInput[MockResourceInput]()
 	autopilot.Ok(t, err)
 	exp := MockResourceInput{Name: "hello world", Age: 50, Age2: opslevel.RefOf(60)}
 	autopilot.Equals(t, exp, *act)

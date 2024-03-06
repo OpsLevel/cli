@@ -55,7 +55,7 @@ responseTemplate: |
   {% endif %}
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := ReadResourceInput[opslevel.CustomActionsTriggerDefinitionCreateInput](nil)
+		input, err := ReadResourceInput[opslevel.CustomActionsTriggerDefinitionCreateInput]()
 		cobra.CheckErr(err)
 		result, err := getClientGQL().CreateTriggerDefinition(*input)
 		cobra.CheckErr(err)
@@ -116,7 +116,7 @@ EOF`,
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := ReadResourceInput[opslevel.CustomActionsTriggerDefinitionUpdateInput](nil)
+		input, err := ReadResourceInput[opslevel.CustomActionsTriggerDefinitionUpdateInput]()
 		input.Id = *opslevel.NewID(key)
 		cobra.CheckErr(err)
 		triggerDefinition, err := getClientGQL().UpdateTriggerDefinition(*input)

@@ -450,7 +450,7 @@ func (checkInputType *CheckInputType) IsUpdateInput() bool {
 }
 
 func readCheckInput() (*CheckInputType, error) {
-	input, err := ReadResourceInput[CheckInputType](nil)
+	input, err := ReadResourceInput[CheckInputType]()
 	fmt.Println(input)
 	if err != nil {
 		return nil, err

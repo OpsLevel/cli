@@ -35,7 +35,7 @@ EOF`,
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
-		input, err := ReadResourceInput[opslevel.TeamCreateInput](nil)
+		input, err := ReadResourceInput[opslevel.TeamCreateInput]()
 		input.Name = key
 		cobra.CheckErr(err)
 		team, err := getClientGQL().CreateTeam(*input)
