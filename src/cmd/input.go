@@ -2,7 +2,12 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"os"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/opslevel/opslevel-go/v2024"
 
 	"github.com/rs/zerolog/log"
 
@@ -59,6 +64,42 @@ func ReadResource[T any](input []byte) (*T, error) {
 		return nil, err
 	}
 	return &resource, nil
+}
+
+func ReadResourceHandleJSONSchema[T any](input []byte) (*T, error) {
+	var err error
+	if input == nil {
+		input, err = readInput()
+		if err != nil {
+			return nil, fmt.Errorf("error reading from input: %w", err)
+		}
+	}
+
+	m, err := ReadResource[map[string]any](input)
+	if err != nil {
+		return nil, fmt.Errorf("error creating map from input: %w", err)
+	}
+	toMap := *m
+
+	if _, ok := toMap["schema"]; !ok {
+		return nil, errors.New("required field 'schema' not found")
+	}
+
+	// if this is a string, the user should have provided JSON so parse the key value pairs
+	if schemaString, ok := toMap["schema"].(string); ok {
+		jsonSchema, err := opslevel.NewJSONSchema(schemaString)
+		if err != nil {
+			return nil, fmt.Errorf("error creating JSONSchema from field 'schema': %w", err)
+		}
+		toMap["schema"] = jsonSchema
+	}
+
+	var finalInput T
+	err = mapstructure.Decode(toMap, &finalInput)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding map as type %T: %w", finalInput, err)
+	}
+	return &finalInput, nil
 }
 
 func ReadResourceInput[T any](input []byte) (*T, error) {
