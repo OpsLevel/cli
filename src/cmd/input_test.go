@@ -59,11 +59,6 @@ age2: 60
 }
 
 func TestSetResourceOnStructWithSchemaUsingJSON(t *testing.T) {
-	// note: this won't work if the JSON is wrapped in quotes with escape characters or if trying to use multiline JSON
-	// because there's no function to handle converting YAML fields into to JSONSchema for this struct type.
-	// the only reason unquoted non-multiline JSON works in this test case is because it's treated as a string which
-	// can be marshaled into JSONSchema because encoding/json can deduce that.
-
 	input := []byte(`
 name: hello world
 schema: {"active": true, "age": 50}
