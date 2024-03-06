@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/opslevel/opslevel-go/v2024"
 
@@ -70,13 +71,15 @@ var listPropertyCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(properties.Nodes, "", "    "))
 		} else {
-			w := common.NewTabWriter("DEFINITION_ID", "VALUE", "LEN_VALIDATION_ERRORS")
-			for _, prop := range properties.Nodes {
+			w := common.NewTabWriter("DEF_ID", "ALIASES", "VALUE", "VALIDATION_ERRS", "LOCKED")
+			for _, p := range properties.Nodes {
 				var valueOutput string
-				if prop.Value != nil {
-					valueOutput = string(*prop.Value)
+				if p.Value != nil {
+					valueOutput = string(*p.Value)
 				}
-				fmt.Fprintf(w, "%s\t%s\t%d\n", string(prop.Definition.Id), valueOutput, len(prop.ValidationErrors))
+				format := "%s\t%s\t%s\t%d\t%t\n"
+				aliases := strings.Join(p.Definition.Aliases, ",")
+				fmt.Fprintf(w, format, string(p.Definition.Id), aliases, valueOutput, len(p.ValidationErrors), p.Locked)
 			}
 			w.Flush()
 		}
@@ -240,9 +243,10 @@ var listPropertyDefinitionsCmd = &cobra.Command{
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else {
-			w := common.NewTabWriter("ALIASES", "ID", "NAME", "SCHEMA")
-			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Aliases, item.Id, item.Name, item.Schema.ToJSON())
+			w := common.NewTabWriter("ALIASES", "ID", "NAME", "SCHEMA", "DISPLAY_STATUS", "ALLOWED_IN_CONFIG_FILES")
+			for _, d := range list {
+				format := "%s\t%s\t%s\t%s\t%s\t%t\n"
+				fmt.Fprintf(w, format, d.Aliases, d.Id, d.Name, d.Schema.ToJSON(), d.PropertyDisplayStatus, d.AllowedInConfigFiles)
 			}
 			w.Flush()
 		}
