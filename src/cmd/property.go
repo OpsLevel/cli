@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/opslevel/opslevel-go/v2024"
@@ -70,16 +72,23 @@ var listPropertyCmd = &cobra.Command{
 
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(properties.Nodes, "", "    "))
+		} else if isCsvOutput() {
+			w := csv.NewWriter(os.Stdout)
+			w.Write([]string{"ID", "LOCKED", "ALIASES"})
+			for _, p := range properties.Nodes {
+				aliases := strings.Join(p.Definition.Aliases, "/")
+				w.Write([]string{string(p.Definition.Id), fmt.Sprintf("%t", p.Locked), aliases})
+			}
+			w.Flush()
 		} else {
-			w := common.NewTabWriter("DEF_ID", "ALIASES", "VALUE", "VALIDATION_ERRS", "LOCKED")
+			w := common.NewTabWriter("ID", "LOCKED", "VALUE", "ALIASES")
 			for _, p := range properties.Nodes {
 				var valueOutput string
 				if p.Value != nil {
 					valueOutput = string(*p.Value)
 				}
-				format := "%s\t%s\t%s\t%d\t%t\n"
 				aliases := strings.Join(p.Definition.Aliases, ",")
-				fmt.Fprintf(w, format, string(p.Definition.Id), aliases, valueOutput, len(p.ValidationErrors), p.Locked)
+				fmt.Fprintf(w, "%s\t%t\t%s\t%s\n", string(p.Definition.Id), p.Locked, valueOutput, aliases)
 			}
 			w.Flush()
 		}
@@ -242,11 +251,19 @@ var listPropertyDefinitionsCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
-		} else {
-			w := common.NewTabWriter("ALIASES", "ID", "NAME", "SCHEMA", "DISPLAY_STATUS", "ALLOWED_IN_CONFIG_FILES")
+		} else if isCsvOutput() {
+			w := csv.NewWriter(os.Stdout)
+			w.Write([]string{"ALIASES", "ID", "NAME", "DISPLAY_STATUS", "ALLOWED_IN_CONFIG_FILES"})
 			for _, d := range list {
-				format := "%s\t%s\t%s\t%s\t%s\t%t\n"
-				fmt.Fprintf(w, format, d.Aliases, d.Id, d.Name, d.Schema.ToJSON(), d.PropertyDisplayStatus, d.AllowedInConfigFiles)
+				aliases := strings.Join(d.Aliases, "/")
+				w.Write([]string{aliases, string(d.Id), d.Name, string(d.PropertyDisplayStatus), fmt.Sprintf("%t", d.AllowedInConfigFiles)})
+			}
+			w.Flush()
+		} else {
+			w := common.NewTabWriter("ALIASES", "ID", "NAME", "DISPLAY_STATUS", "ALLOWED_IN_CONFIG_FILES")
+			for _, d := range list {
+				aliases := strings.Join(d.Aliases, "/")
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%t\n", aliases, d.Id, d.Name, d.PropertyDisplayStatus, d.AllowedInConfigFiles)
 			}
 			w.Flush()
 		}
