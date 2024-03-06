@@ -30,8 +30,9 @@ There are multiple output formats that are useful
 		categoriesConn, err := client.ListCategories(nil)
 		cobra.CheckErr(err)
 		categories := categoriesConn.Nodes
-		data, err := client.ListServicesMaturity()
+		response, err := client.ListServicesMaturity(nil)
 		cobra.CheckErr(err)
+		data := response.Nodes
 		headers := []string{"Name", "Overall"}
 		sort.Slice(categories, func(i, j int) bool {
 			return categories[i].Name < categories[j].Name
