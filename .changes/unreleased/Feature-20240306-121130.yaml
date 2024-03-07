@@ -1,0 +1,3 @@
+kind: Feature
+body: Show DISPLAY_STATUS, ALLOWED_IN_CONFIG_FILES when listing property definitions
+time: 2024-03-06T12:11:30.251694-05:00

@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/opslevel/opslevel-go/v2024"
 
@@ -69,14 +72,23 @@ var listPropertyCmd = &cobra.Command{
 
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(properties.Nodes, "", "    "))
+		} else if isCsvOutput() {
+			w := csv.NewWriter(os.Stdout)
+			w.Write([]string{"ID", "LOCKED", "ALIASES"})
+			for _, p := range properties.Nodes {
+				aliases := strings.Join(p.Definition.Aliases, "/")
+				w.Write([]string{string(p.Definition.Id), fmt.Sprintf("%t", p.Locked), aliases})
+			}
+			w.Flush()
 		} else {
-			w := common.NewTabWriter("DEFINITION_ID", "VALUE", "LEN_VALIDATION_ERRORS")
-			for _, prop := range properties.Nodes {
+			w := common.NewTabWriter("ID", "LOCKED", "VALUE", "ALIASES")
+			for _, p := range properties.Nodes {
 				var valueOutput string
-				if prop.Value != nil {
-					valueOutput = string(*prop.Value)
+				if p.Value != nil {
+					valueOutput = string(*p.Value)
 				}
-				fmt.Fprintf(w, "%s\t%s\t%d\n", string(prop.Definition.Id), valueOutput, len(prop.ValidationErrors))
+				aliases := strings.Join(p.Definition.Aliases, ",")
+				fmt.Fprintf(w, "%s\t%t\t%s\t%s\n", string(p.Definition.Id), p.Locked, valueOutput, aliases)
 			}
 			w.Flush()
 		}
@@ -239,10 +251,19 @@ var listPropertyDefinitionsCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+		} else if isCsvOutput() {
+			w := csv.NewWriter(os.Stdout)
+			w.Write([]string{"ALIASES", "ID", "NAME", "DISPLAY_STATUS", "ALLOWED_IN_CONFIG_FILES"})
+			for _, d := range list {
+				aliases := strings.Join(d.Aliases, "/")
+				w.Write([]string{aliases, string(d.Id), d.Name, string(d.PropertyDisplayStatus), fmt.Sprintf("%t", d.AllowedInConfigFiles)})
+			}
+			w.Flush()
 		} else {
-			w := common.NewTabWriter("ALIASES", "ID", "NAME", "SCHEMA")
-			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Aliases, item.Id, item.Name, item.Schema.ToJSON())
+			w := common.NewTabWriter("ALIASES", "ID", "NAME", "DISPLAY_STATUS", "ALLOWED_IN_CONFIG_FILES")
+			for _, d := range list {
+				aliases := strings.Join(d.Aliases, "/")
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%t\n", aliases, d.Id, d.Name, d.PropertyDisplayStatus, d.AllowedInConfigFiles)
 			}
 			w.Flush()
 		}
