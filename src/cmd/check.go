@@ -152,11 +152,12 @@ func createCheck(input CheckInputType, usePrompts bool) (*opslevel.Check, error)
 	var output *opslevel.Check
 	var err error
 	clientGQL := getClientGQL()
-	opslevel.Cache.CacheCategories(clientGQL)
-	opslevel.Cache.CacheLevels(clientGQL)
-	opslevel.Cache.CacheTeams(clientGQL)
-	opslevel.Cache.CacheFilters(clientGQL)
-	opslevel.Cache.CacheIntegrations(clientGQL)
+	cacher := getCacher()
+	cacher.CacheCategories(clientGQL)
+	cacher.CacheLevels(clientGQL)
+	cacher.CacheTeams(clientGQL)
+	cacher.CacheFilters(clientGQL)
+	cacher.CacheIntegrations(clientGQL)
 	err = input.resolveCategoryAliases(clientGQL, usePrompts)
 	cobra.CheckErr(err)
 	err = input.resolveLevelAliases(clientGQL, usePrompts)
@@ -184,11 +185,12 @@ func updateCheck(input CheckInputType, usePrompts bool) (*opslevel.Check, error)
 	var output *opslevel.Check
 	var err error
 	clientGQL := getClientGQL()
-	opslevel.Cache.CacheCategories(clientGQL)
-	opslevel.Cache.CacheLevels(clientGQL)
-	opslevel.Cache.CacheTeams(clientGQL)
-	opslevel.Cache.CacheFilters(clientGQL)
-	opslevel.Cache.CacheIntegrations(clientGQL)
+	cacher := getCacher()
+	cacher.CacheCategories(clientGQL)
+	cacher.CacheLevels(clientGQL)
+	cacher.CacheTeams(clientGQL)
+	cacher.CacheFilters(clientGQL)
+	cacher.CacheIntegrations(clientGQL)
 	err = input.resolveCategoryAliases(clientGQL, usePrompts)
 	cobra.CheckErr(err)
 	err = input.resolveLevelAliases(clientGQL, usePrompts)
@@ -217,7 +219,7 @@ func updateCheck(input CheckInputType, usePrompts bool) (*opslevel.Check, error)
 func (checkInputType *CheckInputType) resolveCategoryAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := checkInputType.Spec["category"]; ok {
 		delete(checkInputType.Spec, "category")
-		if value, ok := opslevel.Cache.TryGetCategory(item.(string)); ok {
+		if value, ok := getCacher().TryGetCategory(item.(string)); ok {
 			checkInputType.Spec["categoryId"] = value.Id
 			return nil
 		} else {
@@ -243,7 +245,7 @@ func (checkInputType *CheckInputType) resolveCategoryAliases(client *opslevel.Cl
 func (checkInputType *CheckInputType) resolveLevelAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := checkInputType.Spec["level"]; ok {
 		delete(checkInputType.Spec, "level")
-		if value, ok := opslevel.Cache.TryGetLevel(item.(string)); ok {
+		if value, ok := getCacher().TryGetLevel(item.(string)); ok {
 			checkInputType.Spec["levelId"] = value.Id
 			return nil
 		} else {
@@ -269,7 +271,7 @@ func (checkInputType *CheckInputType) resolveLevelAliases(client *opslevel.Clien
 func (checkInputType *CheckInputType) resolveTeamAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := checkInputType.Spec["owner"]; ok {
 		delete(checkInputType.Spec, "owner")
-		if value, ok := opslevel.Cache.TryGetTeam(item.(string)); ok {
+		if value, ok := getCacher().TryGetTeam(item.(string)); ok {
 			checkInputType.Spec["ownerId"] = value.Id
 			return nil
 		} else {
@@ -293,7 +295,7 @@ func (checkInputType *CheckInputType) resolveTeamAliases(client *opslevel.Client
 func (checkInputType *CheckInputType) resolveFilterAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := checkInputType.Spec["filter"]; ok {
 		delete(checkInputType.Spec, "filter")
-		if value, ok := opslevel.Cache.TryGetFilter(item.(string)); ok {
+		if value, ok := getCacher().TryGetFilter(item.(string)); ok {
 			checkInputType.Spec["filterId"] = value.Id
 			return nil
 		} else {
@@ -317,7 +319,7 @@ func (checkInputType *CheckInputType) resolveFilterAliases(client *opslevel.Clie
 func (checkInputType *CheckInputType) resolveIntegrationAliases(client *opslevel.Client, usePrompt bool) error {
 	if item, ok := checkInputType.Spec["integration"]; ok {
 		delete(checkInputType.Spec, "integration")
-		if value, ok := opslevel.Cache.TryGetIntegration(item.(string)); ok {
+		if value, ok := getCacher().TryGetIntegration(item.(string)); ok {
 			checkInputType.Spec["integrationId"] = value.Id
 			return nil
 		} else {

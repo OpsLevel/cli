@@ -18,6 +18,7 @@ import (
 var (
 	_clientRest *resty.Client
 	_clientGQL  *opslevel.Client
+	_cacher     *opslevel.Cacher
 )
 
 var rootCmd = &cobra.Command{
@@ -74,6 +75,8 @@ func setupLogging() {
 		zerolog.SetGlobalLevel(zerolog.WarnLevel)
 	case logLevel == "debug":
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case logLevel == "trace":
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
 	default:
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
@@ -91,4 +94,12 @@ func getClientGQL(options ...opslevel.Option) *opslevel.Client {
 		_clientGQL = common.NewGraphClient(version, options...)
 	}
 	return _clientGQL
+}
+
+func getCacher() *opslevel.Cacher {
+	if _cacher == nil {
+		logger := log.With().Str("from", "opslevel-go-cacher").Logger()
+		_cacher = opslevel.NewCacher(&logger)
+	}
+	return _cacher
 }
