@@ -22,7 +22,6 @@ tasks:
     dir: "{{.SRC_DIR}}"
     cmds:
       - test -z "$(gofumpt -d -e . | tee /dev/stderr)"
-      - go vet ./...
       - golangci-lint run
 
   fix:
