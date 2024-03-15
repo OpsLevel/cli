@@ -1,3 +1,0 @@
-kind: Bugfix
-body: Dockerfile now uses Ubuntu provided jq package
-time: 2024-01-23T09:38:22.042364-05:00
