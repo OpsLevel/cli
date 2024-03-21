@@ -160,9 +160,9 @@ EOF
 	Run: func(cmd *cobra.Command, args []string) {
 		reader, err := readImportFilepathAsCSV()
 		client := getClientGQL()
-		opslevel.Cache.CacheLifecycles(client)
-		opslevel.Cache.CacheTiers(client)
-		opslevel.Cache.CacheTeams(client)
+		getCacher().CacheLifecycles(client)
+		getCacher().CacheTiers(client)
+		getCacher().CacheTeams(client)
 		cobra.CheckErr(err)
 		for reader.Rows() {
 			name := reader.Text("Name")
@@ -175,19 +175,19 @@ EOF
 			}
 			tier := reader.Text("Tier")
 			if tier != "" {
-				if item, ok := opslevel.Cache.Tiers[tier]; ok {
+				if item, ok := getCacher().Tiers[tier]; ok {
 					input.TierAlias = &item.Alias
 				}
 			}
 			lifecycle := reader.Text("Lifecycle")
 			if lifecycle != "" {
-				if item, ok := opslevel.Cache.Lifecycles[lifecycle]; ok {
+				if item, ok := getCacher().Lifecycles[lifecycle]; ok {
 					input.LifecycleAlias = &item.Alias
 				}
 			}
 			owner := reader.Text("Owner")
 			if owner != "" {
-				if item, ok := opslevel.Cache.Teams[owner]; ok {
+				if item, ok := getCacher().Teams[owner]; ok {
 					input.OwnerInput = opslevel.NewIdentifier(item.Alias)
 				}
 			}

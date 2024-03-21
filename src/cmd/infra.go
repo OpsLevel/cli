@@ -69,8 +69,8 @@ opslevel --log-level=ERROR get infra-schema Compute > ~/.opslevel/schemas/comput
 	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		client := getClientGQL()
-		opslevel.Cache.CacheInfraSchemas(client)
-		schema, found := opslevel.Cache.TryGetInfrastructureSchema(key)
+		getCacher().CacheInfraSchemas(client)
+		schema, found := getCacher().TryGetInfrastructureSchema(key)
 		if !found {
 			log.Error().Msgf("unable to find infrastructure schema '%s'", key)
 			return
