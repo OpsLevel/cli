@@ -7,7 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/go-resty/resty/v2 v2.12.0
 	github.com/gosimple/slug v1.14.0
-	github.com/itchyny/gojq v0.12.14
+	github.com/itchyny/gojq v0.12.15
 	github.com/manifoldco/promptui v0.9.0
 	github.com/open-policy-agent/opa v0.62.1
 	github.com/opslevel/opslevel-go/v2024 v2024.3.15
