@@ -3,11 +3,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/mitchellh/mapstructure"
-
-	"github.com/opslevel/opslevel-go/v2024"
-
 	"github.com/opslevel/cli/common"
+	"github.com/opslevel/opslevel-go/v2024"
 	"github.com/spf13/cobra"
 )
 
