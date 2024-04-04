@@ -19,7 +19,7 @@ const (
 var IntegrationConfigCurrentVersion = "1"
 
 type IntegrationInputType struct {
-	Version string `yaml:"Version"`
+	Version string `yaml:"version"`
 	Kind    IntegrationType
 	Spec    map[string]interface{}
 }
@@ -51,6 +51,7 @@ var createIntegrationCmd = &cobra.Command{
 	Short:   "Create an integration",
 	Long:    `Create an integration`,
 	Example: `cat << EOF | opslevel create integration -f -
+version: 1
 kind: aws
 spec:
   name: "Prod"
@@ -111,6 +112,7 @@ var updateIntegrationCmd = &cobra.Command{
 	Short:   "Update an integration",
 	Long:    `Update an integration`,
 	Example: `cat << EOF | opslevel update integration XXXXXXXX -f -
+version: 1
 kind: aws
 spec:
   ownershipTagOverrides: true
