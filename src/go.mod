@@ -9,6 +9,7 @@ require (
 	github.com/gosimple/slug v1.14.0
 	github.com/itchyny/gojq v0.12.15
 	github.com/manifoldco/promptui v0.9.0
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/open-policy-agent/opa v0.63.0
 	github.com/opslevel/opslevel-go/v2024 v2024.3.15
 	github.com/relvacode/iso8601 v1.4.0
@@ -61,7 +62,6 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/opslevel/moredefaults v0.0.0-20240112142637-078c8ff8ba9c // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
