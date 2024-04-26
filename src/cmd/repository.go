@@ -38,8 +38,14 @@ var listRepositoryCmd = &cobra.Command{
 	Aliases: []string{"repositories", "repo", "repos"},
 	Short:   "Lists repositories",
 	Long:    `Lists repositories`,
+	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		resp, err := getClientGQL().ListRepositories(nil)
+		client := getClientGQL()
+		payloadVars := client.InitialPageVariables()
+		// The --hidden flag lists only hidden repos
+		payloadVars["visible"] = !cmd.Flag("hidden").Changed
+
+		resp, err := client.ListRepositories(&payloadVars)
 		list := resp.Nodes
 		cobra.CheckErr(err)
 		if isJsonOutput() {
@@ -56,5 +62,6 @@ var listRepositoryCmd = &cobra.Command{
 
 func init() {
 	getCmd.AddCommand(getRepositoryCmd)
+	listRepositoryCmd.Flags().Bool("hidden", false, "list only hidden repositories when set")
 	listCmd.AddCommand(listRepositoryCmd)
 }
