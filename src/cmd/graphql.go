@@ -101,17 +101,17 @@ query ($id: ID!){
 
 		cobra.CheckErr(err)
 		paginate, err := flags.GetBool("paginate")
-		handleErr("error getting paginate flag", err)
+		cobra.CheckErr(err)
 
 		aggregate, err := flags.GetString("aggregate")
 		cobra.CheckErr(err)
 		jq, err := gojq.Parse(aggregate)
-		handleErr("error parsing pagination flag value", err)
+		cobra.CheckErr(err)
 		aggregation, err := gojq.Compile(jq)
 
-		handleErr("error compiling pagination flag value", err)
+		cobra.CheckErr(err)
 		queryValue, err := flags.GetString("query")
-		handleErr("error getting query flag value", err)
+		cobra.CheckErr(err)
 		queryParsed, err := convert(queryValue)
 		cobra.CheckErr(err)
 		query, ok := queryParsed.(string)
@@ -121,7 +121,7 @@ query ($id: ID!){
 		operationName, err := flags.GetString("operationName")
 		cobra.CheckErr(err)
 		fields, err := flags.GetStringArray("field")
-		handleErr("error getting field flag value", err)
+		cobra.CheckErr(err)
 
 		variables := map[string]interface{}{}
 		for _, field := range fields {
@@ -137,12 +137,12 @@ query ($id: ID!){
 		hasNextPage := true
 		for hasNextPage {
 			data, err := client.ExecRaw(query, variables, opslevel.WithName(operationName))
-			handleErr("error making graphql api call", err)
+			cobra.CheckErr(err)
 			output = append(output, handleAggregate(data, aggregation)...)
 
 			if paginate {
 				hasNextPage, err = strconv.ParseBool(string(hasNextPageExp.FindSubmatch(data)[1]))
-				handleErr("error parsing bool for has next page", err)
+				cobra.CheckErr(err)
 				// don't try to parse endCursor unless we know there's another page
 				if hasNextPage {
 					variables["endCursor"] = string(endCursorExp.FindSubmatch(data)[1])
@@ -153,7 +153,7 @@ query ($id: ID!){
 		}
 
 		json, err := json.Marshal(output)
-		handleErr("error marshaling output to json", err)
+		cobra.CheckErr(err)
 
 		fmt.Println(string(json))
 	},
@@ -211,7 +211,7 @@ func convert(v string) (interface{}, error) {
 func handleAggregate(data []byte, aggregation *gojq.Code) []interface{} {
 	var parsed map[string]interface{}
 	err := json.Unmarshal(data, &parsed)
-	handleErr("error parsing graphql response to json", err)
+	cobra.CheckErr(err)
 	iter := aggregation.Run(parsed)
 	var output []interface{}
 	for {
@@ -220,7 +220,7 @@ func handleAggregate(data []byte, aggregation *gojq.Code) []interface{} {
 			break
 		}
 		if err, ok := value.(error); ok {
-			handleErr("error running aggregation function", err)
+			cobra.CheckErr(err)
 		}
 		output = append(output, value)
 	}
