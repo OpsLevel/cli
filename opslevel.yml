@@ -2,9 +2,9 @@
 version: 1
 service:
   name: Opslevel CLI
-  lifecycle: beta
+  lifecycle: generally_available
   tier: tier_2
-  product: 
+  product:
   owner: platform
   language: Go
   framework: Cobra
