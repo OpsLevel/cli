@@ -1,3 +1,0 @@
-kind: Bugfix
-body: fix "service update" cmd, can now unset lifecycleAlias and tierAlias
-time: 2024-05-13T10:30:49.830113-05:00
