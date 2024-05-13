@@ -120,7 +120,8 @@ EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.ServiceUpdateInput]()
 		cobra.CheckErr(err)
-		service, err := getClientGQL().UpdateService(*input)
+		convertedInput := convertServiceUpdateInput(*input)
+		service, err := getClientGQL().UpdateService(convertedInput)
 		cobra.CheckErr(err)
 		common.JsonPrint(json.MarshalIndent(service, "", "    "))
 	},
@@ -211,4 +212,28 @@ func init() {
 	deleteCmd.AddCommand(deleteServiceCmd)
 
 	importCmd.AddCommand(importServicesCmd)
+}
+
+func convertServiceUpdateInput(input opslevel.ServiceUpdateInput) opslevel.ServiceUpdateInputV2 {
+	return opslevel.ServiceUpdateInputV2{
+		Alias:                 NullableString(input.Alias),
+		Description:           NullableString(input.Description),
+		Framework:             NullableString(input.Framework),
+		Id:                    input.Id,
+		Language:              NullableString(input.Language),
+		LifecycleAlias:        NullableString(input.LifecycleAlias),
+		Name:                  NullableString(input.Name),
+		OwnerInput:            input.OwnerInput,
+		Parent:                input.Parent,
+		SkipAliasesValidation: input.SkipAliasesValidation,
+		Product:               NullableString(input.Product),
+		TierAlias:             NullableString(input.TierAlias),
+	}
+}
+
+func NullableString(value *string) *opslevel.Nullable[string] {
+	if value == nil || *value == "" {
+		return opslevel.NewNull()
+	}
+	return opslevel.NewNullableFrom(*value)
 }
