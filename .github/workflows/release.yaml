@@ -66,6 +66,7 @@ jobs:
           gh release delete ${{ steps.version.outputs.RELEASE_VERSION }} || true
       - name: Ensure Changelog
         run: |
+          git pull --rebase
           git config user.name "OpsLevel Bots"
           git config user.email "bots@opslevel.com"
           if test -f ./.changes/${{ steps.version.outputs.RELEASE_VERSION }}.md
