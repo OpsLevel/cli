@@ -14,8 +14,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var integrationUrl string
-
 type Deployer struct {
 	Email string `validate:"required" json:"email" default:"automation@opslevel.com"`
 	Name  string `json:"name,omitempty"`
@@ -52,6 +50,7 @@ var deployCreateCmd = &cobra.Command{
 	Short: "Create deployment events",
 	Long:  "Create deployment events (report a deployment to OpsLevel using an integration url)",
 	Run: func(cmd *cobra.Command, args []string) {
+		integrationUrl := viper.GetString("integration-url")
 		if integrationUrl == "" {
 			log.Error().Msg("Please provide '--integration-url' to send the deployment information to")
 			os.Exit(1)
@@ -120,7 +119,7 @@ func init() {
 	deployCreateCmd.Flags().StringP("service", "s", "", "service alias for the event (OPSLEVEL_SERVICE)")
 	viper.BindEnv("service", "OPSLEVEL_SERVICE", "OL_SERVICE")
 
-	deployCreateCmd.Flags().StringVarP(&integrationUrl, "integration-url", "i", "", "OpsLevel integration url (OPSLEVEL_INTEGRATION_URL)")
+	deployCreateCmd.Flags().StringP("integration-url", "i", "", "OpsLevel integration url (OPSLEVEL_INTEGRATION_URL)")
 	viper.BindEnv("integration-url", "OPSLEVEL_INTEGRATION_URL", "OL_INTEGRATION_URL")
 
 	viper.BindPFlags(deployCreateCmd.Flags())
