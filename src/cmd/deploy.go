@@ -14,8 +14,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var integrationUrl string
-
 type Deployer struct {
 	Email string `validate:"required" json:"email" default:"automation@opslevel.com"`
 	Name  string `json:"name,omitempty"`
@@ -50,69 +48,81 @@ type DeployEvent struct {
 var deployCreateCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "Create deployment events",
-	Long:  "Create deployment events",
+	Long:  "Create deployment events (report a deployment to OpsLevel using an integration url)",
 	Run: func(cmd *cobra.Command, args []string) {
+		integrationUrl := viper.GetString("integration-url")
 		if integrationUrl == "" {
 			log.Error().Msg("Please provide '--integration-url' to send the deployment information to")
 			os.Exit(1)
 		}
 
-		var err error
 		evt, err := readCreateConfigAsDeployEvent()
 		cobra.CheckErr(err)
 		if dryrun := viper.GetBool("dry-run"); dryrun {
 			b, _ := json.Marshal(evt)
 			log.Info().Msgf("%s", string(b))
-		} else {
-			body, err := json.Marshal(evt)
-			cobra.CheckErr(err)
-			response := &opslevel.RestResponse{}
-			resp, err := getClientRest().R().
-				SetHeader("Content-Type", "application/json").
-				SetBody(body).
-				SetResult(response).
-				Post(integrationUrl)
-			cobra.CheckErr(err)
-			if resp.IsSuccess() {
-				log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
-			} else {
-				log.Error().Msg(resp.String())
-				os.Exit(1)
-			}
+			return
 		}
+		body, err := json.Marshal(evt)
+		cobra.CheckErr(err)
+		response := &opslevel.RestResponse{}
+		resp, err := getClientRest().R().
+			SetHeader("Content-Type", "application/json").
+			SetBody(body).
+			SetResult(response).
+			Post(integrationUrl)
+		cobra.CheckErr(err)
+		if !resp.IsSuccess() {
+			log.Error().Msg(resp.String())
+			os.Exit(1)
+		}
+		log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
 	},
 }
 
 func init() {
 	createCmd.AddCommand(deployCreateCmd)
 
-	deployCreateCmd.Flags().StringVarP(&integrationUrl, "integration-url", "i", "", "OpsLevel integration url (OPSLEVEL_INTEGRATION_URL)")
 	deployCreateCmd.Flags().Bool("dry-run", false, "if true data will be logged and not sent to the integration-url (OPSLEVEL_DRY_RUN)")
-	deployCreateCmd.Flags().String("git-path", "./", "relative path to grab the git commit info from (if git repo is found overrides all commit details)")
+	viper.BindEnv("dry-run", "OPSLEVEL_DRY_RUN", "OL_DRY_RUN")
 
-	deployCreateCmd.Flags().StringP("service", "s", "", "service alias for the event (OPSLEVEL_SERVICE)")
-	deployCreateCmd.Flags().StringP("description", "d", "", "description of the event (OPSLEVEL_DESCRIPTION)")
-	deployCreateCmd.Flags().StringP("environment", "", "", "environment name of the event (OPSLEVEL_ENVIRONMENT)")
-	deployCreateCmd.Flags().StringP("deploy-number", "", "", "deploy number of the event (OPSLEVEL_DEPLOY_NUMBER)")
-	deployCreateCmd.Flags().String("deploy-url", "", "url the event will link back to (OPSLEVEL_DEPLOY_URL)")
-	deployCreateCmd.Flags().String("dedup-id", "", "dedup id of the event (OPSLEVEL_DEDUP_ID)")
-
-	deployCreateCmd.Flags().String("deployer-name", "", "deployer name who created the event (OPSLEVEL_DEPLOYER_NAME)")
-	deployCreateCmd.Flags().String("deployer-email", "", "deployer email who created the event (OPSLEVEL_DEPLOYER_EMAIL)")
+	deployCreateCmd.Flags().String("commit-message", "", "git commit message associated with the event (OPSLEVEL_DEPLOYER_EMAIL)")
+	viper.BindEnv("commit-message", "OPSLEVEL_COMMIT_MESSAGE", "OL_COMMIT_MESSAGE")
 
 	deployCreateCmd.Flags().String("commit-sha", "", "git commit sha associated with the event (OPSLEVEL_DEPLOYER_NAME)")
-	deployCreateCmd.Flags().String("commit-message", "", "git commit message associated with the event (OPSLEVEL_DEPLOYER_EMAIL)")
-	viper.BindPFlags(deployCreateCmd.Flags())
-	viper.BindEnv("integration-url", "OPSLEVEL_INTEGRATION_URL", "OL_INTEGRATION_URL")
-	viper.BindEnv("dry-run", "OPSLEVEL_DRY_RUN", "OL_DRY_RUN")
-	viper.BindEnv("git-path", "OPSLEVEL_GIT_PATH", "OL_GIT_PATH")
-	viper.BindEnv("deploy-number", "OPSLEVEL_DEPLOY_NUMBER", "OL_DEPLOY_NUMBER")
-	viper.BindEnv("deploy-url", "OPSLEVEL_DEPLOY_URL", "OL_DEPLOY_URL")
-	viper.BindEnv("dedup-id", "OPSLEVEL_DEDUP_ID", "OL_DEDUP_ID")
-	viper.BindEnv("deployer-name", "OPSLEVEL_DEPLOYER_NAME", "OL_DEPLOYER_NAME")
-	viper.BindEnv("deployer-email", "OPSLEVEL_DEPLOYER_EMAIL", "OL_DEPLOYER_EMAIL")
 	viper.BindEnv("commit-sha", "OPSLEVEL_COMMIT_SHA", "OL_COMMIT_SHA")
-	viper.BindEnv("commit-message", "OPSLEVEL_COMMIT_MESSAGE", "OL_COMMIT_MESSAGE")
+
+	deployCreateCmd.Flags().String("dedup-id", "", "dedup id of the event (OPSLEVEL_DEDUP_ID)")
+	viper.BindEnv("dedup-id", "OPSLEVEL_DEDUP_ID", "OL_DEDUP_ID")
+
+	deployCreateCmd.Flags().String("deploy-number", "", "deploy number of the event (OPSLEVEL_DEPLOY_NUMBER)")
+	viper.BindEnv("deploy-number", "OPSLEVEL_DEPLOY_NUMBER", "OL_DEPLOY_NUMBER")
+
+	deployCreateCmd.Flags().String("deploy-url", "", "url the event will link back to (OPSLEVEL_DEPLOY_URL)")
+	viper.BindEnv("deploy-url", "OPSLEVEL_DEPLOY_URL", "OL_DEPLOY_URL")
+
+	deployCreateCmd.Flags().String("deployer-email", "", "deployer email who created the event (OPSLEVEL_DEPLOYER_EMAIL)")
+	viper.BindEnv("deployer-email", "OPSLEVEL_DEPLOYER_EMAIL", "OL_DEPLOYER_EMAIL")
+
+	deployCreateCmd.Flags().String("deployer-name", "", "deployer name who created the event (OPSLEVEL_DEPLOYER_NAME)")
+	viper.BindEnv("deployer-name", "OPSLEVEL_DEPLOYER_NAME", "OL_DEPLOYER_NAME")
+
+	deployCreateCmd.Flags().String("environment", "", "environment name of the event (OPSLEVEL_ENVIRONMENT)")
+	viper.BindEnv("environment", "OPSLEVEL_ENVIRONMENT", "OL_ENVIRONMENT")
+
+	deployCreateCmd.Flags().String("git-path", "./", "relative path to grab the git commit info from (if git repo is found overrides all commit details)")
+	viper.BindEnv("git-path", "OPSLEVEL_GIT_PATH", "OL_GIT_PATH")
+
+	deployCreateCmd.Flags().StringP("description", "d", "", "description of the event (OPSLEVEL_DESCRIPTION)")
+	viper.BindEnv("description", "OPSLEVEL_DESCRIPTION", "OL_DESCRIPTION")
+
+	deployCreateCmd.Flags().StringP("service", "s", "", "service alias for the event (OPSLEVEL_SERVICE)")
+	viper.BindEnv("service", "OPSLEVEL_SERVICE", "OL_SERVICE")
+
+	deployCreateCmd.Flags().StringP("integration-url", "i", "", "OpsLevel integration url (OPSLEVEL_INTEGRATION_URL)")
+	viper.BindEnv("integration-url", "OPSLEVEL_INTEGRATION_URL", "OL_INTEGRATION_URL")
+
+	viper.BindPFlags(deployCreateCmd.Flags())
 }
 
 func readCreateConfigAsDeployEvent() (*DeployEvent, error) {
