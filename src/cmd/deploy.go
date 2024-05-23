@@ -49,37 +49,35 @@ type DeployEvent struct {
 
 var deployCreateCmd = &cobra.Command{
 	Use:   "deploy",
-	Short: "Create deployment events",
-	Long:  "Create deployment events",
+	Short: "Create deployment events (report deploy)",
+	Long:  "Create deployment events (report deploy)",
 	Run: func(cmd *cobra.Command, args []string) {
 		if integrationUrl == "" {
 			log.Error().Msg("Please provide '--integration-url' to send the deployment information to")
 			os.Exit(1)
 		}
 
-		var err error
 		evt, err := readCreateConfigAsDeployEvent()
 		cobra.CheckErr(err)
 		if dryrun := viper.GetBool("dry-run"); dryrun {
 			b, _ := json.Marshal(evt)
 			log.Info().Msgf("%s", string(b))
-		} else {
-			body, err := json.Marshal(evt)
-			cobra.CheckErr(err)
-			response := &opslevel.RestResponse{}
-			resp, err := getClientRest().R().
-				SetHeader("Content-Type", "application/json").
-				SetBody(body).
-				SetResult(response).
-				Post(integrationUrl)
-			cobra.CheckErr(err)
-			if resp.IsSuccess() {
-				log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
-			} else {
-				log.Error().Msg(resp.String())
-				os.Exit(1)
-			}
+			return
 		}
+		body, err := json.Marshal(evt)
+		cobra.CheckErr(err)
+		response := &opslevel.RestResponse{}
+		resp, err := getClientRest().R().
+			SetHeader("Content-Type", "application/json").
+			SetBody(body).
+			SetResult(response).
+			Post(integrationUrl)
+		cobra.CheckErr(err)
+		if !resp.IsSuccess() {
+			log.Error().Msg(resp.String())
+			os.Exit(1)
+		}
+		log.Info().Msgf("Successfully registered deploy event for '%s'", evt.Service)
 	},
 }
 
