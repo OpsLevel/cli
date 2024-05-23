@@ -595,7 +595,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			if len(casted.FileExtensions) > 0 {
 				fileExtensions = fmt.Sprintf(`file_extensions = ["%s"]`, strings.Join(casted.FileExtensions, "\", \""))
 			}
-			checkExtras = templateConfig(repoSearchCheckConfig, fileExtensions, flattenPredicate("file_contents_predicate", &casted.FileContentsPredicate))
+			checkExtras = templateConfig(repoSearchCheckConfig, fileExtensions, flattenPredicate("file_contents_predicate", casted.FileContentsPredicate))
 		case opslevel.CheckTypeHasServiceConfig:
 			activeFile = serviceConfigCheckFile
 			checkTypeTerraformName = "service_configuration"
