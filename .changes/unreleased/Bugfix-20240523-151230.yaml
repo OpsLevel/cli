@@ -1,0 +1,3 @@
+kind: Bugfix
+body: Docker image will now install `ca-certificates` during bootstrap
+time: 2024-05-23T15:12:30.528274-04:00
