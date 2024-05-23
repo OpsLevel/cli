@@ -1,0 +1,4 @@
+kind: Bugfix
+body: Support all CLI options for `opslevel create deploy` as env vars (OL_ENVIRONMENT,
+  OL_DESCRIPTION, OL_SERVICE)
+time: 2024-05-23T11:49:29.694134-04:00

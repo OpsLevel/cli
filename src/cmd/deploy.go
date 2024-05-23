@@ -49,8 +49,8 @@ type DeployEvent struct {
 
 var deployCreateCmd = &cobra.Command{
 	Use:   "deploy",
-	Short: "Create deployment events (report deploy)",
-	Long:  "Create deployment events (report deploy)",
+	Short: "Create deployment events",
+	Long:  "Create deployment events (report a deployment to OpsLevel using an integration url)",
 	Run: func(cmd *cobra.Command, args []string) {
 		if integrationUrl == "" {
 			log.Error().Msg("Please provide '--integration-url' to send the deployment information to")
