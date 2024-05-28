@@ -558,7 +558,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			casted := check.AlertSourceUsageCheckFragment
 			activeFile = alertSourceUsageCheckFile
 			checkTypeTerraformName = "alert_source_usage"
-			checkExtras = templateConfig(alertSourceUsageCheckConfig, flattenPredicate("alert_source_name_predicate", &casted.AlertSourceNamePredicate), casted.AlertSourceType)
+			checkExtras = templateConfig(alertSourceUsageCheckConfig, flattenPredicate("alert_source_name_predicate", casted.AlertSourceNamePredicate), casted.AlertSourceType)
 		case opslevel.CheckTypeGeneric:
 			casted := check.CustomEventCheckFragment
 			activeFile = customEventCheckFile
@@ -583,7 +583,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			casted := check.RepositoryGrepCheckFragment
 			activeFile = repoGrepCheckFile
 			checkTypeTerraformName = "repository_grep"
-			checkExtras = templateConfig(repoGrepCheckConfig, casted.DirectorySearch, strings.Join(casted.Filepaths, "\", \""), flattenPredicate("file_contents_predicate", casted.FileContentsPredicate))
+			checkExtras = templateConfig(repoGrepCheckConfig, casted.DirectorySearch, strings.Join(casted.Filepaths, "\", \""), flattenPredicate("file_contents_predicate", &casted.FileContentsPredicate))
 		case opslevel.CheckTypeHasRepository:
 			activeFile = repoIntegratedCheckFile
 			checkTypeTerraformName = "repository_integrated"
@@ -595,7 +595,7 @@ func exportChecks(c *opslevel.Client, shell *os.File, directory string) {
 			if len(casted.FileExtensions) > 0 {
 				fileExtensions = fmt.Sprintf(`file_extensions = ["%s"]`, strings.Join(casted.FileExtensions, "\", \""))
 			}
-			checkExtras = templateConfig(repoSearchCheckConfig, fileExtensions, flattenPredicate("file_contents_predicate", casted.FileContentsPredicate))
+			checkExtras = templateConfig(repoSearchCheckConfig, fileExtensions, flattenPredicate("file_contents_predicate", &casted.FileContentsPredicate))
 		case opslevel.CheckTypeHasServiceConfig:
 			activeFile = serviceConfigCheckFile
 			checkTypeTerraformName = "service_configuration"
