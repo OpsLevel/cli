@@ -11,7 +11,7 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/open-policy-agent/opa v0.63.0
-	github.com/opslevel/opslevel-go/v2024 v2024.5.13
+	github.com/opslevel/opslevel-go/v2024 v2024.5.28
 	github.com/relvacode/iso8601 v1.4.0
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.32.0
