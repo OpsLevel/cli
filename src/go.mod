@@ -10,7 +10,7 @@ require (
 	github.com/itchyny/gojq v0.12.15
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/open-policy-agent/opa v0.63.0
+	github.com/open-policy-agent/opa v0.64.1
 	github.com/opslevel/opslevel-go/v2024 v2024.5.28
 	github.com/relvacode/iso8601 v1.4.0
 	github.com/rocktavious/autopilot v0.1.5
@@ -67,7 +67,7 @@ require (
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.19.0 // indirect
-	github.com/prometheus/client_model v0.5.0 // indirect
+	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
