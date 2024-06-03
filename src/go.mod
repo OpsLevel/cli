@@ -7,7 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-resty/resty/v2 v2.13.1
 	github.com/gosimple/slug v1.14.0
-	github.com/itchyny/gojq v0.12.15
+	github.com/itchyny/gojq v0.12.16
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/open-policy-agent/opa v0.64.1
@@ -55,7 +55,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hasura/go-graphql-client v0.12.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/itchyny/timefmt-go v0.1.5 // indirect
+	github.com/itchyny/timefmt-go v0.1.6 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
