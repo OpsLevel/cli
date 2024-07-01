@@ -10,7 +10,7 @@ require (
 	github.com/itchyny/gojq v0.12.16
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/open-policy-agent/opa v0.65.0
+	github.com/open-policy-agent/opa v0.66.0
 	github.com/opslevel/opslevel-go/v2024 v2024.6.17
 	github.com/relvacode/iso8601 v1.4.0
 	github.com/rocktavious/autopilot v0.1.5
