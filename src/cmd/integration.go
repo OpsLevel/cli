@@ -70,6 +70,17 @@ spec:
   ownershipTagOverride: true
   ownershipTagKeys: ["owner","service","app"]
 EOF
+
+cat << EOF | opslevel create integration -f -
+version: 1
+kind: azure
+spec:
+  name: "Azure New"
+  tenantId: "12345678-1234-1234-1234-123456789abc"
+  subscriptionId: "12345678-1234-1234-1234-123456789def"
+  clientId: "XXX_CLIENT_ID_XXX"
+  clientSecret: "XXX_CLIENT_SECRET_XXX"
+EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, validateErr := validateIntegrationInput()
@@ -142,7 +153,17 @@ kind: aws
 spec:
   ownershipTagOverride: true
   ownershipTagKeys: ["owner","service","app"]
-EOF`,
+EOF
+
+cat << EOF | opslevel update integration XXXXXXXX -f -
+version: 1
+kind: azure
+spec:
+  name: "dev"
+  clientId: "XXX_CLIENT_ID_XXX"
+  clientSecret: "XXX_CLIENT_SECRET_XXX"
+EOF
+`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
