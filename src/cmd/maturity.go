@@ -20,9 +20,9 @@ var getServiceMaturityCmd = &cobra.Command{
 
 There are multiple output formats that are useful
 
-	opslevel get service maturity
-	opslevel get service maturity -o csv > maturity.csv
-	opslevel get service maturity -o json | jq
+	opslevel get service maturity ALIAS
+	opslevel get service maturity ALIAS -o csv > maturity.csv
+	opslevel get service maturity ALIAS -o json | jq
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		alias := args[0]
@@ -85,7 +85,11 @@ func writeOutput(client *opslevel.Client, data []opslevel.ServiceMaturity) {
 	headers := getCategoryHeaders(client)
 
 	if isJsonOutput() {
-		common.JsonPrint(json.MarshalIndent(data, "", "    "))
+		if len(data) == 1 {
+			common.JsonPrint(json.MarshalIndent(data[0], "", "    "))
+		} else {
+			common.JsonPrint(json.MarshalIndent(data, "", "    "))
+		}
 	} else if isCsvOutput() {
 		w := csv.NewWriter(os.Stdout)
 		w.Write(headers)
