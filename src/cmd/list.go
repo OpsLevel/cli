@@ -22,7 +22,7 @@ func init() {
 }
 
 func isJsonOutput() bool {
-	return listOutputType == "json" || getOutputType == "json"
+	return listOutputType == "json"
 }
 
 func isCsvOutput() bool {

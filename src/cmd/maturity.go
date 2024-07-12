@@ -21,16 +21,20 @@ var getServiceMaturityCmd = &cobra.Command{
 There are multiple output formats that are useful
 
 	opslevel get service maturity ALIAS
-	opslevel get service maturity ALIAS -o csv > maturity.csv
-	opslevel get service maturity ALIAS -o json | jq
+	opslevel get service maturity ALIAS -o yaml | yq
 `,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		alias := args[0]
 		client := getClientGQL()
 
 		data, err := client.GetServiceMaturityWithAlias(alias)
 		cobra.CheckErr(err)
-		writeOutput(client, []opslevel.ServiceMaturity{*data})
+		if isYamlOutput() {
+			common.YamlPrint(*data)
+		} else {
+			writeOutput(client, []opslevel.ServiceMaturity{*data})
+		}
 	},
 }
 
