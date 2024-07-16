@@ -13,6 +13,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var getServiceMaturityCmd = &cobra.Command{
+	Use:   "maturity ALIAS",
+	Short: "Get service maturity data (category and level)",
+	Long: `Get service maturity data (category and level)
+
+There are multiple output formats that are useful
+
+	opslevel get service maturity ALIAS
+	opslevel get service maturity ALIAS -o yaml | yq
+`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		alias := args[0]
+		client := getClientGQL()
+
+		data, err := client.GetServiceMaturityWithAlias(alias)
+		cobra.CheckErr(err)
+		if isYamlOutput() {
+			common.YamlPrint(*data)
+		} else {
+			writeOutput(client, []opslevel.ServiceMaturity{*data})
+		}
+	},
+}
+
 var listServiceMaturityCmd = &cobra.Command{
 	Use:     "maturity",
 	Aliases: []string{"maturities"},
@@ -27,40 +52,15 @@ There are multiple output formats that are useful
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := getClientGQL()
-		categoriesConn, err := client.ListCategories(nil)
-		cobra.CheckErr(err)
-		categories := categoriesConn.Nodes
 		response, err := client.ListServicesMaturity(nil)
 		cobra.CheckErr(err)
-		data := response.Nodes
-		headers := []string{"Name", "Overall"}
-		sort.Slice(categories, func(i, j int) bool {
-			return categories[i].Name < categories[j].Name
-		})
-		for _, category := range categories {
-			headers = append(headers, category.Name)
-		}
 
-		if isJsonOutput() {
-			common.JsonPrint(json.MarshalIndent(data, "", "    "))
-		} else if isCsvOutput() {
-			w := csv.NewWriter(os.Stdout)
-			w.Write(headers)
-			for _, item := range data {
-				w.Write(GetValues(&item, headers...))
-			}
-			w.Flush()
-		} else {
-			w := common.NewTabWriter(headers...)
-			for _, item := range data {
-				fmt.Fprintf(w, "%s\n", strings.Join(GetValues(&item, headers...), "\t"))
-			}
-			w.Flush()
-		}
+		writeOutput(client, response.Nodes)
 	},
 }
 
 func init() {
+	getServiceCmd.AddCommand(getServiceMaturityCmd)
 	listServiceCmd.AddCommand(listServiceMaturityCmd)
 }
 
@@ -83,4 +83,44 @@ func GetValues(s *opslevel.ServiceMaturity, fields ...string) []string {
 		}
 	}
 	return output
+}
+
+func writeOutput(client *opslevel.Client, data []opslevel.ServiceMaturity) {
+	headers := getCategoryHeaders(client)
+
+	if isJsonOutput() {
+		if len(data) == 1 {
+			common.JsonPrint(json.MarshalIndent(data[0], "", "    "))
+		} else {
+			common.JsonPrint(json.MarshalIndent(data, "", "    "))
+		}
+	} else if isCsvOutput() {
+		w := csv.NewWriter(os.Stdout)
+		w.Write(headers)
+		for _, item := range data {
+			w.Write(GetValues(&item, headers...))
+		}
+		w.Flush()
+	} else {
+		w := common.NewTabWriter(headers...)
+		for _, item := range data {
+			fmt.Fprintf(w, "%s\n", strings.Join(GetValues(&item, headers...), "\t"))
+		}
+		w.Flush()
+	}
+}
+
+func getCategoryHeaders(client *opslevel.Client) []string {
+	headers := []string{"Name", "Overall"}
+	categoriesConn, err := client.ListCategories(nil)
+	cobra.CheckErr(err)
+	categories := categoriesConn.Nodes
+	sort.Slice(categories, func(i, j int) bool {
+		return categories[i].Name < categories[j].Name
+	})
+	for _, category := range categories {
+		headers = append(headers, category.Name)
+	}
+
+	return headers
 }
