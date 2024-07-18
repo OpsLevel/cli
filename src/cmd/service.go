@@ -232,7 +232,10 @@ func convertServiceUpdateInput(input opslevel.ServiceUpdateInput) opslevel.Servi
 }
 
 func NullableString(value *string) *opslevel.Nullable[string] {
-	if value == nil || *value == "" {
+	if value == nil {
+		return nil
+	}
+	if *value == "" || *value == "null" {
 		return opslevel.NewNull()
 	}
 	return opslevel.NewNullableFrom(*value)
