@@ -36,13 +36,13 @@ name: "hello world"
 description: "Hello World Service"
 framework: "fasthttp"
 language: "Go"
-lifecycleAlias: beta
-ownerInput:
+lifecycle: beta
+owner:
   alias: "platform"
 parent:
   alias: "my_system"
 product: "OSS"
-tierAlias: "tier_4"
+tier: "tier_4"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.ServiceCreateInput]()
@@ -121,13 +121,13 @@ alias: "hello_world"
 description: "Hello World Service Updated"
 framework: "fasthttp"
 language: "Go"
-lifecycleAlias: beta
-ownerInput:
+lifecycle: beta
+owner:
   alias: "platform"
 parent:
   alias: "my_system"
 product: "OSS"
-tierAlias: "tier_3"
+tier: "tier_3"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.ServiceUpdateInput]()
