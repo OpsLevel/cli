@@ -73,6 +73,8 @@ var getServiceCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		_, err = service.GetDependencies(client, nil)
 		cobra.CheckErr(err)
+		_, err = service.GetProperties(client, nil)
+		cobra.CheckErr(err)
 		common.WasFound(service.Id == "", key)
 		common.PrettyPrint(service)
 	},
