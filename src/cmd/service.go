@@ -69,12 +69,7 @@ var getServiceCmd = &cobra.Command{
 			service, err = getClientGQL().GetServiceWithAlias(key)
 			cobra.CheckErr(err)
 		}
-		_, err = service.GetDependents(client, nil)
-		cobra.CheckErr(err)
-		_, err = service.GetDependencies(client, nil)
-		cobra.CheckErr(err)
-		_, err = service.GetProperties(client, nil)
-		cobra.CheckErr(err)
+		hydrateService(service, client)
 		common.WasFound(service.Id == "", key)
 		common.PrettyPrint(service)
 	},
@@ -86,9 +81,14 @@ var listServiceCmd = &cobra.Command{
 	Short:   "Lists services",
 	Long:    `Lists services`,
 	Run: func(cmd *cobra.Command, args []string) {
-		resp, err := getClientGQL().ListServices(nil)
-		list := resp.Nodes
+		var list []opslevel.Service
+		client := getClientGQL()
+		resp, err := client.ListServices(nil)
 		cobra.CheckErr(err)
+		for _, service := range resp.Nodes {
+			hydrateService(&service, client)
+			list = append(list, service)
+		}
 		if isJsonOutput() {
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else if isCsvOutput() {
@@ -214,6 +214,17 @@ func init() {
 	deleteCmd.AddCommand(deleteServiceCmd)
 
 	importCmd.AddCommand(importServicesCmd)
+}
+
+func hydrateService(service *opslevel.Service, client *opslevel.Client) {
+	_, err := service.GetDependencies(client, nil)
+	cobra.CheckErr(err)
+	_, err = service.GetDependents(client, nil)
+	cobra.CheckErr(err)
+	_, err = service.GetDependencies(client, nil)
+	cobra.CheckErr(err)
+	_, err = service.GetProperties(client, nil)
+	cobra.CheckErr(err)
 }
 
 func convertServiceUpdateInput(input opslevel.ServiceUpdateInput) opslevel.ServiceUpdateInputV2 {
