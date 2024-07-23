@@ -217,9 +217,7 @@ func init() {
 }
 
 func hydrateService(service *opslevel.Service, client *opslevel.Client) {
-	_, err := service.GetDependencies(client, nil)
-	cobra.CheckErr(err)
-	_, err = service.GetDependents(client, nil)
+	_, err := service.GetDependents(client, nil)
 	cobra.CheckErr(err)
 	_, err = service.GetDependencies(client, nil)
 	cobra.CheckErr(err)
