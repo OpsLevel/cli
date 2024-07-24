@@ -34,12 +34,15 @@ var createServiceCmd = &cobra.Command{
 cat << EOF | opslevel create service -f -
 name: "hello world"
 description: "Hello World Service"
-product: "OSS"
-language: "Go"
-tier: "tier_4"
 framework: "fasthttp"
+language: "Go"
+lifecycle: beta
 owner:
-  alias: "Platform"
+  alias: "platform"
+parent:
+  alias: "my_system"
+product: "OSS"
+tier: "tier_4"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.ServiceCreateInput]()
@@ -113,8 +116,17 @@ var updateServiceCmd = &cobra.Command{
 	Long: `Update a service
 
 cat << EOF | opslevel update service -f -
+name: "hello world"
 alias: "hello_world"
 description: "Hello World Service Updated"
+framework: "fasthttp"
+language: "Go"
+lifecycle: beta
+owner:
+  alias: "platform"
+parent:
+  alias: "my_system"
+product: "OSS"
 tier: "tier_3"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
