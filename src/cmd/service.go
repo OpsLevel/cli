@@ -69,7 +69,16 @@ var getServiceCmd = &cobra.Command{
 			service, err = getClientGQL().GetServiceWithAlias(key)
 			cobra.CheckErr(err)
 		}
-		hydrateService(service, client)
+		// Extra fields only displayed in JSON format
+		if isJsonOutput() {
+			_, err = service.GetDependents(client, nil)
+			cobra.CheckErr(err)
+			_, err = service.GetDependencies(client, nil)
+			cobra.CheckErr(err)
+			_, err = service.GetProperties(client, nil)
+			cobra.CheckErr(err)
+		}
+
 		common.WasFound(service.Id == "", key)
 		common.PrettyPrint(service)
 	},
@@ -86,7 +95,24 @@ var listServiceCmd = &cobra.Command{
 		resp, err := client.ListServices(nil)
 		cobra.CheckErr(err)
 		for _, service := range resp.Nodes {
-			hydrateService(&service, client)
+			if !isJsonOutput() {
+				list = append(list, service)
+				continue
+			}
+
+			// Extra fields only displayed in JSON format
+			if ok, _ := cmd.Flags().GetBool("dependencies"); ok {
+				_, err = service.GetDependencies(client, nil)
+				cobra.CheckErr(err)
+			}
+			if ok, _ := cmd.Flags().GetBool("dependents"); ok {
+				_, err = service.GetDependents(client, nil)
+				cobra.CheckErr(err)
+			}
+			if ok, _ := cmd.Flags().GetBool("properties"); ok {
+				_, err = service.GetProperties(client, nil)
+				cobra.CheckErr(err)
+			}
 			list = append(list, service)
 		}
 		if isJsonOutput() {
@@ -213,16 +239,11 @@ func init() {
 	updateCmd.AddCommand(updateServiceCmd)
 	deleteCmd.AddCommand(deleteServiceCmd)
 
-	importCmd.AddCommand(importServicesCmd)
-}
+	listServiceCmd.PersistentFlags().Bool("dependencies", false, "Include dependencies of each service")
+	listServiceCmd.PersistentFlags().Bool("dependents", false, "Include dependents of each service")
+	listServiceCmd.PersistentFlags().Bool("properties", false, "Include properties of each service")
 
-func hydrateService(service *opslevel.Service, client *opslevel.Client) {
-	_, err := service.GetDependents(client, nil)
-	cobra.CheckErr(err)
-	_, err = service.GetDependencies(client, nil)
-	cobra.CheckErr(err)
-	_, err = service.GetProperties(client, nil)
-	cobra.CheckErr(err)
+	importCmd.AddCommand(importServicesCmd)
 }
 
 func convertServiceUpdateInput(input opslevel.ServiceUpdateInput) opslevel.ServiceUpdateInputV2 {
