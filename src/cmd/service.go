@@ -235,7 +235,7 @@ func NullableString(value *string) *opslevel.Nullable[string] {
 	if value == nil {
 		return nil
 	}
-	if *value == "" || *value == "null" {
+	if *value == "" {
 		return opslevel.NewNull()
 	}
 	return opslevel.NewNullableFrom(*value)
