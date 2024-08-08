@@ -28,22 +28,25 @@ func execCmd(command Operation, resource string, inputs ...string) ([]byte, erro
 	cliArgs := []string{string(command), resource}
 	cliArgs = append(cliArgs, inputs...)
 
-	r, oldStdout := redirectStdout()
+	r, oldStdout, err := redirectStdout()
 	defer r.Close()
+	if err != nil {
+		return nil, err
+	}
 
 	cmd.RootCmd.SetArgs(cliArgs)
-	err := cmd.RootCmd.Execute()
+	err = cmd.RootCmd.Execute()
 
 	output := captureOutput(r, oldStdout)
 	return output, err
 }
 
 // redirectStdout redirects os.Stdout to a pipe and returns the read and write ends of the pipe.
-func redirectStdout() (*os.File, *os.File) {
-	r, w, _ := os.Pipe()
+func redirectStdout() (*os.File, *os.File, error) {
+	r, w, err := os.Pipe()
 	oldStdout := os.Stdout
 	os.Stdout = w
-	return r, oldStdout
+	return r, oldStdout, err
 }
 
 // captureOutput reads from r until EOF and returns the result as a string.
