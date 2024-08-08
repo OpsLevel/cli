@@ -35,10 +35,11 @@ func execCmd(command Operation, resource string, inputs ...string) ([]byte, erro
 	}
 
 	cmd.RootCmd.SetArgs(cliArgs)
-	err = cmd.RootCmd.Execute()
+	if err = cmd.RootCmd.Execute(); err != nil {
+		return nil, err
+	}
 
-	output := captureOutput(r, oldStdout)
-	return output, err
+	return captureOutput(r, oldStdout)
 }
 
 // redirectStdout redirects os.Stdout to a pipe and returns the read and write ends of the pipe.
@@ -50,13 +51,11 @@ func redirectStdout() (*os.File, *os.File, error) {
 }
 
 // captureOutput reads from r until EOF and returns the result as a string.
-func captureOutput(r *os.File, oldStdout *os.File) []byte {
+func captureOutput(r *os.File, oldStdout *os.File) ([]byte, error) {
 	w := os.Stdout
 	os.Stdout = oldStdout
 	w.Close()
-	gotOutput, _ := io.ReadAll(r)
-	return gotOutput
-	// return strings.TrimSpace(string(gotOutput))
+	return io.ReadAll(r)
 }
 
 // convert a simple API response to a string
@@ -65,21 +64,21 @@ func asString(data []byte) string {
 }
 
 // convert JSON response from API to OpsLevel resource
-func jsonToResource[T any](jsonData []byte) *T {
+func jsonToResource[T any](jsonData []byte) (*T, error) {
 	var resource T
 	if err := json.Unmarshal(jsonData, &resource); err != nil {
-		return nil
+		return nil, err
 	}
-	return &resource
+	return &resource, nil
 }
 
 // write OpsLevel resource to YAML file for commands that read in a file
-func writeToYaml(userFileName string, opslevelResource any) error {
+func writeToYaml(givenFileName string, opslevelResource any) error {
 	yamlData, err := yaml.Marshal(&opslevelResource)
 	if err != nil {
 		return err
 	}
-	if err = os.WriteFile(userFileName, yamlData, 0o644); err != nil {
+	if err = os.WriteFile(givenFileName, yamlData, 0o644); err != nil {
 		return err
 	}
 	return nil

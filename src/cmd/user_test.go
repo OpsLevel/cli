@@ -35,7 +35,10 @@ func Test_UserCRUD(t *testing.T) {
 		t.Errorf("Get 'user' failed, got error: %v", err)
 	}
 
-	createdUser := jsonToResource[opslevel.User](getOutput)
+	createdUser, err := jsonToResource[opslevel.User](getOutput)
+	if err != nil {
+		t.Error("Failed to convert JSON from API to 'opslevel.User' struct")
+	}
 	if createdUser.Name != expectedUser.Name ||
 		createdUser.Email != expectedUser.Email ||
 		string(createdUser.Role) != string(defaultUserRole) ||

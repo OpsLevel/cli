@@ -37,7 +37,10 @@ func Test_TeamCRUD(t *testing.T) {
 		t.Errorf("Get 'team' failed, got error: %v", err)
 	}
 
-	createdTeam := jsonToResource[opslevel.Team](getOutput)
+	createdTeam, err := jsonToResource[opslevel.Team](getOutput)
+	if err != nil {
+		t.Error("Failed to convert JSON from API to 'opslevel.Team' struct")
+	}
 	if createdTeam.Name != teamToCreate.Name ||
 		createdTeam.Responsibilities != *teamToCreate.Responsibilities {
 		t.Errorf("Create 'team' failed, expected team '%+v' but got '%+v'", teamToCreate, createdTeam)
