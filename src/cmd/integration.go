@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/mapstructure"
+
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2024"
 	"github.com/spf13/cobra"
@@ -13,7 +14,8 @@ import (
 type IntegrationType string
 
 const (
-	IntegrationTypeAWS IntegrationType = "aws"
+	IntegrationTypeAWS   IntegrationType = "aws"
+	IntegrationTypeAzure IntegrationType = "azure"
 )
 
 var IntegrationConfigCurrentVersion = "1"
@@ -25,20 +27,29 @@ type IntegrationInputType struct {
 }
 
 type IntegrationInput interface {
-	opslevel.AWSIntegrationInput
+	opslevel.AWSIntegrationInput | opslevel.AzureResourcesIntegrationInput
 }
 
-func readIntegrationInput[T IntegrationInput]() (T, error) {
-	var output T
+func validateIntegrationInput() (*IntegrationInputType, error) {
 	input, err := readResourceInput[IntegrationInputType]()
 	if err != nil {
-		return output, err
+		return nil, err
 	}
 	if input.Version != CheckConfigCurrentVersion {
-		return output, fmt.Errorf("supported config version is '%s' but found '%s'",
+		return nil, fmt.Errorf("supported config version is '%s' but found '%s'",
 			IntegrationConfigCurrentVersion, input.Version)
 	}
-	// TODO: need to use input.Kind and a switch statement - but currently we only support AWS
+	switch input.Kind {
+	case IntegrationTypeAWS, IntegrationTypeAzure:
+		return input, nil
+	default:
+		return nil, fmt.Errorf("unsupported integration kind: '%s' (must be one of: '%s', '%s')",
+			input.Kind, IntegrationTypeAWS, IntegrationTypeAzure)
+	}
+}
+
+func readIntegrationInput[T IntegrationInput](input *IntegrationInputType) (T, error) {
+	var output T
 	if err := mapstructure.Decode(input.Spec, &output); err != nil {
 		return output, err
 	}
@@ -57,16 +68,42 @@ spec:
   name: "Prod"
   iamRole: "arn:aws:iam::XXXXX:role/opslevel-integration"
   externalId: "XXXXXX"
-  ownershipTagOverrides: true
+  awsTagsOverrideOwnership: true
   ownershipTagKeys: ["owner","service","app"]
+EOF
+
+cat << EOF | opslevel create integration -f -
+version: 1
+kind: azure
+spec:
+  name: "Azure New"
+  tenantId: "12345678-1234-1234-1234-123456789abc"
+  subscriptionId: "12345678-1234-1234-1234-123456789def"
+  clientId: "XXX_CLIENT_ID_XXX"
+  clientSecret: "XXX_CLIENT_SECRET_XXX"
 EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readIntegrationInput[opslevel.AWSIntegrationInput]()
-		cobra.CheckErr(err)
-		resp, err := getClientGQL().CreateIntegrationAWS(input)
-		cobra.CheckErr(err)
-		fmt.Printf("Created Integration '%s' with id '%s'\n", resp.Name, resp.Id)
+		input, validateErr := validateIntegrationInput()
+		cobra.CheckErr(validateErr)
+
+		var result *opslevel.Integration
+		switch input.Kind {
+		case IntegrationTypeAWS:
+			awsInput, err := readIntegrationInput[opslevel.AWSIntegrationInput](input)
+			cobra.CheckErr(err)
+			result, err = getClientGQL().CreateIntegrationAWS(awsInput)
+			cobra.CheckErr(err)
+		case IntegrationTypeAzure:
+			azureInput, err := readIntegrationInput[opslevel.AzureResourcesIntegrationInput](input)
+			cobra.CheckErr(err)
+			result, err = getClientGQL().CreateIntegrationAzureResources(azureInput)
+			cobra.CheckErr(err)
+		default:
+			cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
+		}
+
+		fmt.Printf("Created %s integration '%s' with id '%s'\n", input.Kind, result.Name, result.Id)
 	},
 }
 
@@ -111,21 +148,46 @@ var updateIntegrationCmd = &cobra.Command{
 	Aliases: []string{"int"},
 	Short:   "Update an integration",
 	Long:    `Update an integration`,
-	Example: `cat << EOF | opslevel update integration XXXXXXXX -f -
+	Example: `cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
 version: 1
 kind: aws
 spec:
-  ownershipTagOverrides: true
+  awsTagsOverrideOwnership: true
   ownershipTagKeys: ["owner","service","app"]
-EOF`,
+EOF
+
+cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
+version: 1
+kind: azure
+spec:
+  name: "dev"
+  clientId: "XXX_CLIENT_ID_XXX"
+  clientSecret: "XXX_CLIENT_SECRET_XXX"
+EOF
+`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readIntegrationInput[opslevel.AWSIntegrationInput]()
-		cobra.CheckErr(err)
-		resp, err := getClientGQL().UpdateIntegrationAWS(args[0], input)
-		cobra.CheckErr(err)
-		fmt.Printf("Updated Integration '%s' with id '%s'\n", resp.Name, resp.Id)
+		input, validateErr := validateIntegrationInput()
+		cobra.CheckErr(validateErr)
+
+		var result *opslevel.Integration
+		switch input.Kind {
+		case IntegrationTypeAWS:
+			awsInput, err := readIntegrationInput[opslevel.AWSIntegrationInput](input)
+			cobra.CheckErr(err)
+			result, err = getClientGQL().UpdateIntegrationAWS(args[0], awsInput)
+			cobra.CheckErr(err)
+		case IntegrationTypeAzure:
+			azureInput, err := readIntegrationInput[opslevel.AzureResourcesIntegrationInput](input)
+			cobra.CheckErr(err)
+			result, err = getClientGQL().UpdateIntegrationAzureResources(args[0], azureInput)
+			cobra.CheckErr(err)
+		default:
+			cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
+		}
+
+		fmt.Printf("Updated %s integration '%s' with id '%s'\n", input.Kind, result.Name, result.Id)
 	},
 }
 
