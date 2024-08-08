@@ -16,7 +16,10 @@ type IntegrationType string
 const (
 	IntegrationTypeAWS   IntegrationType = "aws"
 	IntegrationTypeAzure IntegrationType = "azure"
+	IntegrationTypeGCP   IntegrationType = "googleCloud"
 )
+
+var AllIntegrationType = []IntegrationType{IntegrationTypeAWS, IntegrationTypeAzure, IntegrationTypeGCP}
 
 var IntegrationConfigCurrentVersion = "1"
 
@@ -27,7 +30,7 @@ type IntegrationInputType struct {
 }
 
 type IntegrationInput interface {
-	opslevel.AWSIntegrationInput | opslevel.AzureResourcesIntegrationInput
+	opslevel.AWSIntegrationInput | opslevel.AzureResourcesIntegrationInput | opslevel.GoogleCloudIntegrationInput
 }
 
 func validateIntegrationInput() (*IntegrationInputType, error) {
@@ -40,11 +43,11 @@ func validateIntegrationInput() (*IntegrationInputType, error) {
 			IntegrationConfigCurrentVersion, input.Version)
 	}
 	switch input.Kind {
-	case IntegrationTypeAWS, IntegrationTypeAzure:
+	case IntegrationTypeAWS, IntegrationTypeAzure, IntegrationTypeGCP:
 		return input, nil
 	default:
-		return nil, fmt.Errorf("unsupported integration kind: '%s' (must be one of: '%s', '%s')",
-			input.Kind, IntegrationTypeAWS, IntegrationTypeAzure)
+		return nil, fmt.Errorf("unsupported integration kind: '%s' (must be one of: %+v)",
+			input.Kind, AllIntegrationType)
 	}
 }
 
@@ -82,6 +85,19 @@ spec:
   clientId: "XXX_CLIENT_ID_XXX"
   clientSecret: "XXX_CLIENT_SECRET_XXX"
 EOF
+
+cat << EOF | opslevel create integration -f -
+version: 1
+kind: googleCloud
+spec:
+  name: "GCP New"
+  ownershipTagKeys:
+	- owner
+    - team
+  privateKey: "XXX_PRIVATE_KEY_XXX"
+  clientEmail: "service-account-123@appspot.gserviceaccount.com"
+  tagsOverrideOwnership: false
+EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, validateErr := validateIntegrationInput()
@@ -98,6 +114,11 @@ EOF
 			azureInput, err := readIntegrationInput[opslevel.AzureResourcesIntegrationInput](input)
 			cobra.CheckErr(err)
 			result, err = getClientGQL().CreateIntegrationAzureResources(azureInput)
+			cobra.CheckErr(err)
+		case IntegrationTypeGCP:
+			gcpInput, err := readIntegrationInput[opslevel.GoogleCloudIntegrationInput](input)
+			cobra.CheckErr(err)
+			result, err = getClientGQL().CreateIntegrationGCP(gcpInput)
 			cobra.CheckErr(err)
 		default:
 			cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
@@ -160,9 +181,21 @@ cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
 version: 1
 kind: azure
 spec:
-  name: "dev"
+  name: "Azure Dev"
   clientId: "XXX_CLIENT_ID_XXX"
   clientSecret: "XXX_CLIENT_SECRET_XXX"
+EOF
+
+cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
+version: 1
+kind: googleCloud
+spec:
+  name: "GCP Dev"
+  ownershipTagKeys:
+	- opslevel_team
+	- team
+  privateKey: "XXX_NEW_PRIVATE_KEY_XXX"
+  tagsOverrideOwnership: true
 EOF
 `,
 	Args:       cobra.ExactArgs(1),
@@ -182,6 +215,11 @@ EOF
 			azureInput, err := readIntegrationInput[opslevel.AzureResourcesIntegrationInput](input)
 			cobra.CheckErr(err)
 			result, err = getClientGQL().UpdateIntegrationAzureResources(args[0], azureInput)
+			cobra.CheckErr(err)
+		case IntegrationTypeGCP:
+			gcpInput, err := readIntegrationInput[opslevel.GoogleCloudIntegrationInput](input)
+			cobra.CheckErr(err)
+			result, err = getClientGQL().UpdateIntegrationGCP(args[0], gcpInput)
 			cobra.CheckErr(err)
 		default:
 			cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
