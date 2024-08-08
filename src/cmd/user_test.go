@@ -1,9 +1,10 @@
-package cmd
+package cmd_test
 
 import (
 	"strings"
 	"testing"
 
+	"github.com/opslevel/cli/cmd"
 	"github.com/opslevel/opslevel-go/v2024"
 )
 
@@ -19,7 +20,7 @@ func Test_UserCRUD(t *testing.T) {
 		Name:   userName,
 	}
 	cliArgs := []string{expectedUser.Email, expectedUser.Name}
-	rootCmd.SetArgs(cliArgs)
+	cmd.RootCmd.SetArgs(cliArgs)
 
 	// Create User
 	createOutput, err := execCmd(Create, "user", cliArgs...)

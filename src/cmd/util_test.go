@@ -1,4 +1,4 @@
-package cmd
+package cmd_test
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/opslevel/cli/cmd"
 	"gopkg.in/yaml.v2"
 )
 
@@ -23,15 +24,15 @@ const (
 )
 
 // execute any OpsLevel CLI command
-func execCmd(cmd Operation, resource string, inputs ...string) ([]byte, error) {
-	cliArgs := []string{string(cmd), resource}
+func execCmd(command Operation, resource string, inputs ...string) ([]byte, error) {
+	cliArgs := []string{string(command), resource}
 	cliArgs = append(cliArgs, inputs...)
 
 	r, oldStdout := redirectStdout()
 	defer r.Close()
 
-	rootCmd.SetArgs(cliArgs)
-	err := rootCmd.Execute()
+	cmd.RootCmd.SetArgs(cliArgs)
+	err := cmd.RootCmd.Execute()
 
 	output := captureOutput(r, oldStdout)
 	return output, err

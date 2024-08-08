@@ -1,8 +1,9 @@
-package cmd
+package cmd_test
 
 import (
 	"testing"
 
+	"github.com/opslevel/cli/cmd"
 	"github.com/opslevel/opslevel-go/v2024"
 )
 
@@ -21,7 +22,7 @@ func Test_TeamCRUD(t *testing.T) {
 	}
 
 	cliArgs := []string{teamToCreate.Name, "-f", teamFileName}
-	rootCmd.SetArgs(cliArgs)
+	cmd.RootCmd.SetArgs(cliArgs)
 
 	// Create Team
 	createOutput, err := execCmd(Create, "team", cliArgs...)
