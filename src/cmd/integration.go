@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/opslevel/cli/common"
@@ -147,7 +148,7 @@ var updateIntegrationCmd = &cobra.Command{
 	Aliases: []string{"int"},
 	Short:   "Update an integration",
 	Long:    `Update an integration`,
-	Example: `cat << EOF | opslevel update integration XXXXXXXX -f -
+	Example: `cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
 version: 1
 kind: aws
 spec:
@@ -155,7 +156,7 @@ spec:
   ownershipTagKeys: ["owner","service","app"]
 EOF
 
-cat << EOF | opslevel update integration XXXXXXXX -f -
+cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
 version: 1
 kind: azure
 spec:
