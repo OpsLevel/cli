@@ -1,0 +1,3 @@
+kind: Feature
+body: get service command populates Dependents, Dependencies, and Properties data in JSON format
+time: 2024-07-23T10:30:58.921742-05:00
