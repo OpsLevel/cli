@@ -68,7 +68,7 @@ spec:
   name: "Prod"
   iamRole: "arn:aws:iam::XXXXX:role/opslevel-integration"
   externalId: "XXXXXX"
-  ownershipTagOverride: true
+  awsTagsOverrideOwnership: true
   ownershipTagKeys: ["owner","service","app"]
 EOF
 
@@ -152,7 +152,7 @@ var updateIntegrationCmd = &cobra.Command{
 version: 1
 kind: aws
 spec:
-  ownershipTagOverride: true
+  awsTagsOverrideOwnership: true
   ownershipTagKeys: ["owner","service","app"]
 EOF
 
