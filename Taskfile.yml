@@ -50,7 +50,13 @@ tasks:
     desc: Run tests
     dir: "{{.SRC_DIR}}"
     cmds:
-      - go test -race -coverprofile=coverage.txt -covermode=atomic -v ./... {{ .CLI_ARGS }}
+      - go test -race -coverprofile=coverage.txt -covermode=atomic -v ./common/... {{ .CLI_ARGS }}
+
+  test-integration:
+    desc: Run Integration tests
+    dir: "{{.SRC_DIR}}"
+    cmds:
+      - go test -race -coverprofile=coverage.txt -covermode=atomic -v ./cmd/... {{ .CLI_ARGS }}
 
   update-opslevel-go:
     desc: Update opslevel-go version to latest release
