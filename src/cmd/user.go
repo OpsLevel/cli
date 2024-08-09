@@ -81,7 +81,7 @@ EOF
 
 var getUserCmd = &cobra.Command{
 	Use:        "user {ID|EMAIL}",
-	Short:      "Get details about a filter",
+	Short:      "Get details about a user",
 	Example:    `opslevel get user john@example.com`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
