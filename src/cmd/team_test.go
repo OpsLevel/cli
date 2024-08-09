@@ -21,15 +21,13 @@ func Test_TeamCRUD(t *testing.T) {
 	}
 	teamId, err := createTeam(teamToCreate)
 	if err != nil {
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
 
 	// Get Team
 	createdTeam, err := getTeam(teamId)
 	if err != nil {
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
 	if createdTeam.Name != teamToCreate.Name ||
 		createdTeam.Responsibilities != *teamToCreate.Responsibilities {
@@ -44,8 +42,7 @@ func Test_TeamCRUD(t *testing.T) {
 	updatedTeamId, err := updateTeam(teamId, teamToUpdate)
 	if err != nil {
 		_ = deleteTeam(string(createdTeam.Id))
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
 	if string(createdTeam.Id) != updatedTeamId {
 		t.Errorf("Update 'team' failed, expected returned ID '%s' but got '%s'", string(createdTeam.Id), updatedTeamId)

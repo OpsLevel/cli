@@ -23,15 +23,13 @@ func Test_UserCRUD(t *testing.T) {
 	// Create User
 	userId, err := createUser(expectedUser)
 	if err != nil {
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
 
 	// Get User
 	createdUser, err := getUser(userId)
 	if err != nil {
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
 	if createdUser.Name != expectedUser.Name ||
 		createdUser.Email != expectedUser.Email ||
@@ -48,8 +46,7 @@ func Test_UserCRUD(t *testing.T) {
 	}
 	updatedUserId, err := updateUser(string(createdUser.Id), expectedUpdatedUser)
 	if err != nil {
-		t.Error(err)
-		t.FailNow()
+		t.Fatal(err)
 	}
 	if string(createdUser.Id) != updatedUserId {
 		t.Errorf("Update 'user' failed, expected returned ID '%s' but got '%s'", string(createdUser.Id), updatedUserId)
