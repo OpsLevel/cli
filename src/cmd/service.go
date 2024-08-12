@@ -15,6 +15,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Used to read in 'service:' field, rather than "serviceId:" or "serviceAlias:"
+//
+// For use with any YAML input file containing a 'service:' field
+type serviceField struct {
+	Service string `yaml:"service,omitempty"`
+}
+
 var exampleServiceCmd = &cobra.Command{
 	Use:     "service",
 	Aliases: []string{"svc"},
@@ -61,17 +68,11 @@ var getServiceCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
 		key := args[0]
 		client := getClientGQL()
-		var service *opslevel.Service
-		var err error
-		if opslevel.IsID(key) {
-			service, err = getClientGQL().GetService(opslevel.ID(key))
-			cobra.CheckErr(err)
-		} else {
-			service, err = getClientGQL().GetServiceWithAlias(key)
-			cobra.CheckErr(err)
-		}
+		service := getService(key)
+
 		// Extra fields only displayed in JSON format
 		if isJsonOutput() {
 			_, err = service.GetDependents(client, nil)
@@ -283,4 +284,31 @@ func NullableString(value *string) *opslevel.Nullable[string] {
 		return opslevel.NewNull()
 	}
 	return opslevel.NewNullableFrom(*value)
+}
+
+func getService(identifier string) *opslevel.Service {
+	var err error
+	var service *opslevel.Service
+
+	if opslevel.IsID(identifier) {
+		service, err = getClientGQL().GetService(opslevel.ID(identifier))
+	} else {
+		service, err = getClientGQL().GetServiceWithAlias(identifier)
+	}
+	cobra.CheckErr(err)
+	if service == nil {
+		log.Error().Msgf("service with identifier '%s' not found", identifier)
+		os.Exit(1)
+	}
+
+	return service
+}
+
+func readServiceFieldFromYaml() string {
+	serviceIdentifier, err := readResourceInput[serviceField]()
+	cobra.CheckErr(err)
+	if serviceIdentifier.Service == "" {
+		cobra.CheckErr(fmt.Errorf("'service:' field is required"))
+	}
+	return serviceIdentifier.Service
 }
