@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/opslevel/cli/common"
 	"github.com/opslevel/opslevel-go/v2024"
@@ -22,15 +24,15 @@ EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := getClientGQL()
-		serviceIdentifier, err := readResourceInput[serviceField]()
-		cobra.CheckErr(err)
-		if serviceIdentifier.Service == "" {
-			cobra.CheckErr(fmt.Errorf("'service:' field is required"))
-		}
+		serviceIdentifier := readServiceFieldFromYaml()
 		toolFromInput, err := readResourceInput[opslevel.ToolCreateInput]()
 		cobra.CheckErr(err)
 
-		service := getService(serviceIdentifier.Service)
+		err = verifyToolCategory(&toolFromInput.Category)
+		cobra.CheckErr(err)
+
+		service, err := getService(serviceIdentifier)
+		cobra.CheckErr(err)
 
 		toolFromInput.ServiceId = &service.Id
 		tool, err := client.CreateTool(*toolFromInput)
@@ -61,17 +63,21 @@ EOF
 		toolId := opslevel.ID(id)
 
 		serviceIdentifier := readServiceFieldFromYaml()
-		toolsFromInput, err := readResourceInput[opslevel.ToolUpdateInput]()
+		toolFromInput, err := readResourceInput[opslevel.ToolUpdateInput]()
+		cobra.CheckErr(err)
+
+		err = verifyToolCategory(toolFromInput.Category)
 		cobra.CheckErr(err)
 
 		client := getClientGQL()
-		service := getService(serviceIdentifier)
+		service, err := getService(serviceIdentifier)
+		cobra.CheckErr(err)
 
 		if !isToolIdInServiceTools(toolId, service.Tools) {
 			cobra.CheckErr(fmt.Errorf("no tool with ID '%s' to update on service with identifier '%s'", toolId, serviceIdentifier))
 		}
-		toolsFromInput.Id = toolId
-		_, err = client.UpdateTool(*toolsFromInput)
+		toolFromInput.Id = toolId
+		_, err = client.UpdateTool(*toolFromInput)
 		cobra.CheckErr(err)
 		common.PrettyPrint(toolId)
 	},
@@ -87,6 +93,17 @@ func isToolIdInServiceTools(toolId opslevel.ID, serviceTools *opslevel.ToolConne
 		}
 	}
 	return false
+}
+
+func verifyToolCategory(toolCategory *opslevel.ToolCategory) error {
+	if toolCategory == nil || slices.Contains(opslevel.AllToolCategory, string(*toolCategory)) {
+		return nil
+	}
+	return fmt.Errorf(
+		"'category:' field has value '%s' but must be one of '%v'",
+		string(*toolCategory),
+		strings.Join(opslevel.AllToolCategory, ", "),
+	)
 }
 
 var deleteServiceToolCmd = &cobra.Command{

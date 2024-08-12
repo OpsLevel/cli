@@ -71,7 +71,8 @@ var getServiceCmd = &cobra.Command{
 		var err error
 		key := args[0]
 		client := getClientGQL()
-		service := getService(key)
+		service, err := getService(key)
+		cobra.CheckErr(err)
 
 		// Extra fields only displayed in JSON format
 		if isJsonOutput() {
@@ -286,7 +287,7 @@ func NullableString(value *string) *opslevel.Nullable[string] {
 	return opslevel.NewNullableFrom(*value)
 }
 
-func getService(identifier string) *opslevel.Service {
+func getService(identifier string) (*opslevel.Service, error) {
 	var err error
 	var service *opslevel.Service
 
@@ -295,13 +296,11 @@ func getService(identifier string) *opslevel.Service {
 	} else {
 		service, err = getClientGQL().GetServiceWithAlias(identifier)
 	}
-	cobra.CheckErr(err)
-	if service == nil {
-		log.Error().Msgf("service with identifier '%s' not found", identifier)
-		os.Exit(1)
+	if service == nil || !opslevel.IsID(string(service.Id)) {
+		err = fmt.Errorf("service with identifier '%s' not found", identifier)
 	}
 
-	return service
+	return service, err
 }
 
 func readServiceFieldFromYaml() string {
