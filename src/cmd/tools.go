@@ -42,8 +42,8 @@ EOF
 }
 
 var updateServiceToolCmd = &cobra.Command{
-	Use:     "tool",
-	Aliases: []string{"tool"},
+	Use:     "tool TOOL-ID",
+	ArgAliases: []string{"TOOL-ID"},
 	Short:   "Update service tool",
 	Args:    cobra.ExactArgs(1),
 	Example: `
@@ -107,11 +107,11 @@ func verifyToolCategory(toolCategory *opslevel.ToolCategory) error {
 }
 
 var deleteServiceToolCmd = &cobra.Command{
-	Use:        "tool ID",
+	Use:        "tool TOOL-ID",
+	ArgAliases: []string{"TOOL-ID"},
 	Short:      "Delete a service tool",
-	Example:    `opslevel delete service tool <tool-ID> `,
+	Example:    `opslevel delete service tool <TOOL-ID>`,
 	Args:       cobra.ExactArgs(1),
-	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
 		id := args[0]
 		if !opslevel.IsID(id) {
