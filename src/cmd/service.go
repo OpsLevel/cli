@@ -15,13 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Used to read in 'service:' field, rather than "serviceId:" or "serviceAlias:"
-//
-// For use with any YAML input file containing a 'service:' field
-type serviceField struct {
-	Service string `yaml:"service,omitempty"`
-}
-
 var exampleServiceCmd = &cobra.Command{
 	Use:     "service",
 	Aliases: []string{"svc"},
@@ -301,13 +294,4 @@ func getService(identifier string) (*opslevel.Service, error) {
 	}
 
 	return service, err
-}
-
-func readServiceFieldFromYaml() string {
-	serviceIdentifier, err := readResourceInput[serviceField]()
-	cobra.CheckErr(err)
-	if serviceIdentifier.Service == "" {
-		cobra.CheckErr(fmt.Errorf("'service:' field is required"))
-	}
-	return serviceIdentifier.Service
 }
