@@ -37,6 +37,13 @@
 brew install opslevel/tap/cli
 ```
 
+#### Curl Download
+
+```sh
+# Note: you can also run without `sudo` and move the binary yourself
+curl -sLS https://raw.githubusercontent.com/OpsLevel/cli/main/install.sh | sudo sh
+```
+
 <!--
 #### Deb
 
