@@ -110,13 +110,7 @@ opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entr
 
 		client := getClientGQL()
 		if ignoreDeactivated {
-			payloadVars = client.InitialPageVariablesPointer()
-			(*payloadVars)["filter"] = &[]opslevel.UsersFilterInput{
-				{
-					Key:  opslevel.UsersFilterEnumDeactivatedAt,
-					Type: opslevel.RefOf(opslevel.BasicTypeEnumEquals),
-				},
-			}
+			payloadVars = client.InitialPageVariablesPointer().WithoutDeactivedUsers()
 		}
 
 		resp, err := getClientGQL().ListUsers(payloadVars)
