@@ -198,6 +198,8 @@ github.com/opslevel/moredefaults v0.0.0-20240529152742-17d1318a3c12 h1:OQZ3W8kby
 github.com/opslevel/moredefaults v0.0.0-20240529152742-17d1318a3c12/go.mod h1:g2GSXVP6LO+5+AIsnMRPN+BeV86OXuFRTX7HXCDtYeI=
 github.com/opslevel/opslevel-go/v2024 v2024.8.1 h1:BnXFO0qfkSaCDu+Hre2Ks9qgisit8MA/kix5PgpB6LY=
 github.com/opslevel/opslevel-go/v2024 v2024.8.1/go.mod h1:Im05vD4br6u/FihTXSYW77E+8mKc5BJMQ9N8sH3ljRI=
+github.com/opslevel/opslevel-go/v2024 v2024.8.16 h1:wFBDdx0i8+WyKKyA9G6QNKfuLIxfKLgmEp0Qsq/dMmE=
+github.com/opslevel/opslevel-go/v2024 v2024.8.16/go.mod h1:Im05vD4br6u/FihTXSYW77E+8mKc5BJMQ9N8sH3ljRI=
 github.com/pelletier/go-toml/v2 v2.2.2 h1:aYUidT7k73Pcl9nb2gScu7NSrKCSHIDE89b3+6Wq+LM=
 github.com/pelletier/go-toml/v2 v2.2.2/go.mod h1:1t835xjRzz80PqgE6HHgN2JOsmgYu/h4qDAS4n929Rs=
 github.com/pjbgf/sha1cd v0.3.0 h1:4D5XXmUUBUl/xQ6IjCkEAbqXskkq/4O7LmGn0AqMDs4=
@@ -427,5 +429,7 @@ gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 nhooyr.io/websocket v1.8.11 h1:f/qXNc2/3DpoSZkHt1DQu6rj4zGC8JmkkLkWss0MgN0=
 nhooyr.io/websocket v1.8.11/go.mod h1:rN9OFWIUwuxg4fR5tELlYC04bXYowCP9GX47ivo2l+c=
+nhooyr.io/websocket v1.8.17 h1:KEVeLJkUywCKVsnLIDlD/5gtayKp8VoCkksHCGGfT9Y=
+nhooyr.io/websocket v1.8.17/go.mod h1:rN9OFWIUwuxg4fR5tELlYC04bXYowCP9GX47ivo2l+c=
 sigs.k8s.io/yaml v1.4.0 h1:Mk1wCc2gy/F0THH0TAp1QYyJNzRm2KCLy3o5ASXVI5E=
 sigs.k8s.io/yaml v1.4.0/go.mod h1:Ejl7/uTz7PSA4eKMyQCUTnhZYNmLIl+5c2lQPGR2BPY=
