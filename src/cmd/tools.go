@@ -25,12 +25,11 @@ EOF
 		toolFromInput, err := readResourceInput[opslevel.ToolCreateInput]()
 		cobra.CheckErr(err)
 
-		client := getClientGQL()
-		serviceId, err := client.GetServiceIdWithAlias(serviceAlias)
+		serviceId, err := getService(serviceAlias)
 		cobra.CheckErr(err)
 
 		toolFromInput.ServiceId = &serviceId.Id
-		tool, err := client.CreateTool(*toolFromInput)
+		tool, err := getClientGQL().CreateTool(*toolFromInput)
 		cobra.CheckErr(err)
 		common.PrettyPrint(string(tool.Id))
 	},
@@ -43,7 +42,6 @@ var updateServiceToolCmd = &cobra.Command{
 	Args:       cobra.ExactArgs(1),
 	Example: `
 cat << EOF | opslevel update service tool tool-ID -f -
-service: my-service-alias
 category: deployment
 displayName: "fancy tool"
 environment: "dev"
@@ -55,14 +53,13 @@ EOF
 		if !opslevel.IsID(id) {
 			cobra.CheckErr(fmt.Errorf("invalid ID: '%s'", id))
 		}
-		toolId := opslevel.ID(id)
 		toolFromInput, err := readResourceInput[opslevel.ToolUpdateInput]()
 		cobra.CheckErr(err)
 
-		toolFromInput.Id = toolId
-		_, err = getClientGQL().UpdateTool(*toolFromInput)
+		toolFromInput.Id = opslevel.ID(id)
+		updatedTool, err := getClientGQL().UpdateTool(*toolFromInput)
 		cobra.CheckErr(err)
-		common.PrettyPrint(toolId)
+		common.PrettyPrint(string(updatedTool.Id))
 	},
 }
 
