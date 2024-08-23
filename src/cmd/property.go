@@ -96,13 +96,16 @@ var listPropertyCmd = &cobra.Command{
 }
 
 var assignPropertyCmd = &cobra.Command{
-	Use:        "property",
-	Aliases:    []string{"prop"},
-	Short:      "Assign a Property",
-	Long:       `Assign a Property to an Entity by Id or Alias`,
-	Args:       cobra.RangeArgs(0, 2),
-	ArgAliases: []string{"OWNER", "PROPERTY_DEFINITION"},
+	Use:     "property [OWNER] [PROPERTY_DEFINITION]",
+	Aliases: []string{"prop"},
+	Short:   "Assign a Property",
+	Long:    `Assign a Property to an Entity by Id or Alias`,
+	Args:    cobra.RangeArgs(0, 2),
 	Example: fmt.Sprintf(`
+cat << EOF | opslevel assign property my-service my-property -f -
+value: example_value
+EOF
+
 cat << EOF | opslevel assign property -f -
 %s
 EOF`, getYaml[opslevel.PropertyInput]()),
