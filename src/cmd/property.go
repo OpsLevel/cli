@@ -114,7 +114,6 @@ EOF`, getYaml[opslevel.PropertyInput]()),
 		cobra.CheckErr(err)
 
 		switch len(args) {
-		case 0:
 		case 1:
 			input.Owner = *opslevel.NewIdentifier(args[0])
 		case 2:
