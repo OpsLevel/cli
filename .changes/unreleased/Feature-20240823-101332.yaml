@@ -1,0 +1,4 @@
+kind: Feature
+body: Add ability to specify the owner id or alias and the property definition id
+  or alias on the command line arguments of the `assign property` command
+time: 2024-08-23T10:13:32.68659-05:00
