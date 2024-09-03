@@ -3,7 +3,7 @@ module github.com/opslevel/cli
 go 1.22
 
 require (
-	github.com/creasty/defaults v1.7.0
+	github.com/creasty/defaults v1.8.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/go-resty/resty/v2 v2.14.0
 	github.com/gosimple/slug v1.14.0
