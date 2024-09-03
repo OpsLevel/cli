@@ -127,7 +127,9 @@ query ($id: ID!){
 		for _, field := range fields {
 			matches := keyValueExp.FindStringSubmatch(field)
 			value, err := convert(matches[2])
-			handleErr(fmt.Sprintf("error parsing variable '%s'", field), err)
+			if err != nil {
+				handleErr(fmt.Sprintf("error parsing variable '%s'", field), err)
+			}
 			variables[matches[1]] = value
 		}
 

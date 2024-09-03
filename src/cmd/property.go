@@ -96,17 +96,31 @@ var listPropertyCmd = &cobra.Command{
 }
 
 var assignPropertyCmd = &cobra.Command{
-	Use:     "property",
+	Use:     "property [OWNER] [PROPERTY_DEFINITION]",
 	Aliases: []string{"prop"},
 	Short:   "Assign a Property",
 	Long:    `Assign a Property to an Entity by Id or Alias`,
+	Args:    cobra.RangeArgs(0, 2),
 	Example: fmt.Sprintf(`
+cat << EOF | opslevel assign property my-service my-property -f -
+value: example_value
+EOF
+
 cat << EOF | opslevel assign property -f -
 %s
 EOF`, getYaml[opslevel.PropertyInput]()),
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.PropertyInput]()
 		cobra.CheckErr(err)
+
+		switch len(args) {
+		case 1:
+			input.Owner = *opslevel.NewIdentifier(args[0])
+		case 2:
+			input.Owner = *opslevel.NewIdentifier(args[0])
+			input.Definition = *opslevel.NewIdentifier(args[1])
+		}
+
 		newProperty, err := getClientGQL().PropertyAssign(*input)
 		cobra.CheckErr(err)
 

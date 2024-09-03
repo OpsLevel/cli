@@ -1,3 +1,0 @@
-kind: Feature
-body: list service command optionally returns Dependents, Dependencies, and Properties data in JSON format
-time: 2024-07-25T10:51:30.25075-05:00
