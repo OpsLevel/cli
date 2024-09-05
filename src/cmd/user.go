@@ -31,8 +31,10 @@ var createUserCmd = &cobra.Command{
 	Example: `
 opslevel create user "john@example.com" "John Doe"
 opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
+opslevel create user "jane@example.com" "Jane Doe" Admin --force-send-invite
+opslevel create user "jane@example.com" "Jane Doe" Admin --force-send-invite --skip-welcome-email
 `,
-	Args: cobra.MinimumNArgs(2),
+	Args: cobra.RangeArgs(2, 4),
 	Run: func(cmd *cobra.Command, args []string) {
 		email := args[0]
 		name := args[1]
@@ -44,14 +46,17 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
 			}
 		}
 
+		forceSendInvite, err := cmd.Flags().GetBool("force-send-invite")
+		cobra.CheckErr(err)
 		skipEmail, err := cmd.Flags().GetBool("skip-welcome-email")
 		cobra.CheckErr(err)
 
-		resource, err := getClientGQL().InviteUser(email, opslevel.UserInput{
+		userInput := opslevel.UserInput{
 			Name:             opslevel.RefOf(name),
 			Role:             opslevel.RefOf(role),
 			SkipWelcomeEmail: opslevel.RefOf(skipEmail),
-		})
+		}
+		resource, err := getClientGQL().InviteUser(email, userInput, opslevel.RefOf(forceSendInvite))
 		cobra.CheckErr(err)
 		fmt.Println(resource.Id)
 	},
@@ -186,7 +191,7 @@ EOF
 				Name: opslevel.RefOf(name),
 				Role: opslevel.RefOf(userRole),
 			}
-			user, err := getClientGQL().InviteUser(email, input)
+			user, err := getClientGQL().InviteUser(email, input, opslevel.RefOf(false))
 			if err != nil {
 				log.Error().Err(err).Msgf("error inviting user '%s' with email '%s'", name, email)
 				continue
@@ -216,7 +221,8 @@ EOF
 }
 
 func init() {
-	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set the welcome e-mail will be skipped from being sent")
+	createUserCmd.Flags().Bool("force-send-invite", false, "If this flag is set the welcome e-mail will be skipped from being sent")
+	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set send an invite email even if notifications are disabled for the account")
 	listUserCmd.Flags().Bool("ignore-deactivated", false, "If this flag is set only return active users")
 
 	exampleCmd.AddCommand(exampleUserCmd)

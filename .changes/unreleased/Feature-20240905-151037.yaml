@@ -1,0 +1,3 @@
+kind: Feature
+body: new "--force-send-invite" flag for "user create" cmd sends invite emails when account notifications are disabled
+time: 2024-09-05T15:10:37.336716-05:00
