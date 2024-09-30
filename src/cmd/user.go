@@ -46,7 +46,7 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-send-invite --sk
 			}
 		}
 
-		sendInvite, err := cmd.Flags().GetBool("skip-send-invite")
+		skipSendInvite, err := cmd.Flags().GetBool("skip-send-invite")
 		cobra.CheckErr(err)
 		skipEmail, err := cmd.Flags().GetBool("skip-welcome-email")
 		cobra.CheckErr(err)
@@ -56,7 +56,7 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-send-invite --sk
 			Role:             opslevel.RefOf(role),
 			SkipWelcomeEmail: opslevel.RefOf(skipEmail),
 		}
-		resource, err := getClientGQL().InviteUser(email, userInput, sendInvite)
+		resource, err := getClientGQL().InviteUser(email, userInput, !skipSendInvite)
 		cobra.CheckErr(err)
 		fmt.Println(resource.Id)
 	},
