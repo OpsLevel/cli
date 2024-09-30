@@ -1,3 +1,3 @@
 kind: Feature
-body: add skip-welcome-email and skip-invite options to bulk import user cmd
+body: add --skip-welcome-email and --skip-invite options to bulk import user cmd
 time: 2024-09-30T15:03:05.541886-05:00
