@@ -165,7 +165,7 @@ var importUsersCmd = &cobra.Command{
 	Long: `Imports a list of users from a CSV file with the column headers:
 Name,Email,Role,Team`,
 	Example: `
-cat << EOF | opslevel import user -f -
+cat << EOF | opslevel import user --skip-send-invite --skip-welcome-email -f -
 Name,Email,Role,Team
 Kyle Rockman,kyle@opslevel.com,Admin,platform
 Edgar Ochoa,edgar@opslevel.com,Admin,platform
@@ -175,6 +175,11 @@ EOF
 	Run: func(cmd *cobra.Command, args []string) {
 		reader, err := readImportFilepathAsCSV()
 		cobra.CheckErr(err)
+		skipSendInvite, err := cmd.Flags().GetBool("skip-send-invite")
+		cobra.CheckErr(err)
+		skipWelcomeEmail, err := cmd.Flags().GetBool("skip-welcome-email")
+		cobra.CheckErr(err)
+
 		for reader.Rows() {
 			name := reader.Text("Name")
 			email := reader.Text("Email")
@@ -188,10 +193,11 @@ EOF
 				userRole = opslevel.UserRole(role)
 			}
 			input := opslevel.UserInput{
-				Name: opslevel.RefOf(name),
-				Role: opslevel.RefOf(userRole),
+				Name:             opslevel.RefOf(name),
+				Role:             opslevel.RefOf(userRole),
+				SkipWelcomeEmail: opslevel.RefOf(skipWelcomeEmail),
 			}
-			user, err := getClientGQL().InviteUser(email, input, false)
+			user, err := getClientGQL().InviteUser(email, input, !skipSendInvite)
 			if err != nil {
 				log.Error().Err(err).Msgf("error inviting user '%s' with email '%s'", name, email)
 				continue
@@ -223,6 +229,8 @@ EOF
 func init() {
 	createUserCmd.Flags().Bool("skip-send-invite", false, "If this flag is set the welcome e-mail will be not be sent")
 	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set send an invite email even if notifications are disabled for the account")
+	importUsersCmd.Flags().Bool("skip-send-invite", false, "If this flag is set the welcome e-mail will be not be sent")
+	importUsersCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set send an invite email even if notifications are disabled for the account")
 	listUserCmd.Flags().Bool("ignore-deactivated", false, "If this flag is set only return active users")
 
 	exampleCmd.AddCommand(exampleUserCmd)
