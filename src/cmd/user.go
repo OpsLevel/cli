@@ -30,9 +30,9 @@ var createUserCmd = &cobra.Command{
 	Long:  "Create a User and optionally define the role (options `User`|`Admin`).",
 	Example: `
 opslevel create user "john@example.com" "John Doe"
+opslevel create user "jane@example.com" "Jane Doe" Admin --skip-send-invite
 opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
-opslevel create user "jane@example.com" "Jane Doe" Admin --force-send-invite
-opslevel create user "jane@example.com" "Jane Doe" Admin --force-send-invite --skip-welcome-email
+opslevel create user "jane@example.com" "Jane Doe" Admin --skip-send-invite --skip-welcome-email
 `,
 	Args: cobra.RangeArgs(2, 4),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -46,7 +46,7 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --force-send-invite --s
 			}
 		}
 
-		forceSendInvite, err := cmd.Flags().GetBool("force-send-invite")
+		sendInvite, err := cmd.Flags().GetBool("skip-send-invite")
 		cobra.CheckErr(err)
 		skipEmail, err := cmd.Flags().GetBool("skip-welcome-email")
 		cobra.CheckErr(err)
@@ -56,7 +56,7 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --force-send-invite --s
 			Role:             opslevel.RefOf(role),
 			SkipWelcomeEmail: opslevel.RefOf(skipEmail),
 		}
-		resource, err := getClientGQL().InviteUser(email, userInput, opslevel.RefOf(forceSendInvite))
+		resource, err := getClientGQL().InviteUser(email, userInput, sendInvite)
 		cobra.CheckErr(err)
 		fmt.Println(resource.Id)
 	},
@@ -191,7 +191,7 @@ EOF
 				Name: opslevel.RefOf(name),
 				Role: opslevel.RefOf(userRole),
 			}
-			user, err := getClientGQL().InviteUser(email, input, opslevel.RefOf(false))
+			user, err := getClientGQL().InviteUser(email, input, false)
 			if err != nil {
 				log.Error().Err(err).Msgf("error inviting user '%s' with email '%s'", name, email)
 				continue
@@ -221,7 +221,7 @@ EOF
 }
 
 func init() {
-	createUserCmd.Flags().Bool("force-send-invite", false, "If this flag is set the welcome e-mail will be skipped from being sent")
+	createUserCmd.Flags().Bool("skip-send-invite", false, "If this flag is set the welcome e-mail will be not be sent")
 	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set send an invite email even if notifications are disabled for the account")
 	listUserCmd.Flags().Bool("ignore-deactivated", false, "If this flag is set only return active users")
 
