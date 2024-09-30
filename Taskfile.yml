@@ -93,7 +93,7 @@ tasks:
           echo "Using latest version of opslevel-go - {{.LATEST_OPSLEVEL_GO_VERSION}}";
         else
           echo "WARNING: current version of opslevel-go is behind '{{.LATEST_OPSLEVEL_GO_VERSION}}'"
-          echo "Run 'task lintfix' to get latest version"
+          echo "Run 'task fix' to get latest version"
           exit 1
         fi
 
