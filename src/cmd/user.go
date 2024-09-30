@@ -34,7 +34,7 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-send-invite
 opslevel create user "jane@example.com" "Jane Doe" Admin --skip-welcome-email
 opslevel create user "jane@example.com" "Jane Doe" Admin --skip-send-invite --skip-welcome-email
 `,
-	Args: cobra.RangeArgs(2, 4),
+	Args: cobra.RangeArgs(2, 3),
 	Run: func(cmd *cobra.Command, args []string) {
 		email := args[0]
 		name := args[1]
