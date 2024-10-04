@@ -14,9 +14,10 @@ import (
 type IntegrationType string
 
 const (
-	IntegrationTypeAWS   IntegrationType = "aws"
-	IntegrationTypeAzure IntegrationType = "azure"
-	IntegrationTypeGCP   IntegrationType = "googleCloud"
+	IntegrationTypeAWS         IntegrationType = "aws"
+	IntegrationTypeAzure       IntegrationType = "azure"
+	IntegrationTypeCustomEvent IntegrationType = "customEvent"
+	IntegrationTypeGCP         IntegrationType = "googleCloud"
 )
 
 var AllIntegrationType = []IntegrationType{IntegrationTypeAWS, IntegrationTypeAzure, IntegrationTypeGCP}
@@ -30,7 +31,10 @@ type IntegrationInputType struct {
 }
 
 type IntegrationInput interface {
-	opslevel.AWSIntegrationInput | opslevel.AzureResourcesIntegrationInput | opslevel.GoogleCloudIntegrationInput
+	opslevel.AWSIntegrationInput |
+		opslevel.AzureResourcesIntegrationInput |
+		opslevel.EventIntegrationInput |
+		opslevel.GoogleCloudIntegrationInput
 }
 
 func validateIntegrationInput() (*IntegrationInputType, error) {
@@ -43,7 +47,7 @@ func validateIntegrationInput() (*IntegrationInputType, error) {
 			IntegrationConfigCurrentVersion, input.Version)
 	}
 	switch input.Kind {
-	case IntegrationTypeAWS, IntegrationTypeAzure, IntegrationTypeGCP:
+	case IntegrationTypeAWS, IntegrationTypeAzure, IntegrationTypeCustomEvent, IntegrationTypeGCP:
 		return input, nil
 	default:
 		return nil, fmt.Errorf("unsupported integration kind: '%s' (must be one of: %+v)",
@@ -98,6 +102,14 @@ spec:
   clientEmail: "service-account-123@appspot.gserviceaccount.com"
   tagsOverrideOwnership: false
 EOF
+
+cat << EOF | opslevel create integration -f -
+version: 1
+kind: customEvent
+spec:
+  name: "GHA New"
+  type: "githubActions"
+EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, validateErr := validateIntegrationInput()
@@ -119,6 +131,15 @@ EOF
 			gcpInput, err := readIntegrationInput[opslevel.GoogleCloudIntegrationInput](input)
 			cobra.CheckErr(err)
 			result, err = getClientGQL().CreateIntegrationGCP(gcpInput)
+			cobra.CheckErr(err)
+		case IntegrationTypeCustomEvent:
+			eventIntegrationInput, err := readIntegrationInput[opslevel.EventIntegrationInput](input)
+			integrationTypeEnum := opslevel.EventIntegrationEnum(eventIntegrationInput.Type)
+			cobra.CheckErr(err)
+			result, err = getClientGQL().CreateEventIntegration(opslevel.EventIntegrationInput{
+				Name: eventIntegrationInput.Name,
+				Type: integrationTypeEnum,
+			})
 			cobra.CheckErr(err)
 		default:
 			cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
@@ -197,6 +218,15 @@ spec:
   privateKey: "XXX_NEW_PRIVATE_KEY_XXX"
   tagsOverrideOwnership: true
 EOF
+
+cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
+version: 1
+kind: customEvent
+spec:
+  name: "GHA Updated"
+  type: "githubActions"
+EOF
+
 `,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
@@ -220,6 +250,14 @@ EOF
 			gcpInput, err := readIntegrationInput[opslevel.GoogleCloudIntegrationInput](input)
 			cobra.CheckErr(err)
 			result, err = getClientGQL().UpdateIntegrationGCP(args[0], gcpInput)
+			cobra.CheckErr(err)
+		case IntegrationTypeCustomEvent:
+			eventIntegrationInput, err := readIntegrationInput[opslevel.EventIntegrationInput](input)
+			cobra.CheckErr(err)
+			result, err = getClientGQL().UpdateEventIntegration(opslevel.EventIntegrationUpdateInput{
+				Id:   opslevel.ID(args[0]),
+				Name: *eventIntegrationInput.Name,
+			})
 			cobra.CheckErr(err)
 		default:
 			cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
