@@ -229,9 +229,26 @@ EOF
 	},
 }
 
+var reactivateIntegrationCmd = &cobra.Command{
+	Use:        "reactivate ID",
+	Short:      "Reactivate an integration",
+	Long:       `Reactivate an integration that was invalidated or deactivated`,
+	Example:    `opslevel update integration reactivate Z2lkOi8vb123456789`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		integration, err := getClientGQL().IntegrationReactivate(args[0])
+		cobra.CheckErr(err)
+
+		fmt.Printf("reactivated integration with id '%s'\n", integration.Id)
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createIntegrationCmd)
 	getCmd.AddCommand(getIntegrationCmd)
 	listCmd.AddCommand(listIntegrationCmd)
 	updateCmd.AddCommand(updateIntegrationCmd)
+
+	updateIntegrationCmd.AddCommand(reactivateIntegrationCmd)
 }
