@@ -73,6 +73,7 @@ spec:
   externalId: "XXXXXX"
   awsTagsOverrideOwnership: true
   ownershipTagKeys: ["owner","service","app"]
+  regionOverride: ["us-east-1","eu-west-1"]
 EOF
 
 cat << EOF | opslevel create integration -f -
@@ -175,6 +176,7 @@ kind: aws
 spec:
   awsTagsOverrideOwnership: true
   ownershipTagKeys: ["owner","service","app"]
+  regionOverride: ["us-east-1"]
 EOF
 
 cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
