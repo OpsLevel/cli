@@ -240,7 +240,7 @@ var reactivateIntegrationCmd = &cobra.Command{
 		integration, err := getClientGQL().IntegrationReactivate(args[0])
 		cobra.CheckErr(err)
 
-		fmt.Printf("reactivated integration with id '%s'\n", integration.Id)
+		fmt.Printf("reactivated integration '%s' with id '%s'", integration.Name, integration.Id)
 	},
 }
 
