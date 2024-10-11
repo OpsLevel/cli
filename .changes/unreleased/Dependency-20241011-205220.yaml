@@ -1,0 +1,3 @@
+kind: Dependency
+body: Bump github.com/open-policy-agent/opa from 0.67.1 to 0.69.0 in /src
+time: 2024-10-11T20:52:20.003624617Z
