@@ -231,6 +231,20 @@ EOF
 	},
 }
 
+var deleteIntegrationCmd = &cobra.Command{
+	Use:        "integration {ID|ALIAS}",
+	Short:      "Delete an integration",
+	Example:    `opslevel delete integration Z2lkOi8vb123456789`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		err := getClientGQL().DeleteIntegration(key)
+		cobra.CheckErr(err)
+		fmt.Printf("integration '%s' deleted\n", key)
+	},
+}
+
 var reactivateIntegrationCmd = &cobra.Command{
 	Use:        "reactivate ID",
 	Short:      "Reactivate an integration",
@@ -251,6 +265,7 @@ func init() {
 	getCmd.AddCommand(getIntegrationCmd)
 	listCmd.AddCommand(listIntegrationCmd)
 	updateCmd.AddCommand(updateIntegrationCmd)
+	deleteCmd.AddCommand(deleteIntegrationCmd)
 
 	updateIntegrationCmd.AddCommand(reactivateIntegrationCmd)
 }
