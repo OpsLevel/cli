@@ -187,7 +187,7 @@ func init() {
 	exampleCmd.AddCommand(exampleTagCmd)
 	createCmd.AddCommand(createTagCmd)
 	createTagCmd.Flags().StringVar(&resourceType, "type", "", "resource type")
-	createTagCmd.Flags().Bool("assign", false, "assign a tag instead of creating it")
+	createTagCmd.Flags().Bool("assign", false, "if a tag with the same key already exists it will be updated, otherwise a new tag will be created.")
 
 	getCmd.AddCommand(getObjectTagCmd)
 	getObjectTagCmd.Flags().StringVar(&resourceType, "type", "", "resource type")
