@@ -99,7 +99,6 @@ require (
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	nhooyr.io/websocket v1.8.17 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 

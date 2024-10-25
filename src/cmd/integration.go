@@ -81,6 +81,7 @@ spec:
   externalId: "XXXXXX"
   awsTagsOverrideOwnership: true
   ownershipTagKeys: ["owner","service","app"]
+  regionOverride: ["us-east-1","eu-west-1"]
 EOF
 
 cat << EOF | opslevel create integration -f -
@@ -202,6 +203,7 @@ kind: aws
 spec:
   awsTagsOverrideOwnership: true
   ownershipTagKeys: ["owner","service","app"]
+  regionOverride: ["us-east-1"]
 EOF
 
 cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
@@ -275,9 +277,41 @@ EOF
 	},
 }
 
+var deleteIntegrationCmd = &cobra.Command{
+	Use:        "integration {ID|ALIAS}",
+	Short:      "Delete an integration",
+	Example:    `opslevel delete integration Z2lkOi8vb123456789`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID", "ALIAS"},
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]
+		err := getClientGQL().DeleteIntegration(key)
+		cobra.CheckErr(err)
+		fmt.Printf("integration '%s' deleted\n", key)
+	},
+}
+
+var reactivateIntegrationCmd = &cobra.Command{
+	Use:        "reactivate ID",
+	Short:      "Reactivate an integration",
+	Long:       `Reactivate an integration that was invalidated or deactivated`,
+	Example:    `opslevel update integration reactivate Z2lkOi8vb123456789`,
+	Args:       cobra.ExactArgs(1),
+	ArgAliases: []string{"ID"},
+	Run: func(cmd *cobra.Command, args []string) {
+		integration, err := getClientGQL().IntegrationReactivate(args[0])
+		cobra.CheckErr(err)
+
+		fmt.Printf("reactivated integration '%s' with id '%s'", integration.Name, integration.Id)
+	},
+}
+
 func init() {
 	createCmd.AddCommand(createIntegrationCmd)
 	getCmd.AddCommand(getIntegrationCmd)
 	listCmd.AddCommand(listIntegrationCmd)
 	updateCmd.AddCommand(updateIntegrationCmd)
+	deleteCmd.AddCommand(deleteIntegrationCmd)
+
+	updateIntegrationCmd.AddCommand(reactivateIntegrationCmd)
 }
