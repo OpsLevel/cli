@@ -227,10 +227,9 @@ EOF
 
 cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
 version: 1
-kind: customEvent
+kind: githubActions
 spec:
   name: "GHA Updated"
-  type: "githubActions"
 EOF
 
 `,
