@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/mitchellh/mapstructure"
 
@@ -30,7 +31,10 @@ type IntegrationInputType struct {
 }
 
 type IntegrationInput interface {
-	opslevel.AWSIntegrationInput | opslevel.AzureResourcesIntegrationInput | opslevel.GoogleCloudIntegrationInput
+	opslevel.AWSIntegrationInput |
+		opslevel.AzureResourcesIntegrationInput |
+		opslevel.EventIntegrationInput |
+		opslevel.GoogleCloudIntegrationInput
 }
 
 func validateIntegrationInput() (*IntegrationInputType, error) {
@@ -41,6 +45,10 @@ func validateIntegrationInput() (*IntegrationInputType, error) {
 	if input.Version != CheckConfigCurrentVersion {
 		return nil, fmt.Errorf("supported config version is '%s' but found '%s'",
 			IntegrationConfigCurrentVersion, input.Version)
+	}
+
+	if slices.Contains(opslevel.AllEventIntegrationEnum, string(input.Kind)) {
+		return input, nil
 	}
 	switch input.Kind {
 	case IntegrationTypeAWS, IntegrationTypeAzure, IntegrationTypeGCP:
@@ -99,30 +107,49 @@ spec:
   clientEmail: "service-account-123@appspot.gserviceaccount.com"
   tagsOverrideOwnership: false
 EOF
+
+cat << EOF | opslevel create integration -f -
+version: 1
+kind: githubActions
+spec:
+  name: "GHA New"
+EOF
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, validateErr := validateIntegrationInput()
 		cobra.CheckErr(validateErr)
 
 		var result *opslevel.Integration
-		switch input.Kind {
-		case IntegrationTypeAWS:
-			awsInput, err := readIntegrationInput[opslevel.AWSIntegrationInput](input)
+		if slices.Contains(opslevel.AllEventIntegrationEnum, string(input.Kind)) {
+			input.Spec["type"] = input.Kind
+			eventIntegrationInput, err := readIntegrationInput[opslevel.EventIntegrationInput](input)
+			integrationTypeEnum := opslevel.EventIntegrationEnum(eventIntegrationInput.Type)
 			cobra.CheckErr(err)
-			result, err = getClientGQL().CreateIntegrationAWS(awsInput)
+			result, err = getClientGQL().CreateEventIntegration(opslevel.EventIntegrationInput{
+				Name: eventIntegrationInput.Name,
+				Type: integrationTypeEnum,
+			})
 			cobra.CheckErr(err)
-		case IntegrationTypeAzure:
-			azureInput, err := readIntegrationInput[opslevel.AzureResourcesIntegrationInput](input)
-			cobra.CheckErr(err)
-			result, err = getClientGQL().CreateIntegrationAzureResources(azureInput)
-			cobra.CheckErr(err)
-		case IntegrationTypeGCP:
-			gcpInput, err := readIntegrationInput[opslevel.GoogleCloudIntegrationInput](input)
-			cobra.CheckErr(err)
-			result, err = getClientGQL().CreateIntegrationGCP(gcpInput)
-			cobra.CheckErr(err)
-		default:
-			cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
+		} else {
+			switch input.Kind {
+			case IntegrationTypeAWS:
+				awsInput, err := readIntegrationInput[opslevel.AWSIntegrationInput](input)
+				cobra.CheckErr(err)
+				result, err = getClientGQL().CreateIntegrationAWS(awsInput)
+				cobra.CheckErr(err)
+			case IntegrationTypeAzure:
+				azureInput, err := readIntegrationInput[opslevel.AzureResourcesIntegrationInput](input)
+				cobra.CheckErr(err)
+				result, err = getClientGQL().CreateIntegrationAzureResources(azureInput)
+				cobra.CheckErr(err)
+			case IntegrationTypeGCP:
+				gcpInput, err := readIntegrationInput[opslevel.GoogleCloudIntegrationInput](input)
+				cobra.CheckErr(err)
+				result, err = getClientGQL().CreateIntegrationGCP(gcpInput)
+				cobra.CheckErr(err)
+			default:
+				cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
+			}
 		}
 
 		fmt.Printf("Created %s integration '%s' with id '%s'\n", input.Kind, result.Name, result.Id)
@@ -199,6 +226,14 @@ spec:
   privateKey: "XXX_NEW_PRIVATE_KEY_XXX"
   tagsOverrideOwnership: true
 EOF
+
+cat << EOF | opslevel update integration Z2lkOi8vb123456789 -f -
+version: 1
+kind: githubActions
+spec:
+  name: "GHA Updated"
+EOF
+
 `,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
@@ -207,24 +242,35 @@ EOF
 		cobra.CheckErr(validateErr)
 
 		var result *opslevel.Integration
-		switch input.Kind {
-		case IntegrationTypeAWS:
-			awsInput, err := readIntegrationInput[opslevel.AWSIntegrationInput](input)
+		if slices.Contains(opslevel.AllEventIntegrationEnum, string(input.Kind)) {
+			input.Spec["type"] = input.Kind
+			eventIntegrationInput, err := readIntegrationInput[opslevel.EventIntegrationInput](input)
 			cobra.CheckErr(err)
-			result, err = getClientGQL().UpdateIntegrationAWS(args[0], awsInput)
+			result, err = getClientGQL().UpdateEventIntegration(opslevel.EventIntegrationUpdateInput{
+				Id:   opslevel.ID(args[0]),
+				Name: *eventIntegrationInput.Name,
+			})
 			cobra.CheckErr(err)
-		case IntegrationTypeAzure:
-			azureInput, err := readIntegrationInput[opslevel.AzureResourcesIntegrationInput](input)
-			cobra.CheckErr(err)
-			result, err = getClientGQL().UpdateIntegrationAzureResources(args[0], azureInput)
-			cobra.CheckErr(err)
-		case IntegrationTypeGCP:
-			gcpInput, err := readIntegrationInput[opslevel.GoogleCloudIntegrationInput](input)
-			cobra.CheckErr(err)
-			result, err = getClientGQL().UpdateIntegrationGCP(args[0], gcpInput)
-			cobra.CheckErr(err)
-		default:
-			cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
+		} else {
+			switch input.Kind {
+			case IntegrationTypeAWS:
+				awsInput, err := readIntegrationInput[opslevel.AWSIntegrationInput](input)
+				cobra.CheckErr(err)
+				result, err = getClientGQL().UpdateIntegrationAWS(args[0], awsInput)
+				cobra.CheckErr(err)
+			case IntegrationTypeAzure:
+				azureInput, err := readIntegrationInput[opslevel.AzureResourcesIntegrationInput](input)
+				cobra.CheckErr(err)
+				result, err = getClientGQL().UpdateIntegrationAzureResources(args[0], azureInput)
+				cobra.CheckErr(err)
+			case IntegrationTypeGCP:
+				gcpInput, err := readIntegrationInput[opslevel.GoogleCloudIntegrationInput](input)
+				cobra.CheckErr(err)
+				result, err = getClientGQL().UpdateIntegrationGCP(args[0], gcpInput)
+				cobra.CheckErr(err)
+			default:
+				cobra.CheckErr(fmt.Errorf("cannot use unexpected input kind: '%s'", input.Kind))
+			}
 		}
 
 		fmt.Printf("Updated %s integration '%s' with id '%s'\n", input.Kind, result.Name, result.Id)
