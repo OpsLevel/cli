@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"os"
+	"reflect"
 
 	"github.com/rs/zerolog/log"
 
@@ -31,10 +33,43 @@ func readInputConfig() {
 }
 
 func readResourceInput[T any]() (*T, error) {
-	var err error
-	var resource T
-	var yamlData []byte
+	yamlData, err := getYamlData()
+	if err != nil {
+		return nil, err
+	}
+	return yamlUnmarshalInto[T](yamlData)
+}
 
+func yamlUnmarshalInto[T any](yamlData []byte) (*T, error) {
+	var resource T
+	if err := yaml.Unmarshal(yamlData, &resource); err != nil {
+		return nil, err
+	}
+	return &resource, nil
+}
+
+// for yaml unmarshaling into a generic struct field - a struct tag name workaound
+func yamlUnmarshalIntoStructField[T any](yamlData []byte, structField reflect.StructField) (*T, error) {
+	withExtraFields := reflect.StructOf([]reflect.StructField{structField})
+	v := reflect.New(withExtraFields).Elem()
+	s := v.Addr().Interface()
+
+	r := bytes.NewReader(yamlData)
+	if err := yaml.NewDecoder(r).Decode(s); err != nil {
+		return nil, err
+	}
+
+	thisOne := v.FieldByName(structField.Name).Addr().Interface()
+	thing, ok := thisOne.(*T)
+	if !ok {
+		return nil, errors.New("could not get extra data yaml data")
+	}
+	return thing, nil
+}
+
+func getYamlData() ([]byte, error) {
+	var yamlData []byte
+	var err error
 	switch dataFile {
 	case ".":
 		yamlData, err = os.ReadFile("./data.yaml")
@@ -48,14 +83,7 @@ func readResourceInput[T any]() (*T, error) {
 	default:
 		yamlData, err = os.ReadFile(dataFile)
 	}
-	if err != nil {
-		return nil, err
-	}
-
-	if err := yaml.Unmarshal(yamlData, &resource); err != nil {
-		return nil, err
-	}
-	return &resource, nil
+	return yamlData, err
 }
 
 func isStdInFromTerminal() bool {

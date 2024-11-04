@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/opslevel/opslevel-go/v2024"
@@ -45,8 +46,23 @@ product: "OSS"
 tier: "tier_4"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.ServiceCreateInput]()
+		yamlData, err := getYamlData()
 		cobra.CheckErr(err)
+
+		input, err := yamlUnmarshalInto[opslevel.ServiceCreateInput](yamlData)
+		cobra.CheckErr(err)
+
+		if input.OwnerInput == nil {
+			ownerStructField := reflect.StructField{
+				Name: "Owner",
+				Tag:  `yaml:"owner"`,
+				Type: reflect.TypeOf(opslevel.IdentifierInput{}),
+			}
+			owner, err := yamlUnmarshalIntoStructField[opslevel.IdentifierInput](yamlData, ownerStructField)
+			cobra.CheckErr(err)
+			input.OwnerInput = owner
+		}
+
 		result, err := getClientGQL().CreateService(*input)
 		cobra.CheckErr(err)
 		common.PrettyPrint(result.Id)
@@ -153,8 +169,23 @@ product: "OSS"
 tier: "tier_3"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.ServiceUpdateInput]()
+		yamlData, err := getYamlData()
 		cobra.CheckErr(err)
+
+		input, err := yamlUnmarshalInto[opslevel.ServiceUpdateInput](yamlData)
+		cobra.CheckErr(err)
+
+		if input.OwnerInput == nil {
+			ownerStructField := reflect.StructField{
+				Name: "Owner",
+				Tag:  `yaml:"owner"`,
+				Type: reflect.TypeOf(opslevel.IdentifierInput{}),
+			}
+			owner, err := yamlUnmarshalIntoStructField[opslevel.IdentifierInput](yamlData, ownerStructField)
+			cobra.CheckErr(err)
+			input.OwnerInput = owner
+		}
+
 		convertedInput := convertServiceUpdateInput(*input)
 		service, err := getClientGQL().UpdateService(convertedInput)
 		cobra.CheckErr(err)
