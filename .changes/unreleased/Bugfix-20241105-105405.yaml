@@ -1,0 +1,3 @@
+kind: Bugfix
+body: fix create,update a service using the "owner" field as shown in help docs, rather than "ownerInput", matching the opslevel-go YAML convention before 2024
+time: 2024-11-05T10:54:05.107745-06:00
