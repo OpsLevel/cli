@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/opslevel/opslevel-go/v2024"
 
@@ -451,9 +452,12 @@ func (checkInputType *CheckInputType) IsUpdateInput() bool {
 
 func readCheckInput() (*CheckInputType, error) {
 	input, err := readResourceInput[CheckInputType]()
-	fmt.Println(input)
 	if err != nil {
 		return nil, err
+	}
+	if !slices.Contains(opslevel.AllCheckType, string(input.Kind)) {
+		return nil, fmt.Errorf("check kind '%s' not one of\n%s\nplease update config file",
+			input.Kind, opslevel.AllCheckType)
 	}
 	if input.Version != CheckConfigCurrentVersion {
 		return nil, fmt.Errorf("supported config version is '%s' but found '%s' | please update config file",
