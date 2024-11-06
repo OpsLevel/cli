@@ -88,7 +88,7 @@ var listServiceCmd = &cobra.Command{
 	Short:   "Lists services",
 	Long:    `Lists services`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var list []opslevel.Service
+		list := []opslevel.Service{}
 		client := getClientGQL()
 		resp, err := client.ListServices(nil)
 		cobra.CheckErr(err)
