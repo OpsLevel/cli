@@ -99,25 +99,19 @@ var listUserCmd = &cobra.Command{
 	Example: `
 opslevel list user
 opslevel list user --ignore-deactivated
-opslevel list user --deactivated
 opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entries'
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		// payloadVars should remain nil if '--ignore-deactivated' or --deactivated not set
+		// payloadVars should remain nil if '--ignore-deactivated'
 		var payloadVars *opslevel.PayloadVariables
 
 		ignoreDeactivated, err := cmd.Flags().GetBool("ignore-deactivated")
-		// deactivated, err := cmd.Flags().GetBool("deactivated")
 		cobra.CheckErr(err)
 
 		client := getClientGQL()
 		if ignoreDeactivated {
 			payloadVars = client.InitialPageVariablesPointer().WithoutDeactivedUsers()
 		}
-
-		//if deactivated {
-		//	payloadVars = client.InitialPageVariablesPointer().DeactivedUsers()
-		//}
 
 		resp, err := getClientGQL().ListUsers(payloadVars)
 		cobra.CheckErr(err)
@@ -259,7 +253,6 @@ EOF
 func init() {
 	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set the welcome e-mail will be skipped from being sent")
 	listUserCmd.Flags().Bool("ignore-deactivated", false, "If this flag is set only return active users")
-	//listUserCmd.Flags().Bool("deactivated", false, "If this flag is set only return deactivated users")
 
 	exampleCmd.AddCommand(exampleUserCmd)
 	createCmd.AddCommand(createUserCmd)
