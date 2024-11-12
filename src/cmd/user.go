@@ -99,19 +99,25 @@ var listUserCmd = &cobra.Command{
 	Example: `
 opslevel list user
 opslevel list user --ignore-deactivated
+opslevel list user --deactivated
 opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entries'
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		// payloadVars should remain nil if '--ignore-deactivated' not set
+		// payloadVars should remain nil if '--ignore-deactivated' or --deactivated not set
 		var payloadVars *opslevel.PayloadVariables
 
 		ignoreDeactivated, err := cmd.Flags().GetBool("ignore-deactivated")
+		// deactivated, err := cmd.Flags().GetBool("deactivated")
 		cobra.CheckErr(err)
 
 		client := getClientGQL()
 		if ignoreDeactivated {
 			payloadVars = client.InitialPageVariablesPointer().WithoutDeactivedUsers()
 		}
+
+		//if deactivated {
+		//	payloadVars = client.InitialPageVariablesPointer().DeactivedUsers()
+		//}
 
 		resp, err := getClientGQL().ListUsers(payloadVars)
 		cobra.CheckErr(err)
@@ -215,9 +221,45 @@ EOF
 	},
 }
 
+var bulkDeleteUsersCmd = &cobra.Command{
+	Use:     "delete users",
+	Aliases: []string{"bulk delete users"},
+	Short:   "Deletes users from a CSV",
+	Long: `Deletes a list of users from a CSV file with the column headers:
+Email`,
+	Example: `
+cat << EOF | opslevel import delete users -f -
+Email
+kyle@opslevel.com
+toms@opslevel.com
+ian@opslevel.com
+EOF
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		reader, err := readImportFilepathAsCSV()
+		cobra.CheckErr(err)
+		for reader.Rows() {
+			email := reader.Text("Email")
+			if email == "" {
+				log.Error().Msgf("user has invalid email '%s'", email)
+				continue
+			} else {
+				err := getClientGQL().DeleteUser(email)
+				if err != nil {
+					log.Error().Err(err).Msgf("error deleting user '%s'", email)
+					continue
+				} else {
+					log.Info().Msgf("deleted user '%s'", email)
+				}
+			}
+		}
+	},
+}
+
 func init() {
 	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set the welcome e-mail will be skipped from being sent")
 	listUserCmd.Flags().Bool("ignore-deactivated", false, "If this flag is set only return active users")
+	//listUserCmd.Flags().Bool("deactivated", false, "If this flag is set only return deactivated users")
 
 	exampleCmd.AddCommand(exampleUserCmd)
 	createCmd.AddCommand(createUserCmd)
@@ -226,4 +268,5 @@ func init() {
 	listCmd.AddCommand(listUserCmd)
 	deleteCmd.AddCommand(deleteUserCmd)
 	importCmd.AddCommand(importUsersCmd)
+	importCmd.AddCommand(bulkDeleteUsersCmd)
 }
