@@ -102,7 +102,7 @@ opslevel list user --ignore-deactivated
 opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entries'
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		// payloadVars should remain nil if '--ignore-deactivated'
+		// payloadVars should remain nil if '--ignore-deactivated' not set
 		var payloadVars *opslevel.PayloadVariables
 
 		ignoreDeactivated, err := cmd.Flags().GetBool("ignore-deactivated")
