@@ -8,6 +8,9 @@ updates:
     directory: "src/"
     schedule:
       interval: "weekly"
+      day: "friday"
+      time: "10:00"
+      timezone: "America/New_York"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
