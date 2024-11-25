@@ -12,7 +12,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/open-policy-agent/opa v0.67.1
 	github.com/opslevel/opslevel-go/v2024 v2024.11.8
-	github.com/relvacode/iso8601 v1.5.0
+	github.com/relvacode/iso8601 v1.6.0
 	github.com/rocktavious/autopilot v0.1.5
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
