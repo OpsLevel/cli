@@ -32,7 +32,12 @@ detect_os() {
 
 # Version of the OpsLevel CLI to install
 get_version() {
-    VERSION=$(curl -sI https://github.com/OpsLevel/cli/releases/latest | grep -i "location:" | awk -F"/" '{ printf "%s", $NF }' | tr -d '\r')
+    if [ "$1" != "" ] && git ls-remote --tags --refs https://github.com/opslevel/opslevel-go/ | grep -q "${1}"; then
+      VERSION=${1}
+    else
+      VERSION=$(curl -sI https://github.com/OpsLevel/cli/releases/latest | grep -i "location:" | awk -F"/" '{ print $NF }' | tr -d '\r')
+    fi
+
     if [ ! $VERSION ]; then
         echo "Failed while attempting to install OpsLevel's cli. Please manually install:"
         echo ""
@@ -77,5 +82,5 @@ install_cli() {
 has_curl
 detect_arch
 detect_os
-get_version
+get_version "$1"
 install_cli
