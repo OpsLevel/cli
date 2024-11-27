@@ -9,6 +9,8 @@ builds:
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
+    ldflags:
+      - '-s -w -X main.version={{ trimprefix .Tag "v" }} -X main.commit={{ .ShortCommit }}'
     goos:
       - windows
       - linux
