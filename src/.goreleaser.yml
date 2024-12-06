@@ -25,14 +25,40 @@ builds:
         goarch: '386'
     binary: '{{ .ProjectName }}'
 dockers:
-  - image_templates:
-    - "public.ecr.aws/opslevel/cli:latest"
-    - "public.ecr.aws/opslevel/cli:{{ .Tag }}"
+  -
+    dockerfile: Dockerfile
+    use: buildx
+    image_templates:
+    - "public.ecr.aws/opslevel/cli:{{ .Tag }}-amd64"
     build_flag_templates:
     - "--label=org.opencontainers.image.created={{ .Date }}"
     - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
     - "--label=org.opencontainers.image.version={{ .Tag }}"
     - "--build-arg=VERSION={{ .Tag }}"
+    - "--platform=linux/amd64"
+    goos: linux
+    goarch: amd64
+  -
+    dockerfile: Dockerfile
+    use: buildx
+    image_templates:
+    - "public.ecr.aws/opslevel/cli:{{ .Tag }}-arm64"
+    build_flag_templates:
+    - "--label=org.opencontainers.image.created={{ .Date }}"
+    - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+    - "--label=org.opencontainers.image.version={{ .Tag }}"
+    - "--build-arg=VERSION={{ .Tag }}"
+    goos: linux
+    goarch: arm64
+docker_manifests:
+  - name_template: "public.ecr.aws/opslevel/cli:latest"
+    image_templates:
+      - "public.ecr.aws/opslevel/cli:{{ .Tag }}-amd64"
+      - "public.ecr.aws/opslevel/cli:{{ .Tag }}-arm64"
+  - name_template: "public.ecr.aws/opslevel/cli:{{ .Tag }}"
+    image_templates:
+      - "public.ecr.aws/opslevel/cli:{{ .Tag }}-amd64"
+      - "public.ecr.aws/opslevel/cli:{{ .Tag }}-arm64"
 archives:
   - name_template: '{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}'
     format_overrides:
