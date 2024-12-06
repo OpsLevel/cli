@@ -53,7 +53,6 @@ dockers:
 docker_manifests:
   - name_template: "public.ecr.aws/opslevel/cli:latest"
     image_templates:
-      - "public.ecr.aws/opslevel/cli:latest"
       - "public.ecr.aws/opslevel/cli:{{ .Tag }}-amd64"
       - "public.ecr.aws/opslevel/cli:{{ .Tag }}-arm64"
   - name_template: "public.ecr.aws/opslevel/cli:{{ .Tag }}"
