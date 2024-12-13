@@ -46,6 +46,11 @@ get_version() {
     fi
 }
 
+# Function to check if a directory is writable
+is_writable() {
+    [ -d "$1" ] && [ -w "$1" ]
+}
+
 # Function to download and install the CLI tool
 install_cli() {
     DOWNLOAD_URL="https://github.com/OpsLevel/cli/releases/download/${VERSION}/opslevel-${OS}-${ARCH}.tar.gz"
@@ -64,9 +69,26 @@ install_cli() {
     echo "Extracting the OpsLevel CLI..."
     tar -xzf "$TMP_DIR/opslevel.tar.gz" -C "$TMP_DIR"
 
-    echo "Installing the OpsLevel CLI to /usr/local/bin ..."
-    sudo mv "$TMP_DIR/opslevel" /usr/local/bin/
 
+
+    # Search for a writable directory in the PATH
+    TARGET_DIR=""
+    for dir in $(echo "$PATH" | tr ':' '\n'); do
+        if is_writable "$dir"; then
+            TARGET_DIR="$dir"
+            break
+        fi
+    done
+
+    # If no writable directory is found, exit
+    if [ -z "$TARGET_DIR" ]; then
+        echo "Installation failed.  User has no permissions to any directory on PATH"
+        exit 1
+    else
+        echo "Installing the OpsLevel CLI to '$TARGET_DIR' ..."
+    fi
+
+    mv "$TMP_DIR/opslevel" "$TARGET_DIR"
     if [ $? -ne 0 ]; then
         echo "Installation failed."
         exit 1
