@@ -88,7 +88,7 @@ install_cli() {
         echo "Installing the OpsLevel CLI to '$TARGET_DIR' ..."
     fi
 
-    mv "$TMP_DIR/opslevel" /usr/local/bin/
+    mv "$TMP_DIR/opslevel" "$TARGET_DIR"
     if [ $? -ne 0 ]; then
         echo "Installation failed."
         exit 1
