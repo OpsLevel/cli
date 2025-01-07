@@ -101,8 +101,6 @@ Chaos           Z2lkOi8vb3BzbGV2ZWwvQ2F0ZWdvcnkvOTY8
 > opslevel delete category Z2lkOi8vb3BzbGV2ZWwvQ2F0ZWdvcnkvOTY8
 ```
 
-<blockquote>This tool is still in beta.</blockquote>
-
 ### Enable shell autocompletion
 
 We have the ability to generate autocompletion scripts for the shell's `bash`, `zsh`, `fish` and `powershell`.  To generate 
