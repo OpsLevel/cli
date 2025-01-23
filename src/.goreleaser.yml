@@ -48,6 +48,7 @@ dockers:
     - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
     - "--label=org.opencontainers.image.version={{ .Tag }}"
     - "--build-arg=VERSION={{ .Tag }}"
+    - "--platform=linux/arm64"
     goos: linux
     goarch: arm64
 docker_manifests:
