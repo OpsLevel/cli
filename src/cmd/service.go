@@ -92,6 +92,10 @@ var listServiceCmd = &cobra.Command{
 		client := getClientGQL()
 		resp, err := client.ListServices(nil)
 		cobra.CheckErr(err)
+		if ok, _ := cmd.Flags().GetBool("count"); ok {
+			fmt.Println(len(resp.Nodes))
+			return
+		}
 		for _, service := range resp.Nodes {
 			if !isJsonOutput() {
 				list = append(list, service)
@@ -249,6 +253,7 @@ func init() {
 	listServiceCmd.PersistentFlags().Bool("dependencies", false, "Include dependencies of each service")
 	listServiceCmd.PersistentFlags().Bool("dependents", false, "Include dependents of each service")
 	listServiceCmd.PersistentFlags().Bool("properties", false, "Include properties of each service")
+	listServiceCmd.PersistentFlags().Bool("count", false, "Print the service count")
 
 	importCmd.AddCommand(importServicesCmd)
 }
