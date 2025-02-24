@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/creasty/defaults v1.8.0
 	github.com/go-git/go-git/v5 v5.13.2
-	github.com/go-resty/resty/v2 v2.16.2
+	github.com/go-resty/resty/v2 v2.16.5
 	github.com/gosimple/slug v1.15.0
 	github.com/itchyny/gojq v0.12.17
 	github.com/manifoldco/promptui v0.9.0
