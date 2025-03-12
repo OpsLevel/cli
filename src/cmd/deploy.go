@@ -43,6 +43,7 @@ type DeployEvent struct {
 	DeployNumber string    `json:"deploy_number,omitempty" yaml:"deploy-number"`
 	Commit       Commit    `json:"commit,omitempty"`
 	DedupID      string    `json:"dedup_id,omitempty" yaml:"dedup-id"`
+	Status       string    `json:"status,omitempty" yaml:"status"`
 }
 
 var deployCreateCmd = &cobra.Command{
@@ -116,6 +117,9 @@ func init() {
 	deployCreateCmd.Flags().StringP("description", "d", "", "description of the event (OPSLEVEL_DESCRIPTION)")
 	viper.BindEnv("description", "OPSLEVEL_DESCRIPTION", "OL_DESCRIPTION")
 
+	deployCreateCmd.Flags().String("status", "", "the status of the event, we accept any value but generally you should use one of ['queued','running','canceled','failure','success'] (OPSLEVEL_STATUS)")
+	viper.BindEnv("status", "OPSLEVEL_STATUS", "OL_STATUS")
+
 	deployCreateCmd.Flags().StringP("service", "s", "", "service alias for the event (OPSLEVEL_SERVICE)")
 	viper.BindEnv("service", "OPSLEVEL_SERVICE", "OL_SERVICE")
 
@@ -169,6 +173,9 @@ func fillWithOverrides(evt *DeployEvent) {
 	}
 	if message := viper.GetString("commit-message"); message != "" {
 		evt.Commit.Message = message
+	}
+	if status := viper.GetString("status"); status != "" {
+		evt.Status = status
 	}
 }
 
