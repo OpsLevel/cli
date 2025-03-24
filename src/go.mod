@@ -14,7 +14,7 @@ require (
 	github.com/opslevel/opslevel-go/v2024 v2024.12.24
 	github.com/relvacode/iso8601 v1.6.0
 	github.com/rocktavious/autopilot v0.1.5
-	github.com/rs/zerolog v1.33.0
+	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.19.0
