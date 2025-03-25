@@ -43,6 +43,8 @@ parent:
   alias: "my_system"
 product: "OSS"
 tier: "tier_4"
+type:
+  alias: "mobile-app"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.ServiceCreateInput]()
@@ -117,15 +119,15 @@ var listServiceCmd = &cobra.Command{
 			common.JsonPrint(json.MarshalIndent(list, "", "    "))
 		} else if isCsvOutput() {
 			w := csv.NewWriter(os.Stdout)
-			w.Write([]string{"NAME", "ID", "ALIASES"})
+			w.Write([]string{"NAME", "ID", "TYPE", "ALIASES"})
 			for _, item := range list {
-				w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
+				w.Write([]string{item.Name, string(item.Id), item.Type.Alias, strings.Join(item.Aliases, "/")})
 			}
 			w.Flush()
 		} else {
-			w := common.NewTabWriter("NAME", "ID", "ALIASES")
+			w := common.NewTabWriter("NAME", "ID", "TYPE", "ALIASES")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Id, strings.Join(item.Aliases, ","))
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t\n", item.Name, item.Id, item.Type.Alias, strings.Join(item.Aliases, ","))
 			}
 			w.Flush()
 		}
@@ -151,6 +153,8 @@ parent:
   alias: "my_system"
 product: "OSS"
 tier: "tier_3"
+type:
+  alias: "mobile-app"
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.ServiceUpdateInput]()
