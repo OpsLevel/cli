@@ -10,7 +10,6 @@ tasks:
   ci:
     desc: Workflow to run in CI
     cmds:
-      - task: workspace
       - task: install-gofumpt
       - task: install-golangci-lint
       - task: lint
