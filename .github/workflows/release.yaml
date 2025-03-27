@@ -58,8 +58,7 @@ jobs:
       - name: Set Release Version
         id: version
         run: |
-          # echo "RELEASE_VERSION=$(date +v%Y.%-m.%-d)" >> $GITHUB_OUTPUT
-          echo "RELEASE_VERSION=2024.12.29" >> $GITHUB_OUTPUT
+          echo "RELEASE_VERSION=$(date +v%Y.%-m.%-d)" >> $GITHUB_OUTPUT
       - name: Cache Docker Layers
         run: docker pull public.ecr.aws/opslevel/cli:v2022.04.22 || true
       - name: Ensure Release Does Not Exist
