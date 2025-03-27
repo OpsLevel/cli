@@ -64,7 +64,7 @@ archives:
   - name_template: '{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}'
     format_overrides:
       - goos: windows
-        format: zip
+        format: [ 'zip' ]
 brews:
   - name: cli
     homepage: "https://www.opslevel.com/"
