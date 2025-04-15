@@ -110,7 +110,7 @@ var mcpCmd = &cobra.Command{
 					URL:   node.HtmlURL,
 				})
 			}
-			data, err := json.Marshal(resp.Nodes)
+			data, err := json.Marshal(components)
 			if err != nil {
 				return nil, err
 			}
