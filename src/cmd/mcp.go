@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+
 	mcp_golang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/mcp-golang/transport/stdio"
 	"github.com/spf13/cobra"
@@ -24,9 +25,9 @@ var mcpCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		done := make(chan struct{})
 
-		//transport := http.NewHTTPTransport("/mcp")
-		//transport.WithAddr(":8080")
-		//server := mcp_golang.NewServer(transport)
+		// transport := http.NewHTTPTransport("/mcp")
+		// transport.WithAddr(":8080")
+		// server := mcp_golang.NewServer(transport)
 		server := mcp_golang.NewServer(stdio.NewStdioServerTransport())
 
 		// Register Teams
@@ -109,7 +110,7 @@ var mcpCmd = &cobra.Command{
 					URL:   node.HtmlURL,
 				})
 			}
-			data, err := json.Marshal(resp.Nodes)
+			data, err := json.Marshal(components)
 			if err != nil {
 				return nil, err
 			}
@@ -143,5 +144,5 @@ var mcpCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(mcpCmd)
+	betaCmd.AddCommand(mcpCmd)
 }
