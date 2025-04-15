@@ -4,10 +4,17 @@ import (
 	"encoding/json"
 	mcp_golang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/mcp-golang/transport/stdio"
+	ol "github.com/opslevel/opslevel-go/v2024"
 	"github.com/spf13/cobra"
 )
 
 type NullArguments struct{}
+
+type InviteUserArgument struct {
+	Email string      `jsonSchema:"required,description=The email address of the user to invite"`
+	Name  string      `jsonSchema:"required,description=The name of the user to invite"`
+	Role  ol.UserRole `jsonSchema:"description=The role of the user to invite must be one of [admin, standards_admin, team_member, user] (default: user)"`
+}
 
 type LightweightComponent struct {
 	Id    string `json:"id"`
@@ -126,6 +133,25 @@ var mcpCmd = &cobra.Command{
 				return nil, err
 			}
 			data, err := json.Marshal(resp.Nodes)
+			if err != nil {
+				return nil, err
+			}
+			return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(data))), nil
+		}); err != nil {
+			panic(err)
+		}
+
+		// Invite User
+		if err := server.RegisterTool("invite-user", "Invite a user to your opslevel account", func(args InviteUserArgument) (*mcp_golang.ToolResponse, error) {
+			client := getClientGQL()
+			resp, err := client.InviteUser(args.Email, ol.UserInput{
+				Name: &args.Name,
+				Role: &args.Role,
+			}, false)
+			if err != nil {
+				return nil, err
+			}
+			data, err := json.Marshal(resp)
 			if err != nil {
 				return nil, err
 			}
