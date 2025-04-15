@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/metoro-io/mcp-golang/transport/http"
 
 	mcp_golang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/mcp-golang/transport/stdio"
@@ -25,10 +27,18 @@ var mcpCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		done := make(chan struct{})
 
-		// transport := http.NewHTTPTransport("/mcp")
-		// transport.WithAddr(":8080")
-		// server := mcp_golang.NewServer(transport)
-		server := mcp_golang.NewServer(stdio.NewStdioServerTransport())
+		mode, err := cmd.Flags().GetString("mode")
+		cobra.CheckErr(err)
+		var server *mcp_golang.Server
+		if mode == "http" {
+			port, err := cmd.Flags().GetString("port")
+			cobra.CheckErr(err)
+			transport := http.NewHTTPTransport("/mcp")
+			transport.WithAddr(fmt.Sprintf(":%s", port))
+			server = mcp_golang.NewServer(transport)
+		} else {
+			server = mcp_golang.NewServer(stdio.NewStdioServerTransport())
+		}
 
 		// Register Teams
 		if err := server.RegisterTool("teams", "Get all the team names, identifiers and metadata for the opslevel account.  Teams are owners of other objects in opslevel. Only use this if you need to search all teams.", func(args NullArguments) (*mcp_golang.ToolResponse, error) {
@@ -145,4 +155,7 @@ var mcpCmd = &cobra.Command{
 
 func init() {
 	betaCmd.AddCommand(mcpCmd)
+
+	mcpCmd.Flags().StringP("mode", "m", "stdio", "Mode to run in.  Can be one of [\"stdio\", \"http\"]")
+	mcpCmd.Flags().StringP("port", "p", "8000", "Port to use when running in 'http' mode")
 }
