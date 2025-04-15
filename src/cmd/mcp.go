@@ -143,5 +143,5 @@ var mcpCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(mcpCmd)
+	betaCmd.AddCommand(mcpCmd)
 }
