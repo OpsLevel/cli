@@ -32,10 +32,12 @@ var mcpCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		var server *mcp_golang.Server
 		if mode == "http" {
+			host, err := cmd.Flags().GetString("host")
+			cobra.CheckErr(err)
 			port, err := cmd.Flags().GetString("port")
 			cobra.CheckErr(err)
 			transport := http.NewHTTPTransport("/mcp")
-			transport.WithAddr(fmt.Sprintf(":%s", port))
+			transport.WithAddr(fmt.Sprintf("%s:%s", host, port))
 			server = mcp_golang.NewServer(transport)
 		} else {
 			server = mcp_golang.NewServer(stdio.NewStdioServerTransport())
@@ -158,5 +160,6 @@ func init() {
 	betaCmd.AddCommand(mcpCmd)
 
 	mcpCmd.Flags().StringP("mode", "m", "stdio", "Mode to run in.  Can be one of [\"stdio\", \"http\"]")
+	mcpCmd.Flags().String("host", "127.0.0.1", "Host address to bind to")
 	mcpCmd.Flags().StringP("port", "p", "8000", "Port to use when running in 'http' mode")
 }
