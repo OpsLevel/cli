@@ -1,104 +1,178 @@
-# Contributing
+# Contributing to opslevel-cli
 
-1. [About this document](#about-this-document)
-1. [Getting the code](#getting-the-code)
-1. [Local development](#local-development)
-1. [Submitting a Pull Request](#submitting-a-pull-request)
+👋 Welcome, and thank you for your interest in contributing to `opslevel-cli`! This guide will help you ramp up, propose changes, develop locally, and contribute code effectively.
 
-## About this document
+---
 
-This document is a guide intended for folks interested in contributing to `opslevel-cli`. Below, we document the process by which members of the community should create issues and submit pull requests (PRs) in this repository. This guide assumes you are using macOS and are comfortable with the command line.
+## Table of Contents
 
-If you're new to Golang development or contributing to open-source software, we encourage you to read this document from start to finish.
+1. [About the CLI](#about-the-cli)
+2. [Getting Started](#getting-started)
+3. [Development Workflow](#development-workflow)
+4. [Proposing and Submitting Changes](#proposing-and-submitting-changes)
+5. [Command Architecture & Style](#command-architecture--style)
+6. [Testing & Tooling](#testing--tooling)
+7. [Release Process](#release-process)
 
-## Proposing a change
+---
 
-This project is what it is today because community members like you have opened issues, provided feedback, and contributed to the knowledge loop for the entire community. Whether you are a seasoned open source contributor or a first-time committer, we welcome and encourage you to contribute code, documentation, ideas, or problem statements to this project.
+## About the CLI
 
-### Defining the problem
+The `opslevel-cli` is a command-line interface for interacting with the [OpsLevel](https://www.opslevel.com) API. It helps engineers automate, inspect, and manage their service catalog, ownership, checks, and more.
 
-If you have an idea for a new feature or if you've discovered a bug, the first step is to open an issue. Please check the list of [open issues](https://github.com/OpsLevel/cli/issues) before creating a new one. If you find a relevant issue, please add a comment to the open issue instead of creating a new one.
+### Architecture
 
-> **Note:** All community-contributed Pull Requests _must_ be associated with an open issue. If you submit a Pull Request that does not pertain to an open issue, you will be asked to create an issue describing the problem before the Pull Request can be reviewed.
+- **[Cobra](https://github.com/spf13/cobra)** powers our CLI framework. Commands are defined as Go structs with handlers, descriptions, and flags.
+- **[Viper](https://github.com/spf13/viper)** handles flag parsing, environment variables, and configuration files.
+- Modular command files live under `/cmd`, grouped by functionality (e.g., services, checks, etc.).
+- Commands are registered to `rootCmd` via `init()` functions.
+- 80% of our functionality is provided by opslevel-go and the purpose of this CLI is just to marshal data between the user and opslevel-go in a UX friendly way.
+- Most commands follow the standard CRUD pattern `opslevel create ...`, `opslevel get ...`, `opslevel list ...`, `opslevel update ...`, `opslevel delete ...`, etc.
+- We have `opslevel beta` subcommand for experimental commands that are subject to removal.
 
-### Submitting a change
+### Minimal Command Example
 
-If an issue is appropriately well scoped and describes a beneficial change to the codebase, then anyone may submit a Pull Request to implement the functionality described in the issue. See the sections below on how to do this.
+```go
+var exampleCmd = &cobra.Command{
+    Use:   "example",
+    Short: "Hello World Command",
+    Long:  "Hello World Command to show how an example command works",
+    RunE: func(cmd *cobra.Command, args []string) error {
+        log.Info().Msg("Hello World!")
+        return nil
+    },
+}
 
-The maintainers will add a `good first issue` label if an issue is suitable for a first-time contributor. This label often means that the required code change is small or a net-new addition that does not impact existing functionality. You can see the list of currently open issues on the [Contribute](https://github.com/OpsLevel/cli/contribute) page.
-
-## Getting the code
-
-### Installing git
-
-You will need `git` in order to download and modify the source code. On macOS, the best way to download git is to just install [Xcode](https://developer.apple.com/support/xcode/).
-
-### External contributors
-
-If you are not a member of the `OpsLevel` GitHub organization, you can contribute by forking the repository. For a detailed overview on forking, check out the [GitHub docs on forking](https://help.github.com/en/articles/fork-a-repo). In short, you will need to:
-
-1. fork the repository
-2. clone your fork locally
-3. check out a new branch for your proposed changes
-4. push changes to your fork
-5. open a pull request from your forked repository
-
-### OpsLevel contributors
-
-If you are a member of the `OpsLevel` GitHub organization, you will have push access to the repo. Rather than forking to make your changes, just clone the repository, check out a new branch, and push directly to that branch.
-
-## Local Development
-
-### Installation
-
-First make sure you have working [golang development environment](https://learn.gopherguides.com/courses/preparing-your-environment-for-go-development) setup.
-
-You will also need an [OpsLevel API Token](https://app.opslevel.com/api_tokens) from your account to successfully make API calls against.  Once you have the API token it is best to put it in your terminal's environment
-
-```sh
- export OPSLEVEL_API_TOKEN=XXXXXXXXX
+func init() {
+    rootCmd.AddCommand(exampleCmd)
+}
 ```
 
-### Local Development Testing
+---
 
-You can run your local code as if it was a prebuilt CLI using:
+## Getting Started
 
-```sh
-go run main.go -h
+### Clone the Repo
+
+If you're an external contributor, fork the repo:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/cli.git
+cd cli
+git checkout -b my-feature
 ```
 
-This way you can iterate on the CLI code quickly to test out your new functionality.
+If you're part of the OpsLevel org:
 
-#### Local Development with an `opslevel-go` Feature Branch
+```bash
+git clone git@github.com:OpsLevel/cli.git
+cd cli
+git checkout -b my-feature
+```
 
-To test local code against a feature branch in the `opslevel-go` repository, run:
+> You might need to be given permissions to the repo, please reach out to team platform.
+
+### Prerequisites
+
+- [Task](https://taskfile.dev)
+- An [OpsLevel API Token](https://app.opslevel.com/api_tokens)
+
+You can use `task setup` to run an idempotent one-time setup.
+
+Set your API token:
 
 ```sh
-# initializes opslevel-go submodule then sets up src/go.work
+export OPSLEVEL_API_TOKEN=your_token_here
+```
+
+If you need to target a different environment, set the `OPSLEVEL_API_URL` environment variable:
+
+```sh
+export OPSLEVEL_API_URL=https://self-hosted.opslevel.dev/
+```
+
+---
+
+## Development Workflow
+
+### Run the CLI Locally
+
+```sh
+go run main.go --help
+```
+
+This is the easiest way to test your changes live.
+
+### Using a Local `opslevel-go` Branch
+
+To test changes from a local branch of [`opslevel-go`](https://github.com/OpsLevel/opslevel-go):
+
+```sh
+# Set up workspace using task
 task workspace
 
-# git checkouts my-feature-branch in the src/submodules/opslevel-go directory
+# Switch to your feature branch in the submodule
 git -C ./src/submodules/opslevel-go checkout --track origin/my-feature-branch
 ```
 
-Code imported from `github.com/opslevel/opslevel-go` will now be sourced from the
-local `my-feature-branch`.
+All CLI calls will now use your local `opslevel-go` code checked out into the submodule at `./src/submodules/opslevel-go`.
 
-### Changie (Change log generation)
+---
 
-Before submitting the pull request, you need add a change entry via Changie so that your contribution changes can be tracked for our next release.
+## Proposing and Submitting Changes
 
-To install Changie, follow the directions [here](https://changie.dev/guide/installation/).
+### 1. Open an Issue
 
-Next, to create a new change entry, in the root of the repository run: `changie new`
+If you're fixing a bug or adding a feature, please [open an issue](https://github.com/OpsLevel/cli/issues) first. This helps us track discussions and ensures your work aligns with project goals.
 
-Follow the prompts to create your change entry - remember this is what will show up in the changelog.  Changie registers the change in a .yaml file, and that file must be included in your pull request before we can release.
+> **Note:** All PRs must be tied to a GitHub issue.
 
-## Submitting a Pull Request
+Look for issues marked `good first issue` if you're new.
 
-OpsLevel provides a CI environment to test changes through GitHub Actions. For example, if you submit a pull request to the repo, GitHub will trigger automated code checks and tests upon approval from an OpsLevel maintainer.
+### 2. Submit a Pull Request
 
-A maintainer will review your PR. They may suggest code revision for style or clarity, or request that you add unit or integration test(s). These are good things! We believe that, with a little bit of help, anyone can contribute high-quality code.
-- First time contributors should be aware that code checks + unit tests require a maintainer to approve.
+- Push your changes to your fork or feature branch
+- Run `changie new` to create a changelog entry
+- Open a PR to `main` or the relevant feature branch
+- Our GitHub Actions pipeline will run tests and lint checks
+- A maintainer will review your PR and request changes if needed
 
-Once all tests are passing and your PR has been approved, a maintainer will merge your changes into the active development branch. And that's it!  It will be available in the next release that is cut. Happy developing :tada:
+Once approved and merged, your change will be included in the next release.
+
+---
+
+## Command Architecture & Style
+
+- Each CLI command lives in its own file under `/cmd`
+- Commands should:
+    - Register themselves via `init()`
+    - Use `RunE` instead of `Run` for error handling
+- Flags and environment variables should be registered with Viper for consistency
+- Prefer readable, minimalistic command logic — delegate heavy logic to opslevel-go unless it's not possible
+
+---
+
+## Testing & Tooling
+
+- Use `task test` to run tests
+- Use `task lint` to check for code quality issues
+- Add tests alongside any new functionality
+
+Our CI pipeline will run `task ci` which can also be run locally to debug any issue that might only arrise in CI.
+
+---
+
+## Release Process
+
+- All customer facing changes must have a [Changie](https://changie.dev) changelog entry
+    - Run: `changie new`
+    - Follow prompts to categorize your change
+    - This generates a YAML file in `.changes/` that must be committed with your PR
+
+- CI/CD (GitHub Actions) runs lint and tests automatically on pull requests and the main branch
+- Maintainers will merge once approved
+- Your contribution will be included in the next versioned release (triggered by a maintainer)
+
+---
+
+Happy hacking 🎉 and thank you for helping improve the `opslevel-cli`!
