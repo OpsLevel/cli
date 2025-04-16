@@ -23,12 +23,12 @@ The `opslevel-cli` is a command-line interface for interacting with the [OpsLeve
 ### Architecture
 
 **[Cobra](https://github.com/spf13/cobra)** is the library we use to define our CLI. Commands are defined as Go structs with handlers, descriptions, and flags.
-- **[Viper](https://github.com/spf13/viper)** handles flag parsing, environment variables, and configuration files.
+- **[Viper](https://github.com/spf13/viper)** handles flag parsing, environment variables, and configuration files.  Examples of our usage of it are [here](https://github.com/OpsLevel/cli/blob/main/src/cmd/root.go#L44) and [here](https://github.com/OpsLevel/cli/blob/main/src/cmd/policy.go#L246)
 - Modular command files live under `/cmd`, grouped by functionality (e.g., services, checks, etc.).
 - Commands are registered to `rootCmd` via `init()` functions.
 - 80% of our functionality is provided by opslevel-go and the purpose of this CLI is just to marshal data between the user and opslevel-go in a UX friendly way.
 - Most commands follow the standard CRUD pattern `opslevel create ...`, `opslevel get ...`, `opslevel list ...`, `opslevel update ...`, `opslevel delete ...`, etc.
-- We have an `opslevel beta` subcommand for experimental commands that are subject to removal.
+- We have an `opslevel beta` subcommand for experimental commands that are subject to change.
 
 ---
 
