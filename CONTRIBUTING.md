@@ -22,13 +22,13 @@ The `opslevel-cli` is a command-line interface for interacting with the [OpsLeve
 
 ### Architecture
 
-- **[Cobra](https://github.com/spf13/cobra)** powers our CLI framework. Commands are defined as Go structs with handlers, descriptions, and flags.
+**[Cobra](https://github.com/spf13/cobra)** is the library we use to define our CLI. Commands are defined as Go structs with handlers, descriptions, and flags.
 - **[Viper](https://github.com/spf13/viper)** handles flag parsing, environment variables, and configuration files.
 - Modular command files live under `/cmd`, grouped by functionality (e.g., services, checks, etc.).
 - Commands are registered to `rootCmd` via `init()` functions.
 - 80% of our functionality is provided by opslevel-go and the purpose of this CLI is just to marshal data between the user and opslevel-go in a UX friendly way.
 - Most commands follow the standard CRUD pattern `opslevel create ...`, `opslevel get ...`, `opslevel list ...`, `opslevel update ...`, `opslevel delete ...`, etc.
-- We have `opslevel beta` subcommand for experimental commands that are subject to removal.
+- We have an `opslevel beta` subcommand for experimental commands that are subject to removal.
 
 ---
 
@@ -36,7 +36,7 @@ The `opslevel-cli` is a command-line interface for interacting with the [OpsLeve
 
 ### Clone the Repo
 
-If you're an external contributor, fork the repo:
+If you're an external contributor fork the repo, then:
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/cli.git
@@ -80,6 +80,7 @@ export OPSLEVEL_API_URL=https://self-hosted.opslevel.dev/
 ### Run the CLI Locally
 
 ```sh
+cd ./src
 go run main.go --help
 ```
 
@@ -107,7 +108,7 @@ This way you can effectively work on both the CLI and `opslevel-go` in parallel 
 - Use `task lint` to check for code quality issues locally
 - Use `task fix` to fix formatting, linting, go.mod, and update submodule all in one go
 
-Our CI pipeline will run `task ci` which can also be run locally to debug any issue that might only arrise in CI.
+Our CI pipeline will run `task ci` which can also be run locally to debug any issue that might only arise in CI.
 
 ---
 
