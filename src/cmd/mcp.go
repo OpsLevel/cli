@@ -135,6 +135,38 @@ var mcpCmd = &cobra.Command{
 			panic(err)
 		}
 
+		// Register Domains
+		if err := server.RegisterTool("domains", "Get all the domains in the opslevel account.  Domains are objects in opslevel that represent a top-level abstraction used to organize and categorize software systems.", func(args NullArguments) (*mcp_golang.ToolResponse, error) {
+			client := getClientGQL()
+			resp, err := client.ListDomains(nil)
+			if err != nil {
+				return nil, err
+			}
+			data, err := json.Marshal(resp.Nodes)
+			if err != nil {
+				return nil, err
+			}
+			return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(data))), nil
+		}); err != nil {
+			panic(err)
+		}
+
+		// Register Systems
+		if err := server.RegisterTool("systems", "Get all the systems in the opslevel account.  Systems are objects in opslevel that represent a grouping of services or components that act together to serve a business function or process.", func(args NullArguments) (*mcp_golang.ToolResponse, error) {
+			client := getClientGQL()
+			resp, err := client.ListSystems(nil)
+			if err != nil {
+				return nil, err
+			}
+			data, err := json.Marshal(resp.Nodes)
+			if err != nil {
+				return nil, err
+			}
+			return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(data))), nil
+		}); err != nil {
+			panic(err)
+		}
+
 		if err := server.Serve(); err != nil {
 			panic(err)
 		}
