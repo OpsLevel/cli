@@ -6,3 +6,4 @@ go.work*
 **coverage.txt
 src/*.yaml
 .vscode/
+src/cli
