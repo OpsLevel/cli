@@ -30,24 +30,6 @@ The `opslevel-cli` is a command-line interface for interacting with the [OpsLeve
 - Most commands follow the standard CRUD pattern `opslevel create ...`, `opslevel get ...`, `opslevel list ...`, `opslevel update ...`, `opslevel delete ...`, etc.
 - We have `opslevel beta` subcommand for experimental commands that are subject to removal.
 
-### Minimal Command Example
-
-```go
-var exampleCmd = &cobra.Command{
-    Use:   "example",
-    Short: "Hello World Command",
-    Long:  "Hello World Command to show how an example command works",
-    RunE: func(cmd *cobra.Command, args []string) error {
-        log.Info().Msg("Hello World!")
-        return nil
-    },
-}
-
-func init() {
-    rootCmd.AddCommand(exampleCmd)
-}
-```
-
 ---
 
 ## Getting Started
@@ -103,8 +85,9 @@ go run main.go --help
 
 This is the easiest way to test your changes live.
 
-### Using a Local `opslevel-go` Branch
+### Using a commit from an `opslevel-go` Branch
 
+Sometimes you will need to make CLI changes in tandem with changes to [`opslevel-go`](https://github.com/OpsLevel/opslevel-go). 
 To test changes from a local branch of [`opslevel-go`](https://github.com/OpsLevel/opslevel-go):
 
 ```sh
@@ -116,6 +99,15 @@ git -C ./src/submodules/opslevel-go checkout --track origin/my-feature-branch
 ```
 
 All CLI calls will now use your local `opslevel-go` code checked out into the submodule at `./src/submodules/opslevel-go`.
+This way you can effectively work on both the CLI and `opslevel-go` in parallel if needed.
+
+## Testing & Tooling
+
+- Use `task test` to run tests locally
+- Use `task lint` to check for code quality issues locally
+- Use `task fix` to fix formatting, linting, go.mod, and update submodule all in one go
+
+Our CI pipeline will run `task ci` which can also be run locally to debug any issue that might only arrise in CI.
 
 ---
 
@@ -150,15 +142,26 @@ Once approved and merged, your change will be included in the next release.
 - Flags and environment variables should be registered with Viper for consistency
 - Prefer readable, minimalistic command logic — delegate heavy logic to opslevel-go unless it's not possible
 
----
+### Minimal Command Example
 
-## Testing & Tooling
+The following shows the minimum amount of code needed to create a command.  There are a plethora of commands already registered to the root command, so this is just an example of how to create a new command.
+Please take a look at the existing commands to get a feel for how they work and whats possible.
 
-- Use `task test` to run tests
-- Use `task lint` to check for code quality issues
-- Add tests alongside any new functionality
+```go
+var exampleCmd = &cobra.Command{
+    Use:   "example",
+    Short: "Hello World Command",
+    Long:  "Hello World Command to show how an example command works",
+    RunE: func(cmd *cobra.Command, args []string) error {
+        log.Info().Msg("Hello World!")
+        return nil
+    },
+}
 
-Our CI pipeline will run `task ci` which can also be run locally to debug any issue that might only arrise in CI.
+func init() {
+    rootCmd.AddCommand(exampleCmd)
+}
+```
 
 ---
 
