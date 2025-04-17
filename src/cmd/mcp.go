@@ -26,9 +26,6 @@ var mcpCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		done := make(chan struct{})
 
-		// transport := http.NewHTTPTransport("/mcp")
-		// transport.WithAddr(":8080")
-		// server := mcp_golang.NewServer(transport)
 		s := server.NewMCPServer(
 			"OpsLevel",
 			"1.0.0",
@@ -66,111 +63,111 @@ var mcpCmd = &cobra.Command{
 				}
 				return mcp.NewToolResultText(string(data)), nil
 			})
-		//
-		//// Register Actions
-		//if err := server.RegisterTool("actions", "Get all the information about actions the user can run in the opslevel account", func(args NullArguments) (*mcp_golang.ToolResponse, error) {
-		//	client := getClientGQL()
-		//	resp, err := client.ListTriggerDefinitions(nil)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	data, err := json.Marshal(resp.Nodes)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(data))), nil
-		//}); err != nil {
-		//	panic(err)
-		//}
-		//
-		//// Register Filters
-		//if err := server.RegisterTool("filters", "Get all the rubric filter names and which predicates they have for the opslevel account", func(args NullArguments) (*mcp_golang.ToolResponse, error) {
-		//	client := getClientGQL()
-		//	resp, err := client.ListFilters(nil)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	data, err := json.Marshal(resp.Nodes)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(data))), nil
-		//}); err != nil {
-		//	panic(err)
-		//}
-		//
-		//// Register Components
-		//if err := server.RegisterTool("components", "Get all the components in the opslevel account.  Components are objects in opslevel that represent things like apis, libraries, services, frontends, backends, etc.", func(args NullArguments) (*mcp_golang.ToolResponse, error) {
-		//	client := getClientGQL()
-		//	resp, err := client.ListServices(nil)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	var components []LightweightComponent
-		//	for _, node := range resp.Nodes {
-		//		components = append(components, LightweightComponent{
-		//			Id:    string(node.Id),
-		//			Name:  node.Name,
-		//			Owner: node.Owner.Alias,
-		//			URL:   node.HtmlURL,
-		//		})
-		//	}
-		//	data, err := json.Marshal(components)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(data))), nil
-		//}); err != nil {
-		//	panic(err)
-		//}
-		//
-		//// Register Infra
-		//if err := server.RegisterTool("infrastructure", "Get all the infrastructure in the opslevel account.  Infrastructure are objects in opslevel that represent cloud provider resources like vpc, databases, caches, networks, vms, etc.", func(args NullArguments) (*mcp_golang.ToolResponse, error) {
-		//	client := getClientGQL()
-		//	resp, err := client.ListInfrastructure(nil)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	data, err := json.Marshal(resp.Nodes)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(data))), nil
-		//}); err != nil {
-		//	panic(err)
-		//}
-		//
-		//// Register Domains
-		//if err := server.RegisterTool("domains", "Get all the domains in the opslevel account.  Domains are objects in opslevel that represent a top-level abstraction used to organize and categorize software systems.", func(args NullArguments) (*mcp_golang.ToolResponse, error) {
-		//	client := getClientGQL()
-		//	resp, err := client.ListDomains(nil)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	data, err := json.Marshal(resp.Nodes)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(data))), nil
-		//}); err != nil {
-		//	panic(err)
-		//}
-		//
-		//// Register Systems
-		//if err := server.RegisterTool("systems", "Get all the systems in the opslevel account.  Systems are objects in opslevel that represent a grouping of services or components that act together to serve a business function or process.", func(args NullArguments) (*mcp_golang.ToolResponse, error) {
-		//	client := getClientGQL()
-		//	resp, err := client.ListSystems(nil)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	data, err := json.Marshal(resp.Nodes)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(data))), nil
-		//}); err != nil {
-		//	panic(err)
-		//}
+
+		// Register Actions
+		s.AddTool(
+			mcp.NewTool("actions", mcp.WithDescription("Get all the information about actions the user can run in the opslevel account")),
+			func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				client := getClientGQL()
+				resp, err := client.ListTriggerDefinitions(nil)
+				if err != nil {
+					return nil, err
+				}
+				data, err := json.Marshal(resp.Nodes)
+				if err != nil {
+					return nil, err
+				}
+				return mcp.NewToolResultText(string(data)), nil
+			})
+
+		// Register Filters
+		s.AddTool(
+			mcp.NewTool("filters", mcp.WithDescription("Get all the rubric filter names and which predicates they have for the opslevel account")),
+			func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				client := getClientGQL()
+				resp, err := client.ListFilters(nil)
+				if err != nil {
+					return nil, err
+				}
+				data, err := json.Marshal(resp.Nodes)
+				if err != nil {
+					return nil, err
+				}
+				return mcp.NewToolResultText(string(data)), nil
+			})
+
+		// Register Components
+		s.AddTool(
+			mcp.NewTool("components", mcp.WithDescription("Get all the components in the opslevel account.  Components are objects in opslevel that represent things like apis, libraries, services, frontends, backends, etc.")),
+			func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				client := getClientGQL()
+				resp, err := client.ListServices(nil)
+				if err != nil {
+					return nil, err
+				}
+				var components []LightweightComponent
+				for _, node := range resp.Nodes {
+					components = append(components, LightweightComponent{
+						Id:    string(node.Id),
+						Name:  node.Name,
+						Owner: node.Owner.Alias,
+						URL:   node.HtmlURL,
+					})
+				}
+				data, err := json.Marshal(components)
+				if err != nil {
+					return nil, err
+				}
+				return mcp.NewToolResultText(string(data)), nil
+			})
+
+		// Register Infra
+		s.AddTool(
+			mcp.NewTool("infrastructure", mcp.WithDescription("Get all the infrastructure in the opslevel account.  Infrastructure are objects in opslevel that represent cloud provider resources like vpc, databases, caches, networks, vms, etc.")),
+			func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				client := getClientGQL()
+				resp, err := client.ListInfrastructure(nil)
+				if err != nil {
+					return nil, err
+				}
+				data, err := json.Marshal(resp.Nodes)
+				if err != nil {
+					return nil, err
+				}
+				return mcp.NewToolResultText(string(data)), nil
+			})
+
+		// Register Domains
+		s.AddTool(
+			mcp.NewTool("domains", mcp.WithDescription("Get all the domains in the opslevel account.  Domains are objects in opslevel that represent a top-level abstraction used to organize and categorize software systems.")),
+			func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				client := getClientGQL()
+				resp, err := client.ListDomains(nil)
+				if err != nil {
+					return nil, err
+				}
+				data, err := json.Marshal(resp.Nodes)
+				if err != nil {
+					return nil, err
+				}
+				return mcp.NewToolResultText(string(data)), nil
+			})
+
+		// Register Systems
+		s.AddTool(
+			mcp.NewTool("systems", mcp.WithDescription("Get all the systems in the opslevel account.  Systems are objects in opslevel that represent a grouping of services or components that act together to serve a business function or process.")),
+			func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				client := getClientGQL()
+				resp, err := client.ListSystems(nil)
+				if err != nil {
+					return nil, err
+				}
+				data, err := json.Marshal(resp.Nodes)
+				if err != nil {
+					return nil, err
+				}
+				return mcp.NewToolResultText(string(data)), nil
+			})
 
 		log.Info().Msg("Starting MCP server...")
 		if err := server.ServeStdio(s); err != nil {
