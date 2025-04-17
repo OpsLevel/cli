@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	
+
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rs/zerolog/log"
