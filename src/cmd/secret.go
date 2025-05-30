@@ -38,7 +38,7 @@ EOF`,
 		newSecret, err := getClientGQL().CreateSecret(secretAlias, *input)
 		cobra.CheckErr(err)
 
-		fmt.Printf(string(newSecret.Id))
+		fmt.Print("%s", string(newSecret.Id))
 	},
 }
 
@@ -102,7 +102,7 @@ EOF`,
 		cobra.CheckErr(err)
 		secret, err := getClientGQL().UpdateSecret(secretId, *input)
 		cobra.CheckErr(err)
-		fmt.Printf(string(secret.Id))
+		fmt.Print("%s", string(secret.Id))
 	},
 }
 

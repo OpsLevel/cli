@@ -3,8 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"slices"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/mitchellh/mapstructure"
 
@@ -33,9 +34,9 @@ type IntegrationInputType struct {
 
 type IntegrationInput interface {
 	opslevel.AWSIntegrationInput |
-	opslevel.AzureResourcesIntegrationInput |
-	opslevel.EventIntegrationInput |
-	opslevel.GoogleCloudIntegrationInput
+		opslevel.AzureResourcesIntegrationInput |
+		opslevel.EventIntegrationInput |
+		opslevel.GoogleCloudIntegrationInput
 }
 
 func validateIntegrationInput() (*IntegrationInputType, error) {
