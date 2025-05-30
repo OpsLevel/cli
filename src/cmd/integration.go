@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"slices"
 
 	"github.com/mitchellh/mapstructure"
@@ -32,9 +33,9 @@ type IntegrationInputType struct {
 
 type IntegrationInput interface {
 	opslevel.AWSIntegrationInput |
-		opslevel.AzureResourcesIntegrationInput |
-		opslevel.EventIntegrationInput |
-		opslevel.GoogleCloudIntegrationInput
+	opslevel.AzureResourcesIntegrationInput |
+	opslevel.EventIntegrationInput |
+	opslevel.GoogleCloudIntegrationInput
 }
 
 func validateIntegrationInput() (*IntegrationInputType, error) {
@@ -246,11 +247,17 @@ EOF
 			input.Spec["type"] = input.Kind
 			eventIntegrationInput, err := readIntegrationInput[opslevel.EventIntegrationInput](input)
 			cobra.CheckErr(err)
-			result, err = getClientGQL().UpdateEventIntegration(opslevel.EventIntegrationUpdateInput{
-				Id:   opslevel.ID(args[0]),
-				Name: eventIntegrationInput.Name.Value,
-			})
-			cobra.CheckErr(err)
+			if eventIntegrationInput.Name == nil {
+				apiInput := opslevel.EventIntegrationUpdateInput{
+					Id:   opslevel.ID(args[0]),
+					Name: eventIntegrationInput.Name.Value,
+				}
+				result, err = getClientGQL().UpdateEventIntegration(apiInput)
+				cobra.CheckErr(err)
+			} else {
+				log.Warn().Msgf("event integration 'name' cannot be updated as no name field was provided")
+				return
+			}
 		} else {
 			switch input.Kind {
 			case IntegrationTypeAWS:
