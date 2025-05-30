@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 	"golang.org/x/exp/slices"
 
 	"github.com/spf13/cobra"

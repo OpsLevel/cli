@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 
 	"github.com/manifoldco/promptui"
 )

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/opslevel/cli/cmd"
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 )
 
 const (

@@ -14,7 +14,7 @@ import (
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 	"github.com/relvacode/iso8601"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"

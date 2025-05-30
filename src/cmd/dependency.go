@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 	"github.com/spf13/cobra"
 )
 
