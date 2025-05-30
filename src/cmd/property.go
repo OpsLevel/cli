@@ -61,11 +61,7 @@ var listPropertyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var service *opslevel.Service
 		var err error
-		if opslevel.IsID(args[0]) {
-			service, err = getClientGQL().GetService(*opslevel.NewID(args[0]))
-		} else {
-			service, err = getClientGQL().GetServiceWithAlias(args[0])
-		}
+		service, err = getClientGQL().GetService(args[0])
 		cobra.CheckErr(err)
 		properties, err := service.GetProperties(getClientGQL(), nil)
 		cobra.CheckErr(err)
@@ -227,7 +223,8 @@ func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
 		propDefInput.Description = opslevel.RefOf(description)
 	}
 	if propertyDisplayStatus, ok := data["propertyDisplayStatus"].(string); ok {
-		propDefInput.PropertyDisplayStatus = opslevel.RefOf(opslevel.PropertyDisplayStatusEnum(propertyDisplayStatus))
+		status := opslevel.PropertyDisplayStatusEnum(propertyDisplayStatus)
+		propDefInput.PropertyDisplayStatus = &status
 	}
 
 	return &propDefInput, nil

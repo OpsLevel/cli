@@ -53,7 +53,7 @@ opslevel create user "jane@example.com" "Jane Doe" Admin --skip-send-invite --sk
 
 		userInput := opslevel.UserInput{
 			Name:             opslevel.RefOf(name),
-			Role:             opslevel.RefOf(role),
+			Role:             &role,
 			SkipWelcomeEmail: opslevel.RefOf(skipEmail),
 		}
 		resource, err := getClientGQL().InviteUser(email, userInput, !skipSendInvite)
@@ -130,13 +130,13 @@ opslevel list user -o json | jq 'map({"key": .Name, "value": .Role}) | from_entr
 			w := csv.NewWriter(os.Stdout)
 			w.Write([]string{"ID", "EMAIL", "NAME", "ROLE", "URL"})
 			for _, item := range list {
-				w.Write([]string{string(item.Id), item.Email, item.Name, string(item.Role), item.HTMLUrl})
+				w.Write([]string{string(item.Id), item.Email, item.Name, string(item.Role), item.HtmlUrl})
 			}
 			w.Flush()
 		} else {
-			w := common.NewTabWriter("NAME", "EMAIL", "ID")
+			w := common.NewTabWriter("NAME", "EMAIL", "ROLE", "ID")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Email, item.Id)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Name, item.Email, string(item.Role), item.Id)
 			}
 			w.Flush()
 		}
@@ -191,10 +191,12 @@ EOF
 			userRole := opslevel.UserRoleUser
 			if slices.Contains(opslevel.AllUserRole, role) {
 				userRole = opslevel.UserRole(role)
+			} else {
+				log.Warn().Msgf("user '%s' has invalid role '%s' defaulting role to 'User'", name, role)
 			}
 			input := opslevel.UserInput{
 				Name:             opslevel.RefOf(name),
-				Role:             opslevel.RefOf(userRole),
+				Role:             &userRole,
 				SkipWelcomeEmail: opslevel.RefOf(skipWelcomeEmail),
 			}
 			user, err := getClientGQL().InviteUser(email, input, !skipSendInvite)

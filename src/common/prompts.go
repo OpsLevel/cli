@@ -37,7 +37,7 @@ func PromptForCategories(client *opslevel.Client) (*opslevel.Category, error) {
 }
 
 func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
-	list, err := client.ListLevels()
+	resp, err := client.ListLevels(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func PromptForLevels(client *opslevel.Client) (*opslevel.Level, error) {
 	}
 
 	var filteredList []opslevel.Level
-	for _, val := range list {
+	for _, val := range resp.Nodes {
 		if val.Index != 0 {
 			filteredList = append(filteredList, val)
 		}

@@ -58,7 +58,7 @@ EOF`,
 			cobra.CheckErr(err)
 			result, err := getClientGQL().CreateWebhookAction(*input)
 			cobra.CheckErr(err)
-			fmt.Printf("created webhook action: %s\n", result.Id)
+			fmt.Printf("created webhook action: %s\n", string(result.CustomActionsId.Id))
 		default:
 			err := fmt.Errorf("unknown action type: '%s'", actionType)
 			cobra.CheckErr(err)
@@ -94,7 +94,7 @@ var listActionCmd = &cobra.Command{
 		} else {
 			w := common.NewTabWriter("ID", "NAME", "HTTP_METHOD", "WEBHOOK_URL")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Id, item.Name, item.HTTPMethod, item.WebhookURL)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", string(item.CustomActionsId.Id), item.Name, item.HttpMethod, item.WebhookUrl)
 			}
 			w.Flush()
 		}

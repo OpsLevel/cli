@@ -173,7 +173,7 @@ opslevel list infra -o json | jq 'map(select(.type == "Database") | .data | from
 			w := csv.NewWriter(os.Stdout)
 			w.Write([]string{"NAME", "ID", "ALIASES"})
 			for _, item := range list {
-				w.Write([]string{item.Name, item.Id, strings.Join(item.Aliases, "/")})
+				w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
 			}
 			w.Flush()
 		} else {
@@ -216,7 +216,7 @@ EOF`,
 		cobra.CheckErr(err)
 		result, err := getClientGQL().UpdateInfrastructure(key, *input)
 		cobra.CheckErr(err)
-		fmt.Println(result.Id)
+		fmt.Println(string(result.Id))
 	},
 }
 

@@ -73,7 +73,7 @@ opslevel list scorecards -o json | jq 'map( {(.Name): (.ServiceCount)} )'
 		} else {
 			w := common.NewTabWriter("ID", "NAME", "PASSING_CHECKS", "CHECKS_COUNT", "SERVICE_COUNT")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%d\t%d\t%d\n", item.Id, item.Name, item.PassingChecks, item.ChecksCount, item.ServiceCount)
+				fmt.Fprintf(w, "%s\t%s\t%d\t%d\t%d\n", item.Id, item.Name, item.PassingChecks, item.TotalChecks, item.ServiceCount)
 			}
 			w.Flush()
 		}

@@ -248,7 +248,7 @@ EOF
 			cobra.CheckErr(err)
 			result, err = getClientGQL().UpdateEventIntegration(opslevel.EventIntegrationUpdateInput{
 				Id:   opslevel.ID(args[0]),
-				Name: *eventIntegrationInput.Name,
+				Name: eventIntegrationInput.Name.Value,
 			})
 			cobra.CheckErr(err)
 		} else {

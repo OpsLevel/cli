@@ -131,13 +131,13 @@ var listLevelCmd = &cobra.Command{
 	Short:   "Lists rubric levels",
 	Long:    `Lists rubric levels`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListLevels()
+		resp, err := getClientGQL().ListLevels(nil)
 		cobra.CheckErr(err)
 		if isJsonOutput() {
-			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+			common.JsonPrint(json.MarshalIndent(resp.Nodes, "", "    "))
 		} else {
 			w := common.NewTabWriter("NAME", "ALIAS", "ID")
-			for _, item := range list {
+			for _, item := range resp.Nodes {
 				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Alias, item.Id)
 			}
 			w.Flush()

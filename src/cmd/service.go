@@ -121,13 +121,13 @@ var listServiceCmd = &cobra.Command{
 			w := csv.NewWriter(os.Stdout)
 			w.Write([]string{"NAME", "ID", "TYPE", "ALIASES"})
 			for _, item := range list {
-				w.Write([]string{item.Name, string(item.Id), item.Type.Alias, strings.Join(item.Aliases, "/")})
+				w.Write([]string{item.Name, string(item.Id), item.Type.Aliases[0], strings.Join(item.Aliases, "/")})
 			}
 			w.Flush()
 		} else {
 			w := common.NewTabWriter("NAME", "ID", "TYPE", "ALIASES")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t\n", item.Name, item.Id, item.Type.Alias, strings.Join(item.Aliases, ","))
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t\n", item.Name, item.Id, item.Type.Aliases[0], strings.Join(item.Aliases, ","))
 			}
 			w.Flush()
 		}
@@ -159,8 +159,7 @@ EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.ServiceUpdateInput]()
 		cobra.CheckErr(err)
-		convertedInput := convertServiceUpdateInput(*input)
-		service, err := getClientGQL().UpdateService(convertedInput)
+		service, err := getClientGQL().UpdateService(*input)
 		cobra.CheckErr(err)
 		common.JsonPrint(json.MarshalIndent(service, "", "    "))
 	},
@@ -216,13 +215,13 @@ EOF
 			tier := reader.Text("Tier")
 			if tier != "" {
 				if item, ok := opslevel.Cache.Tiers[tier]; ok {
-					input.TierAlias = &item.Alias
+					input.TierAlias = opslevel.RefOf(item.Alias)
 				}
 			}
 			lifecycle := reader.Text("Lifecycle")
 			if lifecycle != "" {
 				if item, ok := opslevel.Cache.Lifecycles[lifecycle]; ok {
-					input.LifecycleAlias = &item.Alias
+					input.LifecycleAlias = opslevel.RefOf(item.Alias)
 				}
 			}
 			owner := reader.Text("Owner")
@@ -257,23 +256,6 @@ func init() {
 	importCmd.AddCommand(importServicesCmd)
 }
 
-func convertServiceUpdateInput(input opslevel.ServiceUpdateInput) opslevel.ServiceUpdateInputV2 {
-	return opslevel.ServiceUpdateInputV2{
-		Alias:                 NullableString(input.Alias),
-		Description:           NullableString(input.Description),
-		Framework:             NullableString(input.Framework),
-		Id:                    input.Id,
-		Language:              NullableString(input.Language),
-		LifecycleAlias:        NullableString(input.LifecycleAlias),
-		Name:                  NullableString(input.Name),
-		OwnerInput:            input.OwnerInput,
-		Parent:                input.Parent,
-		SkipAliasesValidation: input.SkipAliasesValidation,
-		Product:               NullableString(input.Product),
-		TierAlias:             NullableString(input.TierAlias),
-	}
-}
-
 func NullableString(value *string) *opslevel.Nullable[string] {
 	if value == nil {
 		return nil
@@ -285,14 +267,7 @@ func NullableString(value *string) *opslevel.Nullable[string] {
 }
 
 func getService(identifier string) (*opslevel.Service, error) {
-	var err error
-	var service *opslevel.Service
-
-	if opslevel.IsID(identifier) {
-		service, err = getClientGQL().GetService(opslevel.ID(identifier))
-	} else {
-		service, err = getClientGQL().GetServiceWithAlias(identifier)
-	}
+	service, err := getClientGQL().GetService(identifier)
 	if service == nil || !opslevel.IsID(string(service.Id)) {
 		err = fmt.Errorf("service with identifier '%s' not found", identifier)
 	}
