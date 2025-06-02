@@ -248,7 +248,7 @@ EOF
 			input.Spec["type"] = input.Kind
 			eventIntegrationInput, err := readIntegrationInput[opslevel.EventIntegrationInput](input)
 			cobra.CheckErr(err)
-			if eventIntegrationInput.Name == nil {
+			if eventIntegrationInput.Name != nil {
 				apiInput := opslevel.EventIntegrationUpdateInput{
 					Id:   opslevel.ID(args[0]),
 					Name: eventIntegrationInput.Name.Value,
