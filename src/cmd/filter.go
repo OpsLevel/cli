@@ -100,19 +100,11 @@ EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.FilterCreateInput]()
+		input, err := readResourceInput[opslevel.FilterUpdateInput]()
 		cobra.CheckErr(err)
+		input.Id = *opslevel.NewID(args[0])
 
-		// hack: in the future all ObjectUpdateInput and ObjectCreateInput
-		// will be merged into ObjectInput. for now, create an update input
-		// by adding in the first argument.
-		updateInput := &opslevel.FilterUpdateInput{
-			Id:         *opslevel.NewID(args[0]),
-			Name:       opslevel.NewNullableFrom(input.Name),
-			Predicates: input.Predicates,
-			Connective: input.Connective,
-		}
-		filter, err := getClientGQL().UpdateFilter(*updateInput)
+		filter, err := getClientGQL().UpdateFilter(*input)
 		cobra.CheckErr(err)
 		common.JsonPrint(json.MarshalIndent(filter, "", "    "))
 	},
