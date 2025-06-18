@@ -158,6 +158,14 @@ type:
 EOF`,
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.ServiceUpdateInput]()
+		if len(args) == 1 {
+			key := args[0]
+			if opslevel.IsID(key) {
+				input.Id = opslevel.RefOf(opslevel.ID(key))
+			} else {
+				input.Alias = opslevel.RefOf(key)
+			}
+		}
 		cobra.CheckErr(err)
 		service, err := getClientGQL().UpdateService(*input)
 		cobra.CheckErr(err)

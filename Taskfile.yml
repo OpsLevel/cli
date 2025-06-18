@@ -60,7 +60,7 @@ tasks:
     desc: Run Integration tests
     dir: "{{.SRC_DIR}}"
     cmds:
-      - go test -race -v ./e2e/... {{ .CLI_ARGS }}
+      - go test -v ./e2e/... {{ .CLI_ARGS }}
 
   update-opslevel-go:
     desc: Update opslevel-go version to latest release

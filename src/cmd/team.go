@@ -31,12 +31,12 @@ parentTeam:
   alias: "parent-team"
 responsibilities: "all the things"
 EOF`,
-	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
-		key := args[0]
 		input, err := readResourceInput[opslevel.TeamCreateInput]()
-		input.Name = key
+		if len(args) == 1 {
+			input.Name = args[0]
+		}
 		cobra.CheckErr(err)
 		team, err := getClientGQL().CreateTeam(*input)
 		cobra.CheckErr(err)
