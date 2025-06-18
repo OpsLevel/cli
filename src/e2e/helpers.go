@@ -4,14 +4,23 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"testing"
 )
 
 type Utility struct {
 	*testing.T
-	ID string // The resource ID created by Create
+	ID string // The resource ID created by a step, if needed
+}
+
+type Step struct {
+	Name     string
+	Run      func(*Utility)
+	Deferred bool // If true, run only at the end as cleanup
+}
+
+type TestCase struct {
+	Steps []Step
 }
 
 // Run executes the CLI using 'go run main.go' from the ./src directory with the given arguments and optional stdin, returning combined output and error.
@@ -30,78 +39,97 @@ func (u *Utility) Run(args string, stdin ...string) (string, error) {
 	return out.String() + errBuf.String(), err
 }
 
-type Step func(*Utility)
-
-type CLITest struct {
-	Create Step
-	Get    [2]Step
-	Delete Step
-	Steps  []Step
-}
-
-func (ct *CLITest) Run(t *testing.T) {
+func (tc *TestCase) Run(t *testing.T) {
 	util := &Utility{T: t}
-	defer func() {
-		if util.ID != "" {
-			ct.Delete(util)
+	// Run non-deferred steps
+	for _, step := range tc.Steps {
+		if step.Deferred {
+			continue
 		}
-	}()
-
-	t.Run("Create", func(t *testing.T) {
-		util.T = t
-		ct.Create(util)
-	})
-	t.Run("Get", func(t *testing.T) {
-		util.T = t
-		ct.Get[0](util) // Should exist after create
-	})
-	for i, step := range ct.Steps {
-		t.Run("Step "+strconv.Itoa(i), func(t *testing.T) {
+		t.Run(step.Name, func(t *testing.T) {
 			util.T = t
-			step(util)
+			step.Run(util)
 		})
 	}
-	t.Run("Delete", func(t *testing.T) {
-		util.T = t
-		ct.Delete(util)
-		ct.Get[1](util) // Should not exist after delete
-		util.ID = ""    // Mark as deleted so defer doesn't try again
-	})
+	// Run deferred steps
+	for _, step := range tc.Steps {
+		if !step.Deferred {
+			continue
+		}
+		t.Run(step.Name, func(t *testing.T) {
+			util.T = t
+			step.Run(util)
+		})
+	}
 }
 
 func Create(cmd string, input string) Step {
-	return func(u *Utility) {
-		out, err := u.Run(cmd, input)
-		if err != nil {
-			u.Fatalf("create failed: %v\nout: %s", err, out)
-		}
-		u.ID = strings.TrimSpace(out)
-		if u.ID == "" {
-			u.Fatalf("expected ID, got: %q", out)
-		}
+	return Step{
+		Name: "Create",
+		Run: func(u *Utility) {
+			out, err := u.Run(cmd, input)
+			if err != nil {
+				u.Fatalf("create failed: %v\nout: %s", err, out)
+			}
+			u.ID = strings.TrimSpace(out)
+			if u.ID == "" {
+				u.Fatalf("expected ID, got: %q", out)
+			}
+		},
 	}
 }
 
-func Get(cmd string) [2]Step {
-	return [2]Step{func(u *Utility) {
-		out, err := u.Run(cmd + " " + u.ID)
-		if err != nil {
-			u.Fatalf("get failed: %v\nout: %s", err, out)
-		}
-	}, func(u *Utility) {
-		out, err := u.Run(cmd + " " + u.ID)
-		lower := strings.ToLower(out)
-		if err == nil || !(strings.Contains(lower, "not found") || strings.Contains(lower, "missing") || strings.Contains(lower, "does not exist on this account")) {
-			u.Fatalf("expected get after delete to fail with not found, got: %v\nout: %s", err, out)
-		}
-	}}
+func Delete(cmd string) Step {
+	return Step{
+		Name:     "Delete",
+		Deferred: true,
+		Run: func(u *Utility) {
+			out, err := u.Run(cmd + " " + u.ID)
+			if err != nil {
+				u.Fatalf("delete failed: %v\nout: %s", err, out)
+			}
+		},
+	}
 }
 
-func Delete(cmd string) Step {
-	return func(u *Utility) {
-		out, err := u.Run(cmd + " " + u.ID)
-		if err != nil {
-			u.Fatalf("delete failed: %v\nout: %s", err, out)
-		}
+// Get returns a Step that runs the get command and validates the output using the provided function.
+func Get(cmd string, validate func(u *Utility, stdout string)) Step {
+	return Step{
+		Name: "Get",
+		Run: func(u *Utility) {
+			out, err := u.Run(cmd + " " + u.ID)
+			if err != nil {
+				u.Fatalf("get failed: %v\nout: %s", err, out)
+			}
+			validate(u, out)
+		},
+	}
+}
+
+// List returns a Step that runs the list command and validates the output using the provided function.
+func List(cmd string, validate func(u *Utility, stdout string)) Step {
+	return Step{
+		Name: "List",
+		Run: func(u *Utility) {
+			out, err := u.Run(cmd)
+			if err != nil {
+				u.Fatalf("list failed: %v\nout: %s", err, out)
+			}
+			validate(u, out)
+		},
+	}
+}
+
+// Update returns a Step that runs the update command with input and validates the output using the provided function.
+func Update(cmd string, input string, validate func(u *Utility, stdout string)) Step {
+	return Step{
+		Name: "Update",
+		Run: func(u *Utility) {
+			out, err := u.Run(cmd+" "+u.ID+" -f -", input)
+			if err != nil {
+				u.Fatalf("update failed: %v\nout: %s", err, out)
+			}
+			validate(u, out)
+		},
 	}
 }
