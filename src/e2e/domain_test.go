@@ -8,6 +8,15 @@ import (
 func TestDomainHappyPath(t *testing.T) {
 	tc := CLITest{
 		Steps: []Step{
+			Example{
+				Cmd: "example domain",
+				Yaml: `
+description: example_description
+name: example_name
+note: example_note
+ownerId: Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk
+`,
+			},
 			Create{
 				Cmd: "create domain",
 				Input: `

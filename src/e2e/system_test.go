@@ -15,6 +15,8 @@ description: example_description
 name: example_name
 note: example_note
 ownerId: Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk
+parent:
+  alias: domain-alias
 `,
 			},
 			Create{

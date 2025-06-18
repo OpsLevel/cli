@@ -22,8 +22,8 @@ var exampleSystemCmd = &cobra.Command{
 			Name:        opslevel.RefOf("example_name"),
 			Description: opslevel.RefOf("example_description"),
 			OwnerId:     opslevel.RefOf(opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk")),
-			//Parent:      opslevel.NewIdentifier("domain-alias"),
-			Note: opslevel.RefOf("example_note"),
+			Parent:      opslevel.NewIdentifier("domain-alias"),
+			Note:        opslevel.RefOf("example_note"),
 		}))
 	},
 }
