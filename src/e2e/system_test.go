@@ -8,6 +8,15 @@ import (
 func TestSystemHappyPath(t *testing.T) {
 	tc := CLITest{
 		Steps: []Step{
+			Example{
+				Cmd: "example system",
+				Yaml: `
+description: example_description
+name: example_name
+note: example_note
+ownerId: Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk
+`,
+			},
 			Create{
 				Cmd: "create system",
 				Input: `
@@ -71,4 +80,4 @@ description: "Updated by integration test"
 		},
 	}
 	tc.Run(t)
-} 
+}

@@ -24,6 +24,20 @@ func getExample[T any]() string {
 	return getYaml[T]()
 }
 
+func getExample2[T any](v T) string {
+	var out []byte
+	var err error
+	if exampleIsJson {
+		out, err = json.Marshal(v)
+	} else {
+		out, err = yaml.Marshal(v)
+	}
+	if err != nil {
+		panic("unexpected error getting example")
+	}
+	return string(out)
+}
+
 func getJson[T any]() string {
 	var (
 		out []byte

@@ -172,3 +172,23 @@ func (s Missing) Run(u *Utility) {
 
 func (s Missing) Name() string   { return "Missing" }
 func (s Missing) Deferred() bool { return true }
+
+type Example struct {
+	Cmd  string
+	Yaml string
+}
+
+func (s Example) Run(u *Utility) {
+	out, err := u.Run(s.Cmd + " --yaml")
+	if err != nil {
+		panic("example failed: " + err.Error() + "\nout: " + out)
+	}
+	wip := strings.TrimSpace(out)
+	expected := strings.TrimSpace(s.Yaml)
+	if wip != expected {
+		u.Fatalf("example mismatch for '%s'\nExpected:\n%s\nWIP:\n%s", s.Cmd, expected, wip)
+	}
+}
+
+func (s Example) Name() string   { return "Example" }
+func (s Example) Deferred() bool { return false }
