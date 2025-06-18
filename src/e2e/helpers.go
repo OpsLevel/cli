@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -40,21 +41,32 @@ type CLITest struct {
 
 func (ct *CLITest) Run(t *testing.T) {
 	util := &Utility{T: t}
-
 	defer func() {
 		if util.ID != "" {
 			ct.Delete(util)
 		}
 	}()
 
-	ct.Create(util)
-	ct.Get[0](util) // Should exist after create
-	for _, step := range ct.Steps {
-		step(util)
+	t.Run("Create", func(t *testing.T) {
+		util.T = t
+		ct.Create(util)
+	})
+	t.Run("Get", func(t *testing.T) {
+		util.T = t
+		ct.Get[0](util) // Should exist after create
+	})
+	for i, step := range ct.Steps {
+		t.Run("Step "+strconv.Itoa(i), func(t *testing.T) {
+			util.T = t
+			step(util)
+		})
 	}
-	ct.Delete(util)
-	ct.Get[1](util) // Should not exist after delete
-	util.ID = ""    // Mark as deleted so defer doesn't try again
+	t.Run("Delete", func(t *testing.T) {
+		util.T = t
+		ct.Delete(util)
+		ct.Get[1](util) // Should not exist after delete
+		util.ID = ""    // Mark as deleted so defer doesn't try again
+	})
 }
 
 func Create(cmd string, input string) Step {
@@ -79,7 +91,7 @@ func Get(cmd string) [2]Step {
 	}, func(u *Utility) {
 		out, err := u.Run(cmd + " " + u.ID)
 		lower := strings.ToLower(out)
-		if err == nil || !(strings.Contains(lower, "not found") || strings.Contains(lower, "missing") || strings.Contains(lower, "gone")) {
+		if err == nil || !(strings.Contains(lower, "not found") || strings.Contains(lower, "missing") || strings.Contains(lower, "does not exist on this account")) {
 			u.Fatalf("expected get after delete to fail with not found, got: %v\nout: %s", err, out)
 		}
 	}}
