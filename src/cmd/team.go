@@ -103,7 +103,7 @@ var exampleContactCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample2(opslevel.ContactInput{
 			DisplayName: opslevel.RefOf("example_display_name"),
-			Address:     opslevel.RefOf("example_address"),
+			Address:     "example_address",
 		}))
 	},
 }

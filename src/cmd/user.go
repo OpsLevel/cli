@@ -20,7 +20,9 @@ var exampleUserCmd = &cobra.Command{
 	Short: "Example User",
 	Long:  `Example User`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.UserInput]())
+		fmt.Println(getExample2(opslevel.UserInput{
+			Name: opslevel.RefOf("example_name"),
+		}))
 	},
 }
 

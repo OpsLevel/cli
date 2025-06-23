@@ -17,13 +17,6 @@ var exampleCmd = &cobra.Command{
 	Long:  "Examples of OpsLevel resources in different formats",
 }
 
-func getExample[T any]() string {
-	if exampleIsJson {
-		return getJson[T]()
-	}
-	return getYaml[T]()
-}
-
 func getExample2[T any](v T) string {
 	var out []byte
 	var err error

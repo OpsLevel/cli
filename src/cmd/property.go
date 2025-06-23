@@ -20,7 +20,11 @@ var examplePropertyCmd = &cobra.Command{
 	Short:   "Example Property",
 	Long:    `Example Property`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.PropertyInput]())
+		fmt.Println(getExample2(opslevel.PropertyInput{
+			Definition: *opslevel.NewIdentifier("example_definition"),
+			Owner:      *opslevel.NewIdentifier("example_owner"),
+			Value:      opslevel.JsonString("example_value"),
+		}))
 	},
 }
 
@@ -149,7 +153,13 @@ var examplePropertyDefinitionCmd = &cobra.Command{
 	Short:   "Example Property Definition",
 	Long:    `Example Property Definition`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.PropertyDefinitionInput]())
+		fmt.Println(getExample2(opslevel.PropertyDefinitionInput{
+			Name:        opslevel.RefOf("example_name"),
+			Description: opslevel.RefOf("example_description"),
+			Schema: opslevel.JSONSchema{
+				"type": "string",
+			},
+		}))
 	},
 }
 

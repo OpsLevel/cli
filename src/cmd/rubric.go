@@ -16,7 +16,9 @@ var exampleCategoryCmd = &cobra.Command{
 	Short:   "Example rubric category",
 	Long:    `Example rubric category`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.CategoryCreateInput]())
+		fmt.Println(getExample2(opslevel.CategoryCreateInput{
+			Name: "example_name",
+		}))
 	},
 }
 
@@ -92,7 +94,9 @@ var exampleLevelCmd = &cobra.Command{
 	Short: "Example rubric level",
 	Long:  `Example rubric level`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.LevelCreateInput]())
+		fmt.Println(getExample2(opslevel.LevelCreateInput{
+			Name: "example_name",
+		}))
 	},
 }
 

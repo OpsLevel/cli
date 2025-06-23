@@ -16,7 +16,10 @@ var exampleAliasCmd = &cobra.Command{
 	Short: "Example alias",
 	Long:  `Example alias`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.AliasCreateInput]())
+		fmt.Println(getExample2(opslevel.AliasCreateInput{
+			OwnerId: opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk"),
+			Alias:   "example_alias",
+		}))
 	},
 }
 

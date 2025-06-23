@@ -16,7 +16,10 @@ var exampleTriggerDefinitionCmd = &cobra.Command{
 	Short:   "Example Scorecard",
 	Long:    `Example Scorecard`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.CustomActionsTriggerDefinitionCreateInput]())
+		fmt.Println(getExample2(opslevel.CustomActionsTriggerDefinitionCreateInput{
+			Name:    "example_name",
+			OwnerId: opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk"),
+		}))
 	},
 }
 
