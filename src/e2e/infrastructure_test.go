@@ -8,6 +8,18 @@ import (
 func TestInfrastructureHappyPath(t *testing.T) {
 	tc := CLITest{
 		Steps: []Step{
+			Example{
+				Cmd: "example infra",
+				Yaml: `
+ownerId: Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk
+data:
+  endpoint: https://google.com
+  engine: BigQuery
+  name: my-big-query
+  replica: false
+providerResourceType: example_type
+`,
+			},
 			Create{
 				Cmd: "create infra",
 				Input: `

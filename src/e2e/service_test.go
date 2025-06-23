@@ -8,6 +8,19 @@ import (
 func TestServiceHappyPath(t *testing.T) {
 	tc := CLITest{
 		Steps: []Step{
+			Example{
+				Cmd: "example service",
+				Yaml: `
+name: example_name
+product: example_product
+description: example_description
+language: example_language
+framework: example_framework
+tier: example_alias
+lifecycle: example_alias
+skipAliasesValidation: false
+`,
+			},
 			Create{
 				Cmd: "create service",
 				Input: `

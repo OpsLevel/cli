@@ -8,6 +8,15 @@ import (
 func TestTeamHappyPath(t *testing.T) {
 	tc := CLITest{
 		Steps: []Step{
+			Example{
+				Cmd: "example team",
+				Yaml: `
+responsibilities: example description of responsibilities
+members: []
+name: example_name
+contacts: []
+`,
+			},
 			Create{
 				Cmd: "create team",
 				Input: `

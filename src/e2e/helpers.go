@@ -52,7 +52,7 @@ func (tc *CLITest) Run(t *testing.T) {
 // Run executes the CLI using 'go run main.go' from the ./src directory with the given arguments and optional stdin, returning combined output and error.
 func (u *Utility) Run(args string, stdin ...string) (string, error) {
 	// TODO: need to allow using the pre-built binary
-	//cmd := exec.Command("opslevel", strings.Split(args, " ")...)
+	// cmd := exec.Command("opslevel", strings.Split(args, " ")...)
 
 	cmd := exec.Command("go", append([]string{"run", "main.go"}, strings.Split(args, " ")...)...)
 	cmd.Dir = ".."
