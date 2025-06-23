@@ -18,7 +18,10 @@ var exampleSecretCmd = &cobra.Command{
 	Short: "Example Secret",
 	Long:  `Example Secret`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.SecretInput]())
+		fmt.Println(getExample2(opslevel.SecretInput{
+			Owner: opslevel.NewIdentifier("example_owner"),
+			Value: opslevel.RefOf("example_value"),
+		}))
 	},
 }
 

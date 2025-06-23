@@ -19,7 +19,10 @@ var exampleTagCmd = &cobra.Command{
 	Short: "Example tag to assign to a resource",
 	Long:  `Example tag to assign to a resource`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.TagInput]())
+		fmt.Println(getExample2(opslevel.TagInput{
+			Key:   "example_key",
+			Value: "example_value",
+		}))
 	},
 }
 

@@ -16,7 +16,12 @@ var exampleTeamCmd = &cobra.Command{
 	Short: "Example team",
 	Long:  `Example team`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.TeamCreateInput]())
+		fmt.Println(getExample2(opslevel.TeamCreateInput{
+			Name:             "example_name",
+			ManagerEmail:     opslevel.RefOf("example_manager_email"),
+			ParentTeam:       opslevel.NewIdentifier("example_parent_team"),
+			Responsibilities: opslevel.RefOf("example_responsibilities"),
+		}))
 	},
 }
 
@@ -49,7 +54,11 @@ var exampleMemberCmd = &cobra.Command{
 	Short: "Example member",
 	Long:  `Example member`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.TeamMembershipUserInput]())
+		fmt.Println(getExample2(opslevel.TeamMembershipUserInput{
+			Email: opslevel.RefOf("example_email"),
+			Role:  opslevel.RefOf("example_role"),
+			User:  opslevel.NewUserIdentifier("example_user"),
+		}))
 	},
 }
 
@@ -92,7 +101,10 @@ var exampleContactCmd = &cobra.Command{
 	Short: "Example contact to a team",
 	Long:  `Example contact to a team`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.ContactInput]())
+		fmt.Println(getExample2(opslevel.ContactInput{
+			DisplayName: opslevel.RefOf("example_display_name"),
+			Address:     opslevel.RefOf("example_address"),
+		}))
 	},
 }
 

@@ -21,7 +21,18 @@ var exampleServiceCmd = &cobra.Command{
 	Short:   "Example service",
 	Long:    `Example service`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.ServiceCreateInput]())
+		fmt.Println(getExample2(opslevel.ServiceCreateInput{
+			Name:           "example_name",
+			Description:    opslevel.RefOf("example_description"),
+			Framework:      opslevel.RefOf("example_framework"),
+			Language:       opslevel.RefOf("example_language"),
+			LifecycleAlias: opslevel.RefOf("example_lifecycle"),
+			OwnerAlias:     opslevel.RefOf("example_owner"),
+			Parent:         opslevel.NewIdentifier("example_parent"),
+			Product:        opslevel.RefOf("example_product"),
+			TierAlias:      opslevel.RefOf("example_tier"),
+			Type:           opslevel.NewIdentifier("example_type"),
+		}))
 	},
 }
 

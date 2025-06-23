@@ -20,7 +20,16 @@ var exampleInfraCmd = &cobra.Command{
 	Short: "Example infrastructure resource",
 	Long:  `Example infrastructure resource`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.InfrastructureResourceInput]())
+		fmt.Println(getExample2(opslevel.InfrastructureResourceInput{
+			Schema: opslevel.RefOf("example_schema"),
+			ProviderData: &opslevel.InfrastructureResourceProviderDataInput{
+				AccountName:  "example_account",
+				ExternalUrl:  opslevel.RefOf("example_external_url"),
+				ProviderName: opslevel.RefOf("example_provider"),
+			},
+			ProviderResourceType: opslevel.RefOf("example_provider_resource_type"),
+			OwnerId:              opslevel.RefOf(opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk")),
+		}))
 	},
 }
 

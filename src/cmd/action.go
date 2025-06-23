@@ -17,7 +17,16 @@ var exampleActionCmd = &cobra.Command{
 	Short: "Example action",
 	Long:  `Example action`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.CustomActionsWebhookActionCreateInput]())
+		fmt.Println(getExample2(opslevel.CustomActionsWebhookActionCreateInput{
+			Name:        "example_name",
+			Description: opslevel.RefOf("example_description"),
+			WebhookUrl:  "example_webhook_url",
+			HttpMethod:  opslevel.RefOf("POST"),
+			Headers: map[string]string{
+				"example_header": "example_value",
+			},
+			LiquidTemplate: opslevel.RefOf("example_liquid_template"),
+		}))
 	},
 }
 
