@@ -20,7 +20,7 @@ var exampleServiceDependencyCmd = &cobra.Command{
 	Short: "Example service dependency",
 	Long:  `Example service dependency`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample2(opslevel.ServiceDependencyCreateInput{
+		fmt.Println(getExample(opslevel.ServiceDependencyCreateInput{
 			DependencyKey: opslevel.ServiceDependencyKey{
 				SourceIdentifier:      opslevel.NewIdentifier("example_source"),
 				DestinationIdentifier: opslevel.NewIdentifier("example_destination"),

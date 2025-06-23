@@ -20,7 +20,7 @@ var exampleInfraCmd = &cobra.Command{
 	Short: "Example infrastructure resource",
 	Long:  `Example infrastructure resource`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample2(opslevel.InfrastructureResourceInput{
+		fmt.Println(getExample(opslevel.InfrastructureResourceInput{
 			Schema: &opslevel.InfrastructureResourceSchemaInput{
 				Type: "example_schema",
 			},

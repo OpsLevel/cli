@@ -15,7 +15,7 @@ var exampleFilterCmd = &cobra.Command{
 	Short: "Example filter",
 	Long:  `Example filter`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample2(opslevel.FilterCreateInput{
+		fmt.Println(getExample(opslevel.FilterCreateInput{
 			Name: "example_name",
 			Predicates: &[]opslevel.FilterPredicateInput{
 				{

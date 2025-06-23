@@ -18,7 +18,7 @@ var exampleSystemCmd = &cobra.Command{
 	Short:   "Example system",
 	Long:    `Example system`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample2(opslevel.SystemInput{
+		fmt.Println(getExample(opslevel.SystemInput{
 			Name:        opslevel.RefOf("example_name"),
 			Description: opslevel.RefOf("example_description"),
 			OwnerId:     opslevel.RefOf(opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk")),

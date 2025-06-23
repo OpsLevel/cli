@@ -21,7 +21,7 @@ var exampleServiceCmd = &cobra.Command{
 	Short:   "Example service",
 	Long:    `Example service`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample2(opslevel.ServiceCreateInput{
+		fmt.Println(getExample(opslevel.ServiceCreateInput{
 			Name:           "example_name",
 			Description:    opslevel.RefOf("example_description"),
 			Framework:      opslevel.RefOf("example_framework"),

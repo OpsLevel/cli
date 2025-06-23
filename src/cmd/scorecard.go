@@ -16,7 +16,7 @@ var exampleScorecardCmd = &cobra.Command{
 	Short:   "Example Scorecard",
 	Long:    `Example Scorecard`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample2(opslevel.ScorecardInput{
+		fmt.Println(getExample(opslevel.ScorecardInput{
 			Name:                        "example_name",
 			Description:                 opslevel.RefOf("example_description"),
 			OwnerId:                     opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk"),

@@ -17,7 +17,7 @@ var exampleDomainCmd = &cobra.Command{
 	Short: "Example Domain",
 	Long:  `Example Domain`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample2(opslevel.DomainInput{
+		fmt.Println(getExample(opslevel.DomainInput{
 			Name:        opslevel.RefOf("example_name"),
 			Description: opslevel.RefOf("example_description"),
 			OwnerId:     opslevel.RefOf(opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk")),
