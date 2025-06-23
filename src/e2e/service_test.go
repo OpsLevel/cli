@@ -11,14 +11,18 @@ func TestServiceHappyPath(t *testing.T) {
 			Example{
 				Cmd: "example service",
 				Yaml: `
-name: example_name
-product: example_product
 description: example_description
-language: example_language
 framework: example_framework
-tier: example_alias
-lifecycle: example_alias
-skipAliasesValidation: false
+language: example_language
+lifecycleAlias: example_lifecycle
+name: example_name
+ownerAlias: example_owner
+parent:
+  alias: example_parent
+product: example_product
+tierAlias: example_tier
+type:
+  alias: example_type
 `,
 			},
 			Create{

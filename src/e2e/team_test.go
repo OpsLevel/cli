@@ -11,10 +11,11 @@ func TestTeamHappyPath(t *testing.T) {
 			Example{
 				Cmd: "example team",
 				Yaml: `
-responsibilities: example description of responsibilities
-members: []
+managerEmail: example_manager_email
 name: example_name
-contacts: []
+parentTeam:
+  alias: example_parent_team
+responsibilities: example_responsibilities
 `,
 			},
 			Create{

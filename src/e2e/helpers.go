@@ -186,7 +186,7 @@ func (s Example) Run(u *Utility) {
 	wip := strings.TrimSpace(out)
 	expected := strings.TrimSpace(s.Yaml)
 	if wip != expected {
-		u.Fatalf("example mismatch for '%s'\nExpected:\n%s\nWIP:\n%s", s.Cmd, expected, wip)
+		u.Fatalf("example mismatch for '%s'\nExpected:\n%s\nGot:\n%s", s.Cmd, expected, wip)
 	}
 }
 
