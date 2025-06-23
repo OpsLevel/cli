@@ -57,7 +57,7 @@ tasks:
       - go test -race -coverprofile=coverage.txt -covermode=atomic -v ./cmd/... {{ .CLI_ARGS }}
 
   test-e2e:
-    desc: Run Integration tests
+    desc: Run end to end Integration tests
     dir: "{{.SRC_DIR}}"
     cmds:
       - go test -v ./e2e/... {{ .CLI_ARGS }}
