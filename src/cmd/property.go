@@ -156,7 +156,7 @@ var examplePropertyDefinitionCmd = &cobra.Command{
 		fmt.Println(getExample2(opslevel.PropertyDefinitionInput{
 			Name:        opslevel.RefOf("example_name"),
 			Description: opslevel.RefOf("example_description"),
-			Schema: opslevel.JSONSchema{
+			Schema: &opslevel.JSONSchema{
 				"type": "string",
 			},
 		}))
