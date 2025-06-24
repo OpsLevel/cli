@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 
-	"github.com/opslevel/opslevel-go/v2025"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
@@ -17,35 +16,16 @@ var exampleCmd = &cobra.Command{
 	Long:  "Examples of OpsLevel resources in different formats",
 }
 
-func getExample[T any]() string {
+func getExample[T any](v T) string {
+	var out []byte
+	var err error
 	if exampleIsJson {
-		return getJson[T]()
+		out, err = json.Marshal(v)
+	} else {
+		out, err = yaml.Marshal(v)
 	}
-	return getYaml[T]()
-}
-
-func getJson[T any]() string {
-	var (
-		out []byte
-		err error
-	)
-	t := opslevel.NewExampleOf[T]()
-	out, err = json.Marshal(t)
 	if err != nil {
-		panic("unexpected error getting example json")
-	}
-	return string(out)
-}
-
-func getYaml[T any]() string {
-	var (
-		out []byte
-		err error
-	)
-	t := opslevel.NewExampleOf[T]()
-	out, err = yaml.Marshal(t)
-	if err != nil {
-		panic("unexpected error getting example yaml")
+		panic("unexpected error getting example")
 	}
 	return string(out)
 }

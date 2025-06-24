@@ -39,9 +39,9 @@ type IntegrationInputType struct {
 
 type IntegrationInput interface {
 	opslevel.AWSIntegrationInput |
-	opslevel.AzureResourcesIntegrationInput |
-	EventIntegrationInputDTO |
-	opslevel.GoogleCloudIntegrationInput
+		opslevel.AzureResourcesIntegrationInput |
+		EventIntegrationInputDTO |
+		opslevel.GoogleCloudIntegrationInput
 }
 
 func validateIntegrationInput() (*IntegrationInputType, error) {

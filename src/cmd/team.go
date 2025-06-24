@@ -16,7 +16,14 @@ var exampleTeamCmd = &cobra.Command{
 	Short: "Example team",
 	Long:  `Example team`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.TeamCreateInput]())
+		fmt.Println(getExample(opslevel.TeamCreateInput{
+			Contacts:         &[]opslevel.ContactInput{},
+			ManagerEmail:     opslevel.RefOf("example_manager_email"),
+			Members:          &[]opslevel.TeamMembershipUserInput{},
+			Name:             "example_name",
+			ParentTeam:       opslevel.NewIdentifier("example_parent_team"),
+			Responsibilities: opslevel.RefOf("example_responsibilities"),
+		}))
 	},
 }
 
@@ -31,12 +38,12 @@ parentTeam:
   alias: "parent-team"
 responsibilities: "all the things"
 EOF`,
-	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"NAME"},
 	Run: func(cmd *cobra.Command, args []string) {
-		key := args[0]
 		input, err := readResourceInput[opslevel.TeamCreateInput]()
-		input.Name = key
+		if len(args) == 1 {
+			input.Name = args[0]
+		}
 		cobra.CheckErr(err)
 		team, err := getClientGQL().CreateTeam(*input)
 		cobra.CheckErr(err)
@@ -49,7 +56,11 @@ var exampleMemberCmd = &cobra.Command{
 	Short: "Example member",
 	Long:  `Example member`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.TeamMembershipUserInput]())
+		fmt.Println(getExample(opslevel.TeamMembershipUserInput{
+			Email: opslevel.RefOf("example_email"),
+			Role:  opslevel.RefOf("example_role"),
+			User:  opslevel.NewUserIdentifier("example_user"),
+		}))
 	},
 }
 
@@ -92,7 +103,10 @@ var exampleContactCmd = &cobra.Command{
 	Short: "Example contact to a team",
 	Long:  `Example contact to a team`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.ContactInput]())
+		fmt.Println(getExample(opslevel.ContactInput{
+			DisplayName: opslevel.RefOf("example_display_name"),
+			Address:     "example_address",
+		}))
 	},
 }
 
