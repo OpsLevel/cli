@@ -7,12 +7,30 @@ import (
 	"os"
 	"strings"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 
 	"github.com/opslevel/cli/common"
 
 	"github.com/spf13/cobra"
 )
+
+func buildExamplePropertyInput() string {
+	return getExample(opslevel.PropertyInput{
+		Definition: *opslevel.NewIdentifier("example_definition"),
+		Owner:      *opslevel.NewIdentifier("example_owner"),
+		Value:      opslevel.JsonString("example_value"),
+	})
+}
+
+func buildExamplePropertyDefinitionInput() string {
+	return getExample(opslevel.PropertyDefinitionInput{
+		Name:        opslevel.RefOf("example_name"),
+		Description: opslevel.RefOf("example_description"),
+		Schema: &opslevel.JSONSchema{
+			"type": "string",
+		},
+	})
+}
 
 var examplePropertyCmd = &cobra.Command{
 	Use:     "property",
@@ -20,7 +38,7 @@ var examplePropertyCmd = &cobra.Command{
 	Short:   "Example Property",
 	Long:    `Example Property`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.PropertyInput]())
+		fmt.Println(buildExamplePropertyInput())
 	},
 }
 
@@ -61,11 +79,7 @@ var listPropertyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var service *opslevel.Service
 		var err error
-		if opslevel.IsID(args[0]) {
-			service, err = getClientGQL().GetService(*opslevel.NewID(args[0]))
-		} else {
-			service, err = getClientGQL().GetServiceWithAlias(args[0])
-		}
+		service, err = getClientGQL().GetService(args[0])
 		cobra.CheckErr(err)
 		properties, err := service.GetProperties(getClientGQL(), nil)
 		cobra.CheckErr(err)
@@ -108,7 +122,7 @@ EOF
 
 cat << EOF | opslevel assign property -f -
 %s
-EOF`, getYaml[opslevel.PropertyInput]()),
+EOF`, buildExamplePropertyInput()),
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readResourceInput[opslevel.PropertyInput]()
 		cobra.CheckErr(err)
@@ -153,7 +167,7 @@ var examplePropertyDefinitionCmd = &cobra.Command{
 	Short:   "Example Property Definition",
 	Long:    `Example Property Definition`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.PropertyDefinitionInput]())
+		fmt.Println(buildExamplePropertyDefinitionInput())
 	},
 }
 
@@ -165,7 +179,7 @@ var createPropertyDefinitionCmd = &cobra.Command{
 	Example: fmt.Sprintf(`
 cat << EOF | opslevel create property-definition -f -
 %s
-EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
+EOF`, buildExamplePropertyDefinitionInput()),
 	Run: func(cmd *cobra.Command, args []string) {
 		input, err := readPropertyDefinitionInput()
 		cobra.CheckErr(err)
@@ -184,7 +198,7 @@ var updatePropertyDefinitionCmd = &cobra.Command{
 	Example: fmt.Sprintf(`
 cat << EOF | opslevel update property-definition propdef3 -f -
 %s
-EOF`, getYaml[opslevel.PropertyDefinitionInput]()),
+EOF`, buildExamplePropertyDefinitionInput()),
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID", "ALIAS"},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -227,7 +241,8 @@ func readPropertyDefinitionInput() (*opslevel.PropertyDefinitionInput, error) {
 		propDefInput.Description = opslevel.RefOf(description)
 	}
 	if propertyDisplayStatus, ok := data["propertyDisplayStatus"].(string); ok {
-		propDefInput.PropertyDisplayStatus = opslevel.RefOf(opslevel.PropertyDisplayStatusEnum(propertyDisplayStatus))
+		status := opslevel.PropertyDisplayStatusEnum(propertyDisplayStatus)
+		propDefInput.PropertyDisplayStatus = &status
 	}
 
 	return &propDefInput, nil

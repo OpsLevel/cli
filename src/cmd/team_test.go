@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/opslevel/cli/cmd"
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 )
 
 const (
@@ -30,7 +30,7 @@ func Test_TeamCRUD(t *testing.T) {
 		t.Fatal(err)
 	}
 	if createdTeam.Name != teamToCreate.Name ||
-		createdTeam.Responsibilities != *teamToCreate.Responsibilities {
+		createdTeam.Responsibilities != (*teamToCreate.Responsibilities).Value {
 		t.Errorf("Create 'team' failed, expected team '%+v' but got '%+v'", teamToCreate, createdTeam)
 	}
 

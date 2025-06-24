@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -16,7 +16,9 @@ var exampleCategoryCmd = &cobra.Command{
 	Short:   "Example rubric category",
 	Long:    `Example rubric category`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.CategoryCreateInput]())
+		fmt.Println(getExample(opslevel.CategoryCreateInput{
+			Name: "example_name",
+		}))
 	},
 }
 
@@ -92,7 +94,9 @@ var exampleLevelCmd = &cobra.Command{
 	Short: "Example rubric level",
 	Long:  `Example rubric level`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.LevelCreateInput]())
+		fmt.Println(getExample(opslevel.LevelCreateInput{
+			Name: "example_name",
+		}))
 	},
 }
 
@@ -131,13 +135,13 @@ var listLevelCmd = &cobra.Command{
 	Short:   "Lists rubric levels",
 	Long:    `Lists rubric levels`,
 	Run: func(cmd *cobra.Command, args []string) {
-		list, err := getClientGQL().ListLevels()
+		resp, err := getClientGQL().ListLevels(nil)
 		cobra.CheckErr(err)
 		if isJsonOutput() {
-			common.JsonPrint(json.MarshalIndent(list, "", "    "))
+			common.JsonPrint(json.MarshalIndent(resp.Nodes, "", "    "))
 		} else {
 			w := common.NewTabWriter("NAME", "ALIAS", "ID")
-			for _, item := range list {
+			for _, item := range resp.Nodes {
 				fmt.Fprintf(w, "%s\t%s\t%s\t\n", item.Name, item.Alias, item.Id)
 			}
 			w.Flush()

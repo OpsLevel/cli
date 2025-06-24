@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 	"golang.org/x/exp/slices"
 
 	"github.com/spf13/cobra"
@@ -19,7 +19,10 @@ var exampleTagCmd = &cobra.Command{
 	Short: "Example tag to assign to a resource",
 	Long:  `Example tag to assign to a resource`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.TagInput]())
+		fmt.Println(getExample(opslevel.TagInput{
+			Key:   "example_key",
+			Value: "example_value",
+		}))
 	},
 }
 
@@ -50,10 +53,11 @@ opslevel create tag --type=Infra my-infra-alias foo bar
 			input := opslevel.TagAssignInput{Tags: []opslevel.TagInput{tagInput}}
 
 			if opslevel.IsID(resource) {
-				input.Id = opslevel.NewID(resource)
+				input.Id = opslevel.RefOf(opslevel.ID(resource))
 			} else {
 				input.Alias = opslevel.RefOf(resource)
-				input.Type = opslevel.RefOf(opslevel.TaggableResource(resourceType))
+				resourceType := opslevel.TaggableResource(resourceType)
+				input.Type = &resourceType
 			}
 
 			result, err := getClientGQL().AssignTag(input)
@@ -67,8 +71,9 @@ opslevel create tag --type=Infra my-infra-alias foo bar
 			if opslevel.IsID(resource) {
 				input.Id = opslevel.NewID(resource)
 			} else {
-				input.Alias = opslevel.RefOf(resource)
-				input.Type = opslevel.RefOf(opslevel.TaggableResource(resourceType))
+				input.Alias = &resource
+				resourceType := opslevel.TaggableResource(resourceType)
+				input.Type = &resourceType
 			}
 
 			result, err := getClientGQL().CreateTag(input)
@@ -155,8 +160,8 @@ opslevel update tag XXX_TAG_ID_XXX foo baz
 
 		input := opslevel.TagUpdateInput{
 			Id:    opslevel.ID(tag),
-			Key:   opslevel.RefOf(key),
-			Value: opslevel.RefOf(value),
+			Key:   &key,
+			Value: &value,
 		}
 
 		result, err := getClientGQL().UpdateTag(input)

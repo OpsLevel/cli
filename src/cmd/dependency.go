@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,13 @@ var exampleServiceDependencyCmd = &cobra.Command{
 	Short: "Example service dependency",
 	Long:  `Example service dependency`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.ServiceDependencyCreateInput]())
+		fmt.Println(getExample(opslevel.ServiceDependencyCreateInput{
+			DependencyKey: opslevel.ServiceDependencyKey{
+				SourceIdentifier:      opslevel.NewIdentifier("example_source"),
+				DestinationIdentifier: opslevel.NewIdentifier("example_destination"),
+			},
+			Notes: opslevel.RefOf("example_notes"),
+		}))
 	},
 }
 

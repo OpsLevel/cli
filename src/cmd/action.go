@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -17,7 +17,16 @@ var exampleActionCmd = &cobra.Command{
 	Short: "Example action",
 	Long:  `Example action`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.CustomActionsWebhookActionCreateInput]())
+		fmt.Println(getExample(opslevel.CustomActionsWebhookActionCreateInput{
+			Name:        "example_name",
+			Description: opslevel.RefOf("example_description"),
+			WebhookUrl:  "example_webhook_url",
+			HttpMethod:  opslevel.CustomActionsHttpMethodEnumPost,
+			Headers: &opslevel.JSON{
+				"example_header": "example_value",
+			},
+			LiquidTemplate: opslevel.RefOf("example_liquid_template"),
+		}))
 	},
 }
 
@@ -58,7 +67,7 @@ EOF`,
 			cobra.CheckErr(err)
 			result, err := getClientGQL().CreateWebhookAction(*input)
 			cobra.CheckErr(err)
-			fmt.Printf("created webhook action: %s\n", result.Id)
+			fmt.Printf("created webhook action: %s\n", string(result.CustomActionsId.Id))
 		default:
 			err := fmt.Errorf("unknown action type: '%s'", actionType)
 			cobra.CheckErr(err)
@@ -94,7 +103,7 @@ var listActionCmd = &cobra.Command{
 		} else {
 			w := common.NewTabWriter("ID", "NAME", "HTTP_METHOD", "WEBHOOK_URL")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Id, item.Name, item.HTTPMethod, item.WebhookURL)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", string(item.CustomActionsId.Id), item.Name, item.HttpMethod, item.WebhookUrl)
 			}
 			w.Flush()
 		}

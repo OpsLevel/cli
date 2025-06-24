@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -20,7 +20,22 @@ var exampleInfraCmd = &cobra.Command{
 	Short: "Example infrastructure resource",
 	Long:  `Example infrastructure resource`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.InfrastructureResourceInput]())
+		fmt.Println(getExample(opslevel.InfraInput{
+			Schema: "example_schema",
+			Owner:  opslevel.NewID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk"),
+			Provider: &opslevel.InfraProviderInput{
+				Account: "example_account",
+				Name:    "example_provider_name",
+				Type:    "example_provider_type",
+				URL:     "example_external_url",
+			},
+			Data: &opslevel.JSON{
+				"name":     "my-big-query",
+				"endpoint": "https://google.com",
+				"engine":   "BigQuery",
+				"replica":  false,
+			},
+		}))
 	},
 }
 
@@ -173,7 +188,7 @@ opslevel list infra -o json | jq 'map(select(.type == "Database") | .data | from
 			w := csv.NewWriter(os.Stdout)
 			w.Write([]string{"NAME", "ID", "ALIASES"})
 			for _, item := range list {
-				w.Write([]string{item.Name, item.Id, strings.Join(item.Aliases, "/")})
+				w.Write([]string{item.Name, string(item.Id), strings.Join(item.Aliases, "/")})
 			}
 			w.Flush()
 		} else {
@@ -216,7 +231,7 @@ EOF`,
 		cobra.CheckErr(err)
 		result, err := getClientGQL().UpdateInfrastructure(key, *input)
 		cobra.CheckErr(err)
-		fmt.Println(result.Id)
+		fmt.Println(string(result.Id))
 	},
 }
 

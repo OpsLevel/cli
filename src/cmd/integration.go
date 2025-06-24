@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +26,11 @@ var AllIntegrationType = []IntegrationType{IntegrationTypeAWS, IntegrationTypeAz
 
 var IntegrationConfigCurrentVersion = "1"
 
+type EventIntegrationInputDTO struct {
+	Name string                        `json:"name,omitempty" yaml:"name,omitempty"`
+	Type opslevel.EventIntegrationEnum `json:"type" yaml:"type" example:"apiDoc"`
+}
+
 type IntegrationInputType struct {
 	Version string `yaml:"version"`
 	Kind    IntegrationType
@@ -33,7 +40,7 @@ type IntegrationInputType struct {
 type IntegrationInput interface {
 	opslevel.AWSIntegrationInput |
 		opslevel.AzureResourcesIntegrationInput |
-		opslevel.EventIntegrationInput |
+		EventIntegrationInputDTO |
 		opslevel.GoogleCloudIntegrationInput
 }
 
@@ -122,12 +129,11 @@ EOF
 		var result *opslevel.Integration
 		if slices.Contains(opslevel.AllEventIntegrationEnum, string(input.Kind)) {
 			input.Spec["type"] = input.Kind
-			eventIntegrationInput, err := readIntegrationInput[opslevel.EventIntegrationInput](input)
-			integrationTypeEnum := opslevel.EventIntegrationEnum(eventIntegrationInput.Type)
+			eventIntegrationInput, err := readIntegrationInput[EventIntegrationInputDTO](input)
 			cobra.CheckErr(err)
 			result, err = getClientGQL().CreateEventIntegration(opslevel.EventIntegrationInput{
-				Name: eventIntegrationInput.Name,
-				Type: integrationTypeEnum,
+				Name: opslevel.NewNullableFrom(eventIntegrationInput.Name),
+				Type: eventIntegrationInput.Type,
 			})
 			cobra.CheckErr(err)
 		} else {
@@ -244,13 +250,21 @@ EOF
 		var result *opslevel.Integration
 		if slices.Contains(opslevel.AllEventIntegrationEnum, string(input.Kind)) {
 			input.Spec["type"] = input.Kind
-			eventIntegrationInput, err := readIntegrationInput[opslevel.EventIntegrationInput](input)
+			eventIntegrationInput, err := readIntegrationInput[EventIntegrationInputDTO](input)
 			cobra.CheckErr(err)
-			result, err = getClientGQL().UpdateEventIntegration(opslevel.EventIntegrationUpdateInput{
-				Id:   opslevel.ID(args[0]),
-				Name: *eventIntegrationInput.Name,
-			})
-			cobra.CheckErr(err)
+			if eventIntegrationInput.Name != "" {
+				apiInput := opslevel.EventIntegrationUpdateInput{
+					Id:   opslevel.ID(args[0]),
+					Name: eventIntegrationInput.Name,
+				}
+				result, err = getClientGQL().UpdateEventIntegration(apiInput)
+
+				cobra.CheckErr(err)
+
+			} else {
+				log.Warn().Msgf("event integration 'name' cannot be updated as no name field was provided")
+				return
+			}
 		} else {
 			switch input.Kind {
 			case IntegrationTypeAWS:

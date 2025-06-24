@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -16,7 +16,12 @@ var exampleScorecardCmd = &cobra.Command{
 	Short:   "Example Scorecard",
 	Long:    `Example Scorecard`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.ScorecardInput]())
+		fmt.Println(getExample(opslevel.ScorecardInput{
+			Name:                        "example_name",
+			Description:                 opslevel.RefOf("example_description"),
+			OwnerId:                     opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk"),
+			AffectsOverallServiceLevels: opslevel.RefOf(false),
+		}))
 	},
 }
 
@@ -73,7 +78,7 @@ opslevel list scorecards -o json | jq 'map( {(.Name): (.ServiceCount)} )'
 		} else {
 			w := common.NewTabWriter("ID", "NAME", "PASSING_CHECKS", "CHECKS_COUNT", "SERVICE_COUNT")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%d\t%d\t%d\n", item.Id, item.Name, item.PassingChecks, item.ChecksCount, item.ServiceCount)
+				fmt.Fprintf(w, "%s\t%s\t%d\t%d\t%d\n", item.Id, item.Name, item.PassingChecks, item.TotalChecks, item.ServiceCount)
 			}
 			w.Flush()
 		}

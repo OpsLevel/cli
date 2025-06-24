@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/opslevel/cli/common"
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +17,12 @@ var exampleDomainCmd = &cobra.Command{
 	Short: "Example Domain",
 	Long:  `Example Domain`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.DomainInput]())
+		fmt.Println(getExample(opslevel.DomainInput{
+			Name:        opslevel.RefOf("example_name"),
+			Description: opslevel.RefOf("example_description"),
+			OwnerId:     opslevel.RefOf(opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk")),
+			Note:        opslevel.RefOf("example_note"),
+		}))
 	},
 }
 

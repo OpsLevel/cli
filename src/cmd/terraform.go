@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 
 	"github.com/gosimple/slug"
 	"github.com/spf13/cobra"
@@ -380,9 +380,9 @@ func exportRubric(c *opslevel.Client, config *os.File, shell *os.File) {
   index = %d
 }
 `
-	levels, err := c.ListLevels()
+	levels, err := c.ListLevels(nil)
 	cobra.CheckErr(err)
-	for _, level := range levels {
+	for _, level := range levels.Nodes {
 		config.WriteString(templateConfig(levelConfig, level.Alias, level.Name, level.Description, level.Index))
 		shell.WriteString(fmt.Sprintf("terraform import opslevel_rubric_level.%s %s\n", level.Alias, level.Id))
 	}

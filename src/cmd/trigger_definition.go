@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -16,7 +16,10 @@ var exampleTriggerDefinitionCmd = &cobra.Command{
 	Short:   "Example Scorecard",
 	Long:    `Example Scorecard`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.CustomActionsTriggerDefinitionCreateInput]())
+		fmt.Println(getExample(opslevel.CustomActionsTriggerDefinitionCreateInput{
+			Name:    "example_name",
+			OwnerId: opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk"),
+		}))
 	},
 }
 

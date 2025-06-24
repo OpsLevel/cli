@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 
 	"github.com/opslevel/cli/common"
 
@@ -18,7 +18,10 @@ var exampleSecretCmd = &cobra.Command{
 	Short: "Example Secret",
 	Long:  `Example Secret`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.SecretInput]())
+		fmt.Println(getExample(opslevel.SecretInput{
+			Owner: opslevel.NewIdentifier("example_owner"),
+			Value: opslevel.RefOf("example_value"),
+		}))
 	},
 }
 
@@ -38,7 +41,7 @@ EOF`,
 		newSecret, err := getClientGQL().CreateSecret(secretAlias, *input)
 		cobra.CheckErr(err)
 
-		fmt.Println(newSecret.ID)
+		fmt.Printf("%s", string(newSecret.Id))
 	},
 }
 
@@ -53,7 +56,7 @@ var getSecretCmd = &cobra.Command{
 		result, err := getClientGQL().GetSecret(identifier)
 		cobra.CheckErr(err)
 
-		common.WasFound(result.ID == "", identifier)
+		common.WasFound(result.Id == "", identifier)
 		if isYamlOutput() {
 			common.YamlPrint(result)
 		} else {
@@ -77,7 +80,7 @@ var listSecretsCmd = &cobra.Command{
 		} else {
 			w := common.NewTabWriter("ALIAS", "ID", "OWNER", "UPDATED_AT")
 			for _, item := range list {
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Alias, item.ID, item.Owner.Alias, item.Timestamps.UpdatedAt.Time)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", item.Alias, item.Id, item.Owner.Alias, item.Timestamps.UpdatedAt.Time)
 			}
 			w.Flush()
 		}
@@ -102,7 +105,7 @@ EOF`,
 		cobra.CheckErr(err)
 		secret, err := getClientGQL().UpdateSecret(secretId, *input)
 		cobra.CheckErr(err)
-		fmt.Println(secret.ID)
+		fmt.Printf("%s", string(secret.Id))
 	},
 }
 
@@ -116,7 +119,7 @@ var deleteSecretCmd = &cobra.Command{
 		secretId := args[0]
 		err := getClientGQL().DeleteSecret(secretId)
 		cobra.CheckErr(err)
-		fmt.Printf("deleted '%s' secret\n", secretId)
+		fmt.Printf("deleted secret: %s\n", secretId)
 	},
 }
 

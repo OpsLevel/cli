@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/opslevel/cli/cmd"
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 )
 
-const (
+var (
 	defaultUserRole = opslevel.UserRoleUser
 	userFileName    = "test_user.yaml"
 	userName        = "CLI Test User"
@@ -17,8 +17,7 @@ const (
 
 func Test_UserCRUD(t *testing.T) {
 	expectedUser := opslevel.User{
-		UserId: opslevel.UserId{Email: "testcli+pat@opslevel.com"},
-		Name:   userName,
+		UserId: opslevel.UserId{Email: "testcli+pat@opslevel.com", Name: userName},
 	}
 	// Create User
 	userId, err := createUser(expectedUser)
@@ -34,14 +33,13 @@ func Test_UserCRUD(t *testing.T) {
 	if createdUser.Name != expectedUser.Name ||
 		createdUser.Email != expectedUser.Email ||
 		string(createdUser.Role) != string(defaultUserRole) ||
-		!strings.HasPrefix(createdUser.HTMLUrl, "https://app.opslevel.com/users/") {
+		!strings.HasPrefix(createdUser.HtmlUrl, "https://app.opslevel.com/users/") {
 		t.Errorf("Create 'user' failed, expected user '%+v' but got '%+v'", expectedUser, createdUser)
 	}
 
 	// Update User
 	expectedUpdatedUser := opslevel.User{
 		UserId: createdUser.UserId,
-		Name:   createdUser.Name,
 		Role:   opslevel.UserRoleTeamMember,
 	}
 	updatedUserId, err := updateUser(string(createdUser.Id), expectedUpdatedUser)

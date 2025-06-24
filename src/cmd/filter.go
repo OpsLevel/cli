@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/opslevel/opslevel-go/v2024"
+	"github.com/opslevel/opslevel-go/v2025"
 
 	"github.com/opslevel/cli/common"
 	"github.com/spf13/cobra"
@@ -15,7 +15,17 @@ var exampleFilterCmd = &cobra.Command{
 	Short: "Example filter",
 	Long:  `Example filter`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample[opslevel.FilterCreateInput]())
+		fmt.Println(getExample(opslevel.FilterCreateInput{
+			Name: "example_name",
+			Predicates: &[]opslevel.FilterPredicateInput{
+				{
+					Key:           opslevel.PredicateKeyEnumAliases,
+					Type:          opslevel.PredicateTypeEnumEquals,
+					Value:         opslevel.RefOf("example_value"),
+					CaseSensitive: opslevel.RefOf(false),
+				},
+			},
+		}))
 	},
 }
 
@@ -100,19 +110,11 @@ EOF`,
 	Args:       cobra.ExactArgs(1),
 	ArgAliases: []string{"ID"},
 	Run: func(cmd *cobra.Command, args []string) {
-		input, err := readResourceInput[opslevel.FilterCreateInput]()
+		input, err := readResourceInput[opslevel.FilterUpdateInput]()
 		cobra.CheckErr(err)
+		input.Id = *opslevel.NewID(args[0])
 
-		// hack: in the future all ObjectUpdateInput and ObjectCreateInput
-		// will be merged into ObjectInput. for now, create an update input
-		// by adding in the first argument.
-		updateInput := &opslevel.FilterUpdateInput{
-			Id:         *opslevel.NewID(args[0]),
-			Name:       &input.Name,
-			Predicates: input.Predicates,
-			Connective: input.Connective,
-		}
-		filter, err := getClientGQL().UpdateFilter(*updateInput)
+		filter, err := getClientGQL().UpdateFilter(*input)
 		cobra.CheckErr(err)
 		common.JsonPrint(json.MarshalIndent(filter, "", "    "))
 	},
