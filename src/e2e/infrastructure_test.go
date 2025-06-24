@@ -11,14 +11,18 @@ func TestInfrastructureHappyPath(t *testing.T) {
 			Example{
 				Cmd: "example infra",
 				Yaml: `
-ownerId: Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk
-providerData:
-  accountName: example_account
-  externalUrl: example_external_url
-  providerName: example_provider
-providerResourceType: example_provider_resource_type
-schema:
-  type: example_schema
+schema: example_schema
+owner: Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk
+provider:
+  account: example_account
+  name: example_provider_name
+  type: example_provider_type
+  url: example_external_url
+data:
+  endpoint: https://google.com
+  engine: BigQuery
+  name: my-big-query
+  replica: false
 `,
 			},
 			Create{

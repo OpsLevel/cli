@@ -20,17 +20,21 @@ var exampleInfraCmd = &cobra.Command{
 	Short: "Example infrastructure resource",
 	Long:  `Example infrastructure resource`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getExample(opslevel.InfrastructureResourceInput{
-			Schema: &opslevel.InfrastructureResourceSchemaInput{
-				Type: "example_schema",
+		fmt.Println(getExample(opslevel.InfraInput{
+			Schema: "example_schema",
+			Owner:  opslevel.NewID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk"),
+			Provider: &opslevel.InfraProviderInput{
+				Account: "example_account",
+				Name:    "example_provider_name",
+				Type:    "example_provider_type",
+				URL:     "example_external_url",
 			},
-			ProviderData: &opslevel.InfrastructureResourceProviderDataInput{
-				AccountName:  "example_account",
-				ExternalUrl:  opslevel.RefOf("example_external_url"),
-				ProviderName: opslevel.RefOf("example_provider"),
+			Data: &opslevel.JSON{
+				"name":     "my-big-query",
+				"endpoint": "https://google.com",
+				"engine":   "BigQuery",
+				"replica":  false,
 			},
-			ProviderResourceType: opslevel.RefOf("example_provider_resource_type"),
-			OwnerId:              opslevel.RefOf(opslevel.ID("Z2lkOi8vc2VydmljZS8xMjM0NTY3ODk")),
 		}))
 	},
 }

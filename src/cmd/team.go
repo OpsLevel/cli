@@ -17,8 +17,10 @@ var exampleTeamCmd = &cobra.Command{
 	Long:  `Example team`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(getExample(opslevel.TeamCreateInput{
-			Name:             "example_name",
+			Contacts:         &[]opslevel.ContactInput{},
 			ManagerEmail:     opslevel.RefOf("example_manager_email"),
+			Members:          &[]opslevel.TeamMembershipUserInput{},
+			Name:             "example_name",
 			ParentTeam:       opslevel.NewIdentifier("example_parent_team"),
 			Responsibilities: opslevel.RefOf("example_responsibilities"),
 		}))
