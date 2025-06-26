@@ -230,6 +230,41 @@ EOF
 	},
 }
 
+var bulkDeleteUsersCmd = &cobra.Command{
+	Use:     "delete users",
+	Aliases: []string{"bulk delete users"},
+	Short:   "Deletes users from a CSV",
+	Long: `Deletes a list of users from a CSV file with the column headers:
+Email`,
+	Example: `
+cat << EOF | opslevel import delete users -f -
+Email
+kyle@opslevel.com
+toms@opslevel.com
+ian@opslevel.com
+EOF
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		reader, err := readImportFilepathAsCSV()
+		cobra.CheckErr(err)
+		for reader.Rows() {
+			email := reader.Text("Email")
+			if email == "" {
+				log.Error().Msgf("user has invalid email '%s'", email)
+				continue
+			} else {
+				err := getClientGQL().DeleteUser(email)
+				if err != nil {
+					log.Error().Err(err).Msgf("error deleting user '%s'", email)
+					continue
+				} else {
+					log.Info().Msgf("deleted user '%s'", email)
+				}
+			}
+		}
+	},
+}
+
 func init() {
 	createUserCmd.Flags().Bool("skip-send-invite", false, "If this flag is set the welcome e-mail will be not be sent")
 	createUserCmd.Flags().Bool("skip-welcome-email", false, "If this flag is set send an invite email even if notifications are disabled for the account")
@@ -244,4 +279,5 @@ func init() {
 	listCmd.AddCommand(listUserCmd)
 	deleteCmd.AddCommand(deleteUserCmd)
 	importCmd.AddCommand(importUsersCmd)
+	importCmd.AddCommand(bulkDeleteUsersCmd)
 }
