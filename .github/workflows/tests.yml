@@ -9,6 +9,8 @@ on:
       - 'go.mod'
       - .github/workflows/tests.yml
 
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
