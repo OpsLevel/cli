@@ -3,7 +3,7 @@
 version: '3'
 
 env:
-  OPSLEVEL_GO_PKG: "github.com/opslevel/opslevel-go/v2024"
+  OPSLEVEL_GO_PKG: "github.com/opslevel/opslevel-go/v2025"
   SRC_DIR: "{{.TASKFILE_DIR}}/src"
 
 tasks:
