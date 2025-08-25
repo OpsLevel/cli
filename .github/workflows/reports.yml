@@ -1,3 +1,5 @@
+permissions:
+  contents: read
 name: "Reports"
 
 # Every Monday at 1PM UTC (9AM EST)
