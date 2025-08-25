@@ -1,0 +1,3 @@
+kind: Dependency
+body: Bump github.com/go-viper/mapstructure/v2 from 2.3.0 to 2.4.0 in /src
+time: 2025-08-21T15:04:13.225274264Z
