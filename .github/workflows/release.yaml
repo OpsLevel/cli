@@ -74,8 +74,8 @@ jobs:
           then
             echo "Skip Changie..."
           else
-            (cd src && go tool changie batch --dir .. ${{ steps.version.outputs.RELEASE_VERSION }})
-            (cd src && go tool changie merge --dir ..)
+            (cd src && go tool changie batch ${{ steps.version.outputs.RELEASE_VERSION }})
+            (cd src && go tool changie merge)
             git add .
             git commit -m "Cut Release '${{ steps.version.outputs.RELEASE_VERSION }}'"
             git push origin HEAD
