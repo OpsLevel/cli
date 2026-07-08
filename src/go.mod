@@ -286,4 +286,3 @@ tool (
 	github.com/miniscruff/changie
 	mvdan.cc/gofumpt
 )
-
