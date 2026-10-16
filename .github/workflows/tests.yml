@@ -6,7 +6,8 @@ on:
   pull_request:
     paths:
       - 'src/**.go'
-      - 'go.mod'
+      - 'src/go.mod'
+      - 'src/go.sum'
       - .github/workflows/tests.yml
 
 permissions:
