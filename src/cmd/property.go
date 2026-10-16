@@ -54,7 +54,7 @@ var getPropertyCmd = &cobra.Command{
 		ownerId := args[0]
 		propertyId := args[1]
 
-		result, err := getClientGQL().GetProperty(ownerId, propertyId)
+		result, err := getClientGQL().GetProperty(ownerId, propertyId) //nolint:staticcheck // only resolves service owners; switching to Service/Team.GetProperty needs owner-type detection
 		cobra.CheckErr(err)
 		if result.Definition.Id == "" && result.Owner.Id() == "" {
 			err = fmt.Errorf("property '%s' on entity '%s' not found\n", propertyId, ownerId)
