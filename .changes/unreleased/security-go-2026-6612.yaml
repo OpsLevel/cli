@@ -1,2 +1,0 @@
-kind: Security
-body: Bumped golang.org/x/net from v0.57.0 to v0.60.0 and Go from 1.26.4 to 1.26.9 to address GO-2026-6612 (HTTP/2 server double flow control refund).
